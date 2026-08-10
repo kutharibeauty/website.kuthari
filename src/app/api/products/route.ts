@@ -2,16 +2,8 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { auth } from '@/lib/auth/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { skuPrefix } from '@/lib/products/sku'
 import type { AuthMetadata } from '@/types'
-
-const CAT_CODES: Record<string, string> = {
-  'edible-oil':     'OIL',
-  'pulses-dal':     'PUL',
-  'atta-flour':     'ATT',
-  'spices-masala':  'SPI',
-  'sugar-jaggery':  'SUG',
-  'packaged-water': 'WAT',
-}
 
 async function generateSku(categoryId: string, supabase: ReturnType<typeof createAdminClient>): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,9 +13,7 @@ async function generateSku(categoryId: string, supabase: ReturnType<typeof creat
     .eq('id', categoryId)
     .maybeSingle()
 
-  const catCode = CAT_CODES[cat?.slug ?? ''] ?? 'GEN'
-  const year = new Date().getFullYear()
-  const prefix = `KBS-${catCode}-${year}-`
+  const prefix = skuPrefix(cat?.slug)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { count } = await (supabase as any)

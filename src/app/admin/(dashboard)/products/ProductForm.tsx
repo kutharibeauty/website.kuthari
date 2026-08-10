@@ -17,6 +17,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
+import { skuPrefix } from '@/lib/products/sku'
 import type { Product, Category } from '@/types/database.types'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -66,11 +67,12 @@ function toSlug(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
 }
 
-function generateSku(categoryName: string) {
-  const cat = categoryName.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X').padEnd(3, 'X')
-  const year = new Date().getFullYear()
+/** Suggested SKU for the "Auto" button. Uses the same category map as the
+ *  server so both routes produce the same prefix; the sequence here is random
+ *  (the server counts existing SKUs, which the client cannot do). */
+function generateSku(categorySlug: string | undefined) {
   const seq = String(Math.floor(Math.random() * 9000) + 1000)
-  return `KBS-${cat}-${year}-${seq}`
+  return `${skuPrefix(categorySlug)}${seq}`
 }
 
 function makeId() {
@@ -539,8 +541,8 @@ export default function ProductForm({
                   <button
                     type="button"
                     onClick={() => {
-                      const catName = categories.find(c => c.id === form.category_id)?.name ?? 'GEN'
-                      set('sku', generateSku(catName))
+                      const catSlug = categories.find(c => c.id === form.category_id)?.slug
+                      set('sku', generateSku(catSlug))
                     }}
                     className="px-3 py-2 bg-surface-container-high text-on-surface rounded-xl font-body-md text-body-md hover:bg-surface-container-highest transition-colors whitespace-nowrap"
                   >
