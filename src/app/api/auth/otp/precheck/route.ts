@@ -57,19 +57,11 @@ export async function POST(request: Request) {
         )
       }
 
-      // Registered as staff → wrong portal for a customer sign-up.
-      const { data: staff } = await admin
-        .from('admin_profiles')
-        .select('id')
-        .or(`phone.eq.${cleanPhone},phone.eq.${digits}`)
-        .maybeSingle()
-
-      if (staff) {
-        return NextResponse.json(
-          { error: 'This number is registered as staff. Please use the staff login.', error_code: 'wrong_portal' },
-          { status: 400 },
-        )
-      }
+      // NOTE: a staff number is deliberately NOT rejected here. Staff are
+      // customers too — the owner and admins shop on their own site — so they
+      // may hold both a staff account and a customer account on one number.
+      // The two sign-ins stay independent because they use separate session
+      // cookies and separate role fields; see AuthMetadata.
     } catch (err) {
       console.error('[otp/precheck] signup DB check failed:', err)
       // fail open — /verify performs the authoritative dedup check

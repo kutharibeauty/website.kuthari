@@ -137,14 +137,24 @@ export async function proxy(request: NextRequest) {
 
   const meta = (user.app_metadata ?? {}) as Partial<AuthMetadata>
 
+  // Staff routes are gated on `staff_role`, NOT on `role`. Someone who is both
+  // an admin and a shopper is one auth user, and signing in to the shop sets
+  // `role` to 'customer' — reading `role` here would have locked them out of
+  // the admin panel the moment they used the storefront. `role` is still the
+  // fallback so staff accounts predating `staff_role` keep working.
+  //
+  // `user` on these paths is always the staff-cookie session (see isStaffPath
+  // above), so a storefront-only session can never satisfy these checks.
+  const staffRole = meta.staff_role ?? meta.role
+
   if (isAdminRoute(pathname)) {
-    if (meta.role !== 'admin' && meta.role !== 'super_admin') {
+    if (staffRole !== 'admin' && staffRole !== 'super_admin') {
       return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
   if (isDeliveryRoute(pathname)) {
-    if (meta.role !== 'delivery') {
+    if (staffRole !== 'delivery') {
       return NextResponse.redirect(new URL('/', request.url))
     }
   }

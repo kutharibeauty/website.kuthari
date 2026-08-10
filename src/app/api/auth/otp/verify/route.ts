@@ -6,7 +6,7 @@ import { findAuthUserIdByPhone } from '@/lib/auth/find-user'
 import { upsertProfile } from '@/lib/auth/upsert-profile'
 import { normalizeIndianPhone, isPersonName, isEmail, isSafeInternalPath } from '@/lib/validators'
 import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
-import type { AuthMetadata } from '@/types'
+import type { AuthMetadata, StaffRole } from '@/types'
 
 type Portal = 'customer' | 'admin' | 'delivery'
 
@@ -145,7 +145,12 @@ export async function POST(request: Request) {
         await supabaseAdmin.from('admin_profiles').update({ user_id: userId }).eq('id', staff.id)
       }
 
-      appMetadata = { role: staff.role as AuthMetadata['role'], supabase_profile_id: userId, admin_profile_id: staff.id }
+      appMetadata = {
+        role: staff.role as AuthMetadata['role'],
+        supabase_profile_id: userId,
+        admin_profile_id: staff.id,
+        staff_role: staff.role as StaffRole,
+      }
     } else if (mode === 'login') {
       // ── Customer login ──
       const { data: profile } = await supabaseAdmin
@@ -155,19 +160,10 @@ export async function POST(request: Request) {
         .maybeSingle()
 
       if (!profile) {
-        const { data: staffMatch } = await supabaseAdmin
-          .from('admin_profiles')
-          .select('id')
-          .or(`phone.eq.${cleanPhone},phone.eq.${submittedDigits}`)
-          .maybeSingle()
-
-        if (staffMatch) {
-          return NextResponse.json(
-            { error: 'This number is registered as staff. Please use the staff login.', error_code: 'wrong_portal' },
-            { status: 400 },
-          )
-        }
-
+        // Staff are allowed to hold a customer account too, so having a staff
+        // profile is no longer a reason to refuse. Either way what's missing is
+        // a CUSTOMER account, and `user_not_found` is what moves the form on to
+        // sign-up — which is exactly what this person needs to do.
         return NextResponse.json(
           { error: 'No account found for this number. Please create an account first.', error_code: 'user_not_found' },
           { status: 404 },
@@ -186,7 +182,7 @@ export async function POST(request: Request) {
         }
       }
       userEmail = authData?.user?.email || `${submittedDigits}@kutharibeauty.internal`
-      appMetadata = { role: 'customer', supabase_profile_id: userId }
+      appMetadata = { role: 'customer', supabase_profile_id: userId, has_customer_account: true }
     } else {
       // ── Customer signup ──
       const { data: existingProfile } = await supabaseAdmin
@@ -255,10 +251,21 @@ export async function POST(request: Request) {
         }
       }
 
-      appMetadata = { role: 'customer', supabase_profile_id: userId }
+      appMetadata = { role: 'customer', supabase_profile_id: userId, has_customer_account: true }
     }
 
-    await supabaseAdmin.auth.admin.updateUserById(userId, { app_metadata: appMetadata }).catch((err) => {
+    // MERGE, never replace. One phone is one auth user even when that person is
+    // both staff and a shopper, so writing this object wholesale would let a
+    // shop sign-in wipe `staff_role` (locking an admin out of the admin panel)
+    // or a staff sign-in wipe `has_customer_account`. GoTrue happens to merge
+    // app_metadata keys itself, but reading and merging explicitly means this
+    // doesn't silently depend on that behaviour. Each branch above sets only its
+    // own portal's fields, so the other portal's survive untouched.
+    const { data: currentAuth } = await supabaseAdmin.auth.admin.getUserById(userId)
+    const existingMeta = (currentAuth?.user?.app_metadata ?? {}) as Partial<AuthMetadata>
+    const mergedMetadata: AuthMetadata = { ...existingMeta, ...appMetadata }
+
+    await supabaseAdmin.auth.admin.updateUserById(userId, { app_metadata: mergedMetadata }).catch((err) => {
       console.error('[OTP Verify] app_metadata update failed:', err)
     })
 

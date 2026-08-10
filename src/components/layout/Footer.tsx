@@ -1,6 +1,7 @@
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 import { Phone, Mail, MapPin, Heart } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import Logo from './Logo'
 import type { Category } from '@/types/database.types'
 
@@ -17,15 +18,33 @@ const USEFUL_LINKS = [
   { label: 'Cart', href: '/cart' },
 ]
 
-async function getFooterCategories(): Promise<Pick<Category, 'id' | 'name' | 'slug'>[]> {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('categories')
-    .select('id, name, slug')
-    .eq('is_active', true)
-    .order('display_order')
-  return data ?? []
-}
+/**
+ * Cached + admin client on purpose, NOT the cookie-scoped one. Same reasoning as
+ * the shop layout's chrome query, but getting it wrong here was worse: the
+ * cookie client calls `cookies()`, and this footer renders inside the layout on
+ * EVERY shop page. Most of them are dynamic, so it went unnoticed — but the
+ * product page sets `revalidate = 60`, so Next tries to statically generate it,
+ * hits `cookies()` deep in the layout, and fails the whole render with
+ * DYNAMIC_SERVER_USAGE. That was a hard 500 on every /product/* URL in
+ * production (including ones that should have 404'd) while local dynamic
+ * renders looked fine.
+ *
+ * Nothing here is per-user — it's a list of active category names — so caching
+ * it also stops re-querying the same rows on every navigation.
+ */
+const getFooterCategories = unstable_cache(
+  async (): Promise<Pick<Category, 'id' | 'name' | 'slug'>[]> => {
+    const supabase = createAdminClient()
+    const { data } = await supabase
+      .from('categories')
+      .select('id, name, slug')
+      .eq('is_active', true)
+      .order('display_order')
+    return data ?? []
+  },
+  ['footer-categories'],
+  { revalidate: 300, tags: ['shop-chrome'] },
+)
 
 export default async function Footer() {
   const categories = await getFooterCategories()

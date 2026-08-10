@@ -1,66 +1,38 @@
 import Link from 'next/link'
+import { Search, Home } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="bg-background text-on-background font-body-md min-h-[max(884px,100dvh)] flex flex-col items-center justify-center relative overflow-hidden w-full">
-      {/* Decorative background blobs */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-surface-container-high rounded-full opacity-50 blur-3xl transform -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-1/4 right-1/4 w-[50vw] h-[50vw] bg-surface-container-low rounded-full opacity-60 blur-3xl transform translate-x-1/4 translate-y-1/4" />
-      </div>
+    <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 py-20 relative overflow-hidden">
+      {/* Soft brand glow, echoing the hero */}
+      <div className="absolute inset-0 pointer-events-none radial-glow-gold opacity-60" aria-hidden />
 
-      <main className="z-10 w-full max-w-[1280px] px-margin-mobile md:px-margin-desktop flex flex-col items-center text-center">
-        {/* Illustration */}
-        <div className="mb-12 relative group">
-          <div className="w-48 h-48 md:w-64 md:h-64 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant shadow-lg transition-transform duration-500 ease-out group-hover:scale-105">
-            <span
-              className="material-symbols-outlined text-[100px] md:text-[140px] text-primary transition-colors duration-300 group-hover:text-tertiary"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              inventory_2
-            </span>
-          </div>
-          <div className="absolute -bottom-4 -right-4 bg-error text-on-error px-4 py-2 rounded-full font-label-sm text-label-sm shadow-md animate-bounce">
-            404 ERROR
-          </div>
-        </div>
+      <div className="relative z-10 flex flex-col items-center">
+        <span className="eyebrow">404 — Not found</span>
+        <div className="rule-gold w-24 mt-4 mb-7" />
 
-        {/* Heading & description */}
-        <div className="space-y-6 max-w-2xl mx-auto">
-          <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary">
-            Page Not Found
-          </h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant px-4">
-            We&apos;re sorry, but the page you are looking for doesn&apos;t exist or has been moved.
-            Please check the URL or navigate back to our main trading hub.
-          </p>
-        </div>
+        <h1 className="display text-3xl md:text-5xl">This page doesn&apos;t exist</h1>
 
-        {/* Action buttons */}
-        <div className="mt-12 flex flex-col sm:flex-row gap-4 items-center justify-center">
+        <p className="mt-4 max-w-lg text-sm md:text-base leading-relaxed text-on-surface-variant/75">
+          The page you&apos;re looking for may have been moved, or the product is no
+          longer listed. Try a search, or head back to the store.
+        </p>
+
+        <div className="mt-9 flex flex-wrap gap-3 justify-center">
           <Link
             href="/"
-            className="bg-primary hover:bg-primary-container text-on-primary px-8 py-4 rounded-full font-label-sm text-label-sm uppercase tracking-wider transition-colors duration-300 ease-in-out shadow-sm hover:shadow-md flex items-center gap-2"
+            className="press gold-sheen relative overflow-hidden flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-white text-[11px] font-bold uppercase tracking-[0.14em] hover:bg-primary/90 transition-colors"
           >
-            <span className="material-symbols-outlined text-[18px]">home</span>
-            Go Back to Home
+            <Home size={14} strokeWidth={2.5} /> Back to store
           </Link>
           <Link
-            href="/contact"
-            className="bg-transparent border-[1.5px] border-primary text-primary hover:bg-surface-container px-8 py-4 rounded-full font-label-sm text-label-sm uppercase tracking-wider transition-colors duration-300 ease-in-out flex items-center gap-2"
+            href="/search"
+            className="press flex items-center gap-2 px-7 py-3.5 rounded-full border-[1.5px] border-table-border text-primary text-[11px] font-bold uppercase tracking-[0.14em] hover:border-primary transition-colors"
           >
-            <span className="material-symbols-outlined text-[18px]">support_agent</span>
-            Contact Support
+            <Search size={14} strokeWidth={2.5} /> Browse products
           </Link>
         </div>
-
-        {/* Branding */}
-        <div className="mt-24 pt-8 border-t border-outline-variant w-full max-w-sm mx-auto flex items-center justify-center opacity-70">
-          <span className="font-headline-md text-headline-md font-bold text-on-surface-variant tracking-tight">
-            Kuthari Beauty Store
-          </span>
-        </div>
-      </main>
+      </div>
     </div>
   )
 }
