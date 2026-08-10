@@ -1,0 +1,326 @@
+@import "tailwindcss";
+
+@theme {
+  /* Mirror & Gold Palette — matches the Kuthari Beauty Store crest (deep navy
+     ink + antique gold foil on a warm ivory ground). Same token names as
+     before, so every component using bg-primary/text-secondary/etc.
+     re-themes automatically. */
+  --color-background: #FAF6EE;
+  --color-surface: #FAF6EE;
+  --color-surface-bright: #FFFFFF;
+  --color-surface-dim: #EBE1CC;
+  --color-surface-variant: #DDD0B4;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #F7F1E4;
+  --color-surface-container: #F2EADA;
+  --color-surface-container-high: #ECE2CC;
+  --color-surface-container-highest: #E5D9BF;
+  --color-surface-tint: #1B2C3D;
+
+  /* Primary — the deep navy ink from the mirror's silhouette & wordmark */
+  --color-primary: #1B2C3D;
+  --color-on-primary: #FAF6EE;
+  --color-primary-container: #24384C;
+  --color-on-primary-container: #FAF6EE;
+  --color-primary-fixed: #24384C;
+  --color-primary-fixed-dim: #16232F;
+  --color-on-primary-fixed: #FAF6EE;
+  --color-on-primary-fixed-variant: #ECE2CC;
+  --color-inverse-primary: #D9AF5C;
+
+  /* Secondary — antique gold foil accent (the mirror frame) */
+  --color-secondary: #B9862F;
+  --color-on-secondary: #FAF6EE;
+  --color-secondary-container: #F0DBA8;
+  --color-on-secondary-container: #1B2C3D;
+  --color-secondary-fixed: #D9AF5C;
+  --color-secondary-fixed-dim: #B9862F;
+  --color-on-secondary-fixed: #1B2C3D;
+  --color-on-secondary-fixed-variant: #2E2213;
+
+  /* Tertiary — dusty rose, a cosmetics-appropriate accent alongside navy/gold */
+  --color-tertiary: #B76E79;
+  --color-on-tertiary: #FFFFFF;
+  --color-tertiary-container: #F3DEE0;
+  --color-on-tertiary-container: #4A2328;
+  --color-tertiary-fixed: #B76E79;
+  --color-tertiary-fixed-dim: #96525C;
+  --color-on-tertiary-fixed: #FFFFFF;
+  --color-on-tertiary-fixed-variant: #ECE2CC;
+
+  --color-error: #B3261E;
+  --color-on-error: #FFFFFF;
+  --color-error-container: #FBE9E7;
+  --color-on-error-container: #7A1912;
+
+  --color-outline: #362C1D;
+  --color-outline-variant: #DDD0B4;
+
+  --color-on-background: #1B2C3D;
+  --color-on-surface: #1B2C3D;
+  --color-on-surface-variant: #5B5240;
+
+  --color-inverse-surface: #1B2C3D;
+  --color-inverse-on-surface: #FAF6EE;
+
+  /* Extra surface / border tokens */
+  --color-surface-card: #FFFFFF;
+  --color-table-border: #E5D9BF;
+
+  /* Status colours */
+  --color-status-placed: #6B7280;
+  --color-status-confirmed: #3B82F6;
+  --color-status-packed: #F59E0B;
+  --color-status-shipping: #8B5CF6;
+  --color-status-delivered: #0C831F;
+
+  /* Font families */
+  /* Main site font — Poppins */
+  --font-sans: var(--font-poppins), 'Poppins', ui-sans-serif, sans-serif;
+  --font-body-lg: var(--font-poppins), 'Poppins', sans-serif;
+  --font-body-md: var(--font-poppins), 'Poppins', sans-serif;
+  /* Heading / sub-heading font — Playfair Display */
+  --font-heading: var(--font-playfair), 'Playfair Display', ui-serif, Georgia, serif;
+  --font-headline-lg: var(--font-heading);
+  --font-headline-md: var(--font-heading);
+  --font-headline-sm: var(--font-heading);
+  --font-headline-lg-mobile: var(--font-heading);
+  /* Labels use the main Poppins font too — keeps the site visually consistent
+     (Playfair headings are the only secondary accent). */
+  --font-label-sm: var(--font-poppins), 'Poppins', ui-sans-serif, sans-serif;
+
+  /* Font sizes */
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+  --text-headline-lg: 40px;
+  --text-headline-lg--line-height: 48px;
+  --text-headline-lg-mobile: 30px;
+  --text-headline-lg-mobile--line-height: 36px;
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+
+  /* Spacing */
+  --spacing-margin-mobile: 16px;
+  --spacing-margin-desktop: 64px;
+  --spacing-gutter: 24px;
+  --spacing-base: 8px;
+  --spacing-max-width: 1280px;
+
+  /* Border radius */
+  --radius-DEFAULT: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+  --radius-card: 0.75rem;
+  --radius-btn: 0.5rem;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.12);
+
+  /* Success / Add-to-cart green */
+  --color-success: #16a34a;
+  --color-success-subtle: #dcfce7;
+  --color-on-success: #ffffff;
+}
+
+/* Remove default disclosure triangle from <details> */
+details>summary {
+  list-style: none;
+}
+
+details>summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Admin dashboard chart animation */
+@keyframes chart-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@utility animate-chart {
+  stroke-dasharray: 1500;
+  stroke-dashoffset: 1500;
+  animation: chart-draw 2.4s ease-in-out forwards;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
+/* Gold sheen hover-sweep — a diagonal light band that crosses a primary CTA on
+   hover. Add `.gold-sheen` to a `relative overflow-hidden` element; the sweep
+   sits on a pseudo-element so it never affects layout or interferes with the
+   element's own content/border-radius. */
+@utility gold-sheen {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.35) 48%, rgba(255, 255, 255, 0.35) 52%, transparent 70%);
+    transform: translateX(-120%);
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    transform: translateX(120%);
+    transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  &::after {
+    transition: transform 0.01s;
+  }
+}
+
+/* Soft radial gold glow — a decorative accent behind hero/empty-state sections. */
+@utility radial-glow-gold {
+  background: radial-gradient(circle, rgba(185, 134, 47, 0.16) 0%, transparent 70%);
+}
+
+@keyframes heart-burst {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+
+  70% {
+    transform: scale(1.9);
+    opacity: 0.35;
+  }
+
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@utility animate-heart-burst {
+  animation: heart-burst 0.55s ease-out forwards;
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Slim light scrollbar for scrollable areas on a DARK background (the search
+   sidebar's category list). scrollbar-hide leaves no hint that there's more to
+   see, which on a short/zoomed viewport reads as "the list is cut off". */
+@utility scrollbar-thin-light {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.28);
+    border-radius: 9999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.45);
+  }
+}
+
+/* The footer carries mt-8/md:mt-24 as breathing room after ordinary page
+   content. The search page is a full-bleed two-column layout whose dark sidebar
+   runs to the bottom of the section, so that margin renders as a stray cream
+   band between the sidebar and the footer. Opt that one layout out — both are
+   bg-primary, so they now meet seamlessly. */
+body:has([data-flush-footer]) footer {
+  margin-top: 0;
+}
+
+@utility font-odia {
+  font-family: 'Noto Sans Odia', sans-serif;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* iOS Safari zooms the whole page in when a focused control's font-size is under
+   16px (ours are 14px), then leaves the page zoomed. Bumping to 16px stops it.
+   Scoped to iOS only — `-webkit-touch-callout` is an iOS-Safari-only feature —
+   so desktop and Android inputs are byte-for-byte unchanged. Field HEIGHT is
+   padding-driven, so this only nudges the text size on iPhone, nothing else. */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Headings / sub-headings use the Playfair Display serif by default.
+   Product names (h4) intentionally stay on the main Poppins font. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+}
+
+@media print {
+
+  /* Hide all site chrome — only the order detail content prints */
+  header,
+  nav,
+  footer,
+  [data-print-hide],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+  }
+
+  /* Expand the order detail to fill the page */
+  main,
+  .max-w-4xl {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure cards print with visible borders */
+  .border,
+  [class*="border-"] {
+    border-color: #ccc !important;
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
+}

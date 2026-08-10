@@ -1,0 +1,23 @@
+{
+  "nav.home": "ଘର",
+  "nav.categories": "ବର୍ଗ",
+  "nav.orders": "ଅର୍ଡର",
+  "nav.signIn": "ସାଇନ ଇନ",
+  "nav.account": "ଆକାଉଣ୍ଟ",
+  "nav.myCart": "ମୋ କାର୍ଟ",
+  "nav.searchPlaceholder": "ଉତ୍ପାଦ ଖୋଜନ୍ତୁ...",
+  "category.shopAll": "ସବୁ ଦେଖନ୍ତୁ",
+  "category.sectionTitle": "ବର୍ଗ ଅନୁସାରେ କିଣନ୍ତୁ",
+  "product.viewAll": "ସବୁ ଦେଖନ୍ତୁ",
+  "product.outOfStock": "ଷ୍ଟକ ନାହିଁ",
+  "product.bestSellers": "ସବୁଠୁ ଅଧିକ ବିକ୍ରି",
+  "product.addToCart": "ଯୋଡ଼ନ୍ତୁ",
+  "product.added": "ଯୋଡ଼ା ହେଲା!",
+  "coupon.copyCode": "କପି",
+  "footer.tagline": "ଓଡ଼ିଶାରେ ଆପଣଙ୍କ ବିଶ୍ୱସ୍ତ ଥୋକ ବ୍ୟବସାୟ ସହଭାଗୀ",
+  "footer.rights": "ସର୍ବ ସ୍ୱତ୍ୱ ସংରক୍ଷିତ",
+  "bottomnav.home": "ଘର",
+  "bottomnav.search": "ଖୋଜ",
+  "bottomnav.orders": "ଅର୍ଡର",
+  "bottomnav.profile": "ପ୍ରୋଫାଇଲ"
+}

@@ -1,0 +1,23 @@
+{
+  "nav.home": "Home",
+  "nav.categories": "Categories",
+  "nav.orders": "Orders",
+  "nav.signIn": "Sign In",
+  "nav.account": "Account",
+  "nav.myCart": "My Cart",
+  "nav.searchPlaceholder": "Search products...",
+  "category.shopAll": "Shop All",
+  "category.sectionTitle": "Shop by Category",
+  "product.viewAll": "View All",
+  "product.outOfStock": "Out of Stock",
+  "product.bestSellers": "Best Sellers",
+  "product.addToCart": "Add",
+  "product.added": "Added!",
+  "coupon.copyCode": "Copy",
+  "footer.tagline": "Your trusted wholesale partner in Odisha",
+  "footer.rights": "All rights reserved",
+  "bottomnav.home": "Home",
+  "bottomnav.search": "Search",
+  "bottomnav.orders": "Orders",
+  "bottomnav.profile": "Profile"
+}

@@ -1,0 +1,421 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { Plus, Minus, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useCartStore } from '@/store/cartStore'
+import { useAuthPromptStore } from '@/store/authPromptStore'
+import { useOverlayStore } from '@/store/overlayStore'
+import { useFlyToCartStore } from '@/store/flyToCartStore'
+import { useSupabaseUser } from '@/hooks/useSupabaseUser'
+import { useT } from '@/hooks/useT'
+import { cn } from '@/lib/utils'
+import { getBuyOptions } from '@/lib/products/packaging'
+import type { Product } from '@/types/database.types'
+
+interface Props {
+  product: Product
+  className?: string
+  /** "icon" — small circle ADD (default, for product detail etc.)
+   *  "full" — full-width ADD button with text + stepper */
+  variant?: 'icon' | 'full'
+  disabled?: boolean
+}
+
+// "Box" -> "Boxes", "Bottle" -> "Bottles". Handles the sibilant endings a naive
+// +"s" gets wrong ("Box" -> "Boxs").
+function pluralize(word: string): string {
+  return /(?:s|x|z|ch|sh)$/i.test(word) ? `${word}es` : `${word}s`
+}
+
+export default function AddToCartButton({ product, className, variant = 'icon', disabled }: Props) {
+  const addItem       = useCartStore((s) => s.addItem)
+  const updateQuantity = useCartStore((s) => s.updateQuantity)
+  const showAuthPrompt = useAuthPromptStore((s) => s.show)
+  const { isSignedIn, isLoaded } = useSupabaseUser()
+  const [flash, setFlash] = useState(false)
+  const { t, tField } = useT()
+  // Anchor for the fly-to-cart animation — whichever visual (icon button or
+  // full-width button) is on screen sets this, so addToCart() has a fixed
+  // point to launch the flight from regardless of which variant/flow added.
+  const anchorRef = useRef<HTMLElement | null>(null)
+
+  // The levels this product can be bought at — e.g. Box, or Hanger/Pack for
+  // spices. Same source of truth as the product page, so prices and unit counts
+  // can't drift apart between the two.
+  const buyOptions = getBuyOptions(product)
+  const hasLevels = buyOptions.length > 1
+  const [levelIdx, setLevelIdx] = useState(0)
+  const opt = buyOptions[Math.min(levelIdx, buyOptions.length - 1)]
+
+  // Every product gets a Blinkit-style quick-pick sheet (1 / 10 / custom) on the
+  // first ADD, so the customer chooses how many units to add instead of always
+  // starting at one. After it's in the cart the button becomes a +/- stepper.
+  // Pieces contained in ONE of the selected level. Only fall back to
+  // units_per_pack for single-level products that name a pack_type, where it
+  // legacy-means pieces-per-box. Once a product HAS levels, units_per_pack counts
+  // lower units (e.g. 20 hangers per box), not pieces — printing it against the
+  // lower unit's label claims "1 Hanger = 1,200 pieces". Better to show no count
+  // than a wrong one, so this is 0 (hidden) when there's nothing meaningful.
+  const unitsPerBox = opt.pieces ?? (hasLevels ? 0 : (product.pack_type ? product.units_per_pack : 0)) ?? 0
+  const pricePerBox = opt.price
+  // "Box" / "Hanger" / "Pack" for multi-level products; for a single-level
+  // product use its own pack_type ("Bottle", "Bag", "Piece"…), falling back to a
+  // plain "unit" when it names none — so the sheet reads correctly for every
+  // product, not just boxes. "Box" keeps its Odia translation (the common case).
+  const isBoxUnit = !hasLevels && (product.pack_type ?? '').toLowerCase() === 'box'
+  const unitWord = hasLevels
+    ? opt.label
+    : isBoxUnit
+      ? tField('Box', 'ବାକ୍ସ')
+      : (product.pack_type || tField('unit', 'ୟୁନିଟ୍'))
+  const unitWordPlural = hasLevels
+    ? pluralize(opt.label)
+    : isBoxUnit
+      ? tField('Boxes', 'ବାକ୍ସ')
+      : (product.pack_type ? pluralize(product.pack_type) : tField('units', 'ୟୁନିଟ୍'))
+  const maxQty = product.stock_qty > 0 ? product.stock_qty : 9999
+  const clampNum = (n: number) => Math.max(1, Math.min(Math.floor(n), maxQty))
+
+  // Each level is its own cart line (a Hanger and a Pack are separate).
+  const lineId = hasLevels ? `${product.id}::${opt.label}` : product.id
+  const cartItem = useCartStore((s) => s.items.find((i) => i.id === lineId))
+
+  const [showSheet, setShowSheet] = useState(false)
+  const [qtyStr, setQtyStr] = useState('1')
+  const qtyNum = clampNum(parseInt(qtyStr || '1', 10) || 1)
+
+  // Portal target only exists on the client.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  const pushOverlay = useOverlayStore((s) => s.push)
+  const popOverlay = useOverlayStore((s) => s.pop)
+
+  // While the sheet is open: lock background scroll and mark an overlay open
+  // (so the floating WhatsApp button hides). The sheet itself is portaled to
+  // <body> so it escapes the card's transformed stacking context.
+  useEffect(() => {
+    if (!showSheet) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    pushOverlay()
+    return () => {
+      document.body.style.overflow = prev
+      popOverlay()
+    }
+  }, [showSheet, pushOverlay, popOverlay])
+
+  const requireAuth = () => {
+    if (isLoaded && !isSignedIn) { showAuthPrompt(); return false }
+    return true
+  }
+
+  const addToCart = (quantity: number) => {
+    addItem({
+      id: lineId,
+      product_id: product.id,
+      // Mirrors ProductBuyPanel so the cart line and the server-side price
+      // lookup agree on which level was bought.
+      variant: hasLevels ? opt.label : null,
+      name: product.name,
+      price: hasLevels ? opt.price : product.price,
+      mrp: hasLevels ? opt.mrp : product.mrp,
+      unit: hasLevels
+        ? (opt.pieces ? `${opt.label} · ${opt.pieces} pieces` : opt.label)
+        : product.unit,
+      units_each: hasLevels ? (opt.pieces ?? undefined) : undefined,
+      image: product.images?.[0] ?? null,
+      slug: product.slug,
+      delivery_charge: product.delivery_charge_enabled ? (product.delivery_charge ?? 0) : 0,
+    })
+    if (quantity > 1) updateQuantity(lineId, quantity)
+    useFlyToCartStore.getState().launch(product.images?.[0] ?? null, anchorRef.current)
+    setFlash(true)
+    setTimeout(() => setFlash(false), 800)
+  }
+
+  const handleAdd = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (disabled) return
+    if (!requireAuth()) return
+    // Ask "how many?" before the first add for every product.
+    if (!cartItem) {
+      setQtyStr('1')
+      setShowSheet(true)
+      return
+    }
+    addToCart(1)
+  }
+
+  const confirmSheet = () => {
+    addToCart(qtyNum)
+    setShowSheet(false)
+  }
+
+  const handleChange = (e: React.MouseEvent, delta: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!cartItem) return
+    updateQuantity(cartItem.id, cartItem.quantity + delta)
+  }
+
+  const fmt = (n: number) => n.toLocaleString('en-IN')
+
+  // ── Quick-pick bottom sheet (box products) ──────────────────────────────────
+  const sheet = (
+    <AnimatePresence>
+      {showSheet && (
+        <motion.div
+          key="box-sheet"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowSheet(false) }}
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+        >
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+            className="relative w-full max-w-md bg-surface rounded-t-3xl p-5 shadow-2xl max-h-[92dvh] overflow-y-auto overscroll-contain"
+            style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}
+          >
+            <div className="mx-auto w-10 h-1.5 rounded-full bg-outline-variant/40 mb-4" />
+
+            {/* Header */}
+            <div className="flex items-start gap-3 mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={product.images?.[0] ?? ''} alt="" className="w-12 h-12 rounded-lg object-contain bg-surface-container flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="font-black text-sm text-primary leading-tight line-clamp-2">{tField(product.name, product.name_or)}</p>
+                <p className="text-[11px] font-bold text-on-surface-variant/60 mt-0.5">
+                  {unitsPerBox ? `${fmt(unitsPerBox)} units/${unitWord} · ` : ''}₹{fmt(pricePerBox)}/{unitWord}
+                </p>
+              </div>
+              <button onClick={() => setShowSheet(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:text-primary transition-colors flex-shrink-0" aria-label="Close">
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Level picker — e.g. Hanger vs Pack for spices. */}
+            {hasLevels && (
+              <>
+                <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">
+                  {tField('Buy by', 'କିଣନ୍ତୁ')}
+                </p>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {buyOptions.map((o, i) => {
+                    const sel = i === levelIdx
+                    return (
+                      <button
+                        key={o.label}
+                        onClick={() => { setLevelIdx(i); setQtyStr('1') }}
+                        aria-pressed={sel}
+                        className={cn(
+                          'flex flex-col items-start gap-0.5 rounded-2xl border-2 p-3 text-left transition-all active:scale-95',
+                          sel ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27, 44, 61,0.06)]' : 'border-table-border hover:border-primary/40',
+                        )}
+                      >
+                        <span className="font-black text-sm text-primary">{o.label}</span>
+                        <span className="font-black text-base text-primary">₹{fmt(o.price)}</span>
+                        {o.pieces != null && (
+                          <span className="text-[10px] font-bold text-on-surface-variant/60">{fmt(o.pieces)} {tField('units', 'ୟୁନିଟ୍')}</span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+
+            <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">
+              {`Select number of ${unitWordPlural}`}
+            </p>
+
+            {/* Quick options: 1 box / 10 boxes */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              {[1, 10].map((n) => {
+                const sel = qtyStr === String(n)
+                return (
+                  <button
+                    key={n}
+                    onClick={() => setQtyStr(String(n))}
+                    className={cn(
+                      'flex flex-col items-start gap-0.5 rounded-2xl border-2 p-3 text-left transition-all active:scale-95',
+                      sel ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27, 44, 61,0.06)]' : 'border-table-border hover:border-primary/40',
+                    )}
+                  >
+                    <span className="font-black text-sm text-primary">{n} {n === 1 ? unitWord : unitWordPlural}</span>
+                    <span className="font-black text-base text-primary">₹{fmt(n * pricePerBox)}</span>
+                    {unitsPerBox > 0 && (
+                      <span className="text-[10px] font-bold text-on-surface-variant/60">{fmt(n * unitsPerBox)} {tField('units', 'ୟୁନିଟ୍')}</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Custom number of boxes */}
+            <div className="rounded-2xl border-2 border-primary/25 bg-primary/[0.04] p-3 mb-4">
+              <label htmlFor="box-sheet-custom" className="block text-[10px] font-black uppercase tracking-widest text-primary mb-2">
+                {`Or enter custom ${unitWordPlural}`}
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  id="box-sheet-custom"
+                  type="text"
+                  inputMode="numeric"
+                  value={qtyStr}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => setQtyStr(e.target.value.replace(/[^0-9]/g, ''))}
+                  onBlur={() => setQtyStr(String(qtyNum))}
+                  placeholder="100"
+                  aria-label={`Number of ${unitWordPlural}`}
+                  className="w-24 h-12 px-3 rounded-xl border-2 border-primary/40 bg-surface text-center font-black text-lg text-primary placeholder:text-on-surface-variant/30 outline-none focus:border-primary"
+                />
+                <span className="text-sm font-bold text-on-surface-variant">{unitWordPlural}</span>
+                <div className="ml-auto text-right">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/50">{tField('Total', 'ମୋଟ')}</p>
+                  <p className="text-xl font-black text-primary leading-none mt-0.5">₹{fmt(qtyNum * pricePerBox)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Confirm */}
+            <button
+              onClick={confirmSheet}
+              className="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-primary text-white font-black text-sm uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+            >
+              {`Add ${qtyNum} ${qtyNum === 1 ? unitWord : unitWordPlural}`} · ₹{fmt(qtyNum * pricePerBox)}
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+
+  // ── Full-width variant ─────────────────────────────────────────────────────
+  if (variant === 'full') {
+    return (
+      <>
+      <div
+        ref={(el) => { anchorRef.current = el }}
+        className={cn('relative h-10', className)}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {cartItem ? (
+            // Stepper
+            <motion.div
+              key="stepper"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1,    opacity: 1 }}
+              exit={{    scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              className="absolute inset-0 flex items-center justify-between rounded-xl bg-primary text-white overflow-hidden"
+            >
+              <button
+                onClick={(e) => handleChange(e, -1)}
+                className="w-10 h-full flex items-center justify-center bg-transparent hover:bg-white/20 transition-colors active:scale-95"
+                aria-label="Remove one"
+              >
+                <Minus size={16} strokeWidth={3} />
+              </button>
+              <span className="text-[14px] font-black min-w-6 text-center tracking-widest">
+                {cartItem.quantity}
+              </span>
+              <button
+                onClick={(e) => handleChange(e, 1)}
+                className="w-10 h-full flex items-center justify-center bg-transparent hover:bg-white/20 transition-colors active:scale-95"
+                aria-label="Add one more"
+              >
+                <Plus size={16} strokeWidth={3} />
+              </button>
+            </motion.div>
+          ) : (
+            // ADD button
+            <motion.button
+              key="add"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1,    opacity: 1 }}
+              exit={{    scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              onClick={handleAdd}
+              disabled={disabled}
+              className={cn(
+                'absolute inset-0 overflow-hidden flex items-center justify-center gap-2 rounded-xl font-black text-xs md:text-[13px] transition-all duration-300 active:scale-95 group/btn uppercase tracking-widest',
+                disabled
+                  ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-50'
+                  : flash
+                  ? 'bg-primary-fixed text-on-primary'
+                  : 'gold-sheen bg-primary text-white hover:bg-primary-container shadow-sm hover:shadow-md',
+              )}
+              aria-label={t('product.addToCart')}
+            >
+              <Plus size={16} strokeWidth={3} className="transition-transform duration-300 group-hover/btn:rotate-90" />
+              ADD
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
+      {mounted && createPortal(sheet, document.body)}
+      </>
+    )
+  }
+
+  // ── Icon variant (default — small circle) ───────────────────────────────────
+  if (cartItem) {
+    return (
+      <div
+        onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+        className={cn('flex items-center justify-between bg-primary-fixed rounded-lg px-1 py-0.5 min-w-[96px]', className)}
+      >
+        <button
+          onClick={(e) => handleChange(e, -1)}
+          className="w-7 h-7 flex items-center justify-center rounded-md bg-surface-card shadow-sm text-primary hover:bg-primary-fixed-dim transition-colors"
+        >
+          <Minus size={14} />
+        </button>
+        <span className="text-sm font-bold text-primary min-w-6 text-center">
+          {cartItem.quantity}
+        </span>
+        <button
+          onClick={(e) => handleChange(e, 1)}
+          className="w-7 h-7 flex items-center justify-center rounded-md bg-primary text-on-primary shadow-sm hover:opacity-90 transition-opacity"
+        >
+          <Plus size={14} />
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <>
+    <button
+      ref={(el) => { anchorRef.current = el }}
+      onClick={handleAdd}
+      disabled={disabled}
+      className={cn(
+        'w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95',
+        disabled
+          ? 'bg-surface-container text-on-surface-variant cursor-not-allowed'
+          : flash
+          ? 'bg-primary-fixed text-primary'
+          : 'bg-primary-container text-on-primary hover:bg-primary hover:text-on-primary',
+        className,
+      )}
+      aria-label={t('product.addToCart')}
+    >
+      <Plus size={18} />
+    </button>
+    {mounted && createPortal(sheet, document.body)}
+    </>
+  )
+}

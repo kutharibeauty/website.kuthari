@@ -1,0 +1,62 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# Credential / handover notes pasted into the project folder. These contain
+# live keys and must never be committed.
+GitHub repo*.md
+*credentials*
+*CREDENTIALS*
+secrets.*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# clerk configuration (can include secrets)
+/.clerk/
+._bytest/
+
+# Client business data (prices, stock). Kept locally, never served or committed:
+# anything under public/ is downloadable by anyone at bcrtraders.com/<filename>.
+/data
+
+# BCR-era handover docs / scratch files, not part of the app
+bcr_traders_new_features_prompt.md
+VYAPAR_NEEDS_ADMIN.txt
+KUTHARI_FANCY_STORE_INFO_FORM.txt
+._wm.pdf
