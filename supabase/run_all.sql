@@ -792,7 +792,7 @@ CREATE POLICY "public_read_banner_images"
 -- =============================================================================
 --  003: SEED DATA — Admin Account
 -- =============================================================================
--- Only the super-admin account is seeded here. Categories, products,
+-- Only the super-admin accounts are seeded here. Categories, products,
 -- serviceable pincodes and coupons are intentionally NOT seeded — the client
 -- is adding their real catalog and coverage area through the admin panel
 -- rather than starting from BCR Traders' old grocery demo data.
@@ -800,12 +800,22 @@ CREATE POLICY "public_read_banner_images"
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- ── Admin Profiles ───────────────────────────────────────────────────────────
+-- `view_unserviceable` is deliberately absent: migration 036 removed that
+-- feature along with the unserviceable_attempts table.
 INSERT INTO admin_profiles (phone, name, email, role, permissions) VALUES
   ('+918114325023', 'Jyotiranjan Sahoo', 'sahoojyotiranjan595@gmail.com', 'super_admin',
    '{"view_orders":true,"update_order_status":true,"manage_products":true,
      "manage_categories":true,"manage_banners":true,"manage_coupons":true,
      "manage_pincodes":true,"manage_cms":true,"manage_admin_profiles":true,
      "manage_delivery_persons":true,"view_analytics":true,
-     "view_abandoned_carts":true,"view_unserviceable":true,
+     "view_abandoned_carts":true,
+     "receive_order_emails":true,"export_data":true}'::jsonb),
+
+  ('+919861235276', 'Vinay', 'kuthari.dev@gmail.com', 'super_admin',
+   '{"view_orders":true,"update_order_status":true,"manage_products":true,
+     "manage_categories":true,"manage_banners":true,"manage_coupons":true,
+     "manage_pincodes":true,"manage_cms":true,"manage_admin_profiles":true,
+     "manage_delivery_persons":true,"view_analytics":true,
+     "view_abandoned_carts":true,
      "receive_order_emails":true,"export_data":true}'::jsonb)
 ON CONFLICT (phone) DO NOTHING;
