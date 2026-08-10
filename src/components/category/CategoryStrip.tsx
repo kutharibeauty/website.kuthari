@@ -9,10 +9,11 @@ import type { Category } from '@/types/database.types'
 type StripCategory = Pick<Category, 'id' | 'name' | 'name_or' | 'slug' | 'image_url'>
 
 /**
- * Blinkit-style horizontal category switcher: a scrollable row of circular
- * images with labels. The image is the admin-uploaded `image_url` (use
- * transparent-background PNGs so it reads as an icon); shown object-contain on a
- * light circle. The active category is highlighted.
+ * Horizontal category switcher: a scrollable row of image tiles with labels.
+ * The image is the admin-uploaded `image_url` — use a transparent background so
+ * it reads as an icon; it is shown object-contain on a light rounded tile
+ * (`rounded-full` resolves to 12px here, see `--radius-full` in globals.css).
+ * The active category is highlighted.
  */
 export default function CategoryStrip({
   categories,
@@ -55,7 +56,9 @@ export default function CategoryStrip({
                 className={cn(
                   'w-[88px] h-[88px] sm:w-[104px] sm:h-[104px] rounded-full flex items-center justify-center overflow-hidden border-2 transition-all duration-200 active:scale-95',
                   active
-                    ? 'border-primary bg-primary/[0.06] shadow-[0_0_0_3px_rgba(27, 44, 61,0.07)]'
+                    // Arbitrary values cannot contain spaces — `rgba(27, 44, 61,0.07)`
+                    // silently produced no class at all, so the ring never rendered.
+                    ? 'border-primary bg-primary/[0.06] shadow-[0_0_0_3px_rgb(27_44_61_/_0.07)]'
                     : 'border-table-border bg-surface-container group-hover:border-primary/40',
                 )}
               >

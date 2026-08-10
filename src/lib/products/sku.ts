@@ -22,7 +22,6 @@ export const CAT_CODES: Record<string, string> = {
   'bath-body':             'BTH',
   'salon-parlour':         'SLN',
   'beauty-tools':          'TLS',
-  'baby-kids-care':        'BBY',
 }
 
 export const FALLBACK_CAT_CODE = 'GEN'
