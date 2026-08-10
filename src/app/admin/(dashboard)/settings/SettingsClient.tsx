@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
 import { formatMinute, parseTimeToMinutes } from '@/lib/store-hours'
 
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
 
 /** "04:00" → "4:00 AM" for the settings preview; leaves malformed input as-is. */
 function fmtTime(hhmm: string): string {
@@ -34,7 +34,7 @@ type Settings = {
 
 function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
-    <section className="bg-surface-card rounded-2xl border-2 border-table-border p-6 space-y-6">
+    <section className="card-lift animate-rise bg-surface-card rounded-2xl border-2 border-table-border p-6 space-y-6 hover:border-primary/25">
       <div className="border-b-2 border-table-border pb-4">
         <h2 className="font-black text-xl text-primary">{title}.</h2>
         {sub && <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">{sub}</p>}
@@ -175,7 +175,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm"
+          className="gold-sheen relative overflow-hidden flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0 transition-all duration-200 active:scale-95 shadow-sm"
         >
           {saving && <Loader2 size={16} className="animate-spin" />}
           {saving ? 'Saving…' : saved ? <><Check size={16} strokeWidth={2.5} /> Saved</> : 'Save Settings'}
@@ -210,7 +210,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
               type="text"
               value={settings.store_tagline}
               onChange={e => set('store_tagline', e.target.value)}
-              placeholder="Your trusted wholesale beauty partner"
+              placeholder="Your trusted beauty store"
               className={inputCls}
             />
           </Field>

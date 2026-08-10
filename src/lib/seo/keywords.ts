@@ -1,98 +1,108 @@
 /**
  * SEO keyword pools for Kuthari Beauty Store.
  *
- * Generic cosmetics / salon / grooming terms. Once the client confirms the
- * exact brands and categories they stock, the `categories` group below should
- * be extended with brand names ("wholesale Lakme distributor", …) — those are
- * the highest-intent terms and can't be guessed.
+ * Retail-first, matching how the store actually sells: single pieces at retail
+ * price, with bulk (box/pack) as an option. The `bulk` group is deliberately
+ * kept — buying by the box is a real offer and those are high-intent searches —
+ * but it no longer leads.
+ *
+ * Once the client confirms the exact brands they stock, add them to
+ * `categories` ("Lakme distributor Brahmapur", …) — brand terms convert best
+ * and can't be guessed.
  */
 export const MASTER_KEYWORDS = {
   brand: [
     'KUTHARI BEAUTY STORE',
     'Kuthari Beauty Store online',
     'Kuthari Beauty Store Odisha',
-    'Kuthari Beauty Store wholesale',
     'Kuthari Beauty Store Brahmapur',
     'Kuthari Beauty Store price list',
-    'Kuthari Beauty Store bulk order',
-    'Kuthari wholesale cosmetics distributor',
+    'Kuthari beauty products',
+    'Kuthari cosmetics shop',
   ],
 
-  wholesale: [
-    'wholesale cosmetics distributor',
-    'wholesale beauty products supplier',
-    'cosmetics wholesale market online',
-    'beauty products wholesale price list',
-    'salon products wholesale supplier',
-    'parlour products wholesale dealer',
-    'bulk cosmetics supplier India',
-    'B2B cosmetics supplier',
-    'cosmetic distributor for retailers',
-    'beauty wholesale online India',
-    'salon supplies distributor',
-    'grooming products wholesale',
-    'cosmetics dealer near me',
-    'wholesale makeup supplier India',
-    'beauty store wholesale rates',
+  retail: [
+    'buy cosmetics online',
+    'beauty products online store',
+    'buy skincare online India',
+    'order makeup online',
+    'cosmetics shop online India',
+    'beauty store near me',
+    'buy beauty products with home delivery',
+    'genuine branded cosmetics online',
+    'affordable beauty products online',
+    'cosmetics home delivery India',
   ],
 
   categories: [
-    'wholesale skincare products',
-    'wholesale haircare products',
-    'wholesale makeup products',
-    'wholesale face wash bulk',
-    'wholesale shampoo distributor',
-    'wholesale hair oil supplier',
-    'wholesale perfume dealer',
-    'wholesale nail polish supplier',
-    'wholesale hair colour distributor',
-    'salon equipment wholesale',
-    'beauty parlour items wholesale',
-    'wholesale body lotion supplier',
-    'wholesale soap and bath products',
-    'wholesale mens grooming products',
-    'wholesale cosmetics combo packs',
+    'buy skincare products',
+    'buy haircare products',
+    'buy makeup online',
+    'face wash online',
+    'shampoo online store',
+    'hair oil online',
+    'perfume and deodorant online',
+    'nail polish online',
+    'hair colour online',
+    'salon products online',
+    'beauty parlour items online',
+    'body lotion online',
+    'soap and bath products online',
+    'mens grooming products online',
+    'beauty combo packs online',
+  ],
+
+  // Bulk buying is still offered — box/pack rates for shops, salons and parlours.
+  bulk: [
+    'buy cosmetics in bulk online',
+    'bulk beauty products supplier',
+    'cosmetics box pack rate',
+    'salon products bulk order',
+    'parlour products bulk supplier',
+    'beauty products for resale',
+    'cosmetics distributor for retailers',
+    'wholesale cosmetics supplier India',
   ],
 
   cities: [
-    'cosmetics wholesale Brahmapur',
-    'beauty products wholesale Berhampur',
-    'cosmetics distributor Odisha',
-    'beauty wholesale Bhubaneswar',
-    'cosmetics wholesale Cuttack',
-    'beauty products supplier Andhra Pradesh',
-    'cosmetics distributor West Bengal',
-    'beauty wholesale Chhattisgarh',
+    'cosmetics shop Brahmapur',
+    'beauty products Berhampur',
+    'cosmetics store Odisha',
+    'beauty products Bhubaneswar',
+    'cosmetics shop Cuttack',
+    'beauty products Andhra Pradesh',
+    'cosmetics store West Bengal',
+    'beauty products Chhattisgarh',
   ],
 
   nearMe: [
-    'cosmetics wholesaler near me',
-    'beauty products wholesale near me',
+    'cosmetics shop near me',
+    'beauty products near me',
     'salon supplies near me',
     'parlour products shop near me',
   ],
 
   buyIntent: [
-    'buy cosmetics in bulk online',
-    'order beauty products wholesale',
-    'cosmetics bulk order online India',
-    'beauty products for resale',
-    'start a beauty business supplier',
+    'order beauty products online',
+    'buy cosmetics with cash free delivery',
+    'best online beauty store India',
+    'beauty products delivered to home',
+    'buy single piece or full box cosmetics',
   ],
 
   questions: [
-    'where to buy cosmetics in bulk',
-    'how to start a cosmetics retail shop',
-    'best wholesale beauty distributor in Odisha',
-    'minimum order for wholesale cosmetics',
+    'where to buy genuine cosmetics online',
+    'best beauty store in Odisha',
+    'do you deliver cosmetics all over India',
+    'minimum order for bulk cosmetics',
   ],
 
   longTail: [
-    'genuine branded cosmetics wholesale distributor',
-    'cosmetics wholesale with home delivery',
-    'beauty products wholesale all over India',
-    'retail and wholesale cosmetics supplier',
+    'genuine branded cosmetics with home delivery',
+    'beauty products delivered all over India',
+    'retail and bulk cosmetics store',
     'salon and parlour product supplier Odisha',
+    'buy one piece or a full box of cosmetics',
   ],
 } as const
 

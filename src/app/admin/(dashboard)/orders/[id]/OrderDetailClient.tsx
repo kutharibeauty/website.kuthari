@@ -347,7 +347,7 @@ export default function OrderDetailClient({
                 onChange={e => setNotes(e.target.value)}
                 rows={4}
                 placeholder="Internal notes (not visible to customer)…"
-                className="w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors resize-none"
+                className="w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 resize-none"
               />
               <button
                 onClick={saveNotes}

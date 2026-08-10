@@ -14,7 +14,7 @@ interface Props {
 }
 
 const inputCls =
-  'w-full px-3 py-2.5 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed'
+  'w-full px-3 py-2.5 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed'
 
 export default function AdminProfileForm({ profile }: Props) {
   const router = useRouter()

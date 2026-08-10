@@ -33,7 +33,7 @@ export default function OrderConfirmedCustomer({
           <Section style={header}>
             <Heading style={headerTitle}>KUTHARI BEAUTY STORE</Heading>
             <Text style={headerRule}>&nbsp;</Text>
-            <Text style={headerSub}>WHOLESALE · TRUSTED · DELIVERED</Text>
+            <Text style={headerSub}>BEAUTY · TRUSTED · DELIVERED</Text>
           </Section>
 
           {/* Hero */}

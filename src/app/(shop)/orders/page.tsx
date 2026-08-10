@@ -9,7 +9,7 @@ import { Package, ArrowRight, ShoppingBag, Clock, CheckCircle, XCircle, Truck } 
 
 export const metadata: Metadata = {
   title: 'My Orders — Kuthari Beauty Store',
-  description: 'Track your Kuthari Beauty Store wholesale orders — view status, delivery updates, invoices and reorder in one tap.',
+  description: 'Track your Kuthari Beauty Store orders — view status, delivery updates, invoices and reorder in one tap.',
   robots: { index: false },
 }
 

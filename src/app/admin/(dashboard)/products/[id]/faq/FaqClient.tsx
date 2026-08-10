@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -21,66 +21,65 @@ import type { ProductFAQ } from '@/types/database.types'
 type FaqTemplate = { question: string; question_or: string; answer: string; answer_or: string }
 
 const TEMPLATES: Record<string, FaqTemplate[]> = {
-  oil: [
-    { question: 'What is the shelf life of this oil?', question_or: 'ଏହି ତେଲର ଶୈଲ୍ଫ ଲାଇଫ୍ କ\'ଣ?', answer: '<p>This oil has a shelf life of 12–18 months from the date of manufacture when stored in a cool, dry place away from direct sunlight.</p>', answer_or: '' },
-    { question: 'What is the extraction method used?', question_or: 'ଏହି ତେଲ କିପରି ପ୍ରସ୍ତୁତ?', answer: '<p>Our oil is processed using modern cold-press / solvent extraction methods to retain maximum nutrients and natural flavour.</p>', answer_or: '' },
-    { question: 'How should I store this oil?', question_or: 'ଏହି ତେଲ କିପରି ସଂରକ୍ଷଣ କରିବେ?', answer: '<p>Store in a cool, dry place away from heat and light. Keep the container tightly closed after each use. Avoid storing near the stove.</p>', answer_or: '' },
-    { question: 'What pack sizes are available for bulk orders?', question_or: 'ଥୋକ ଅର୍ଡର ପାଇଁ କେଉଁ ପ୍ୟାକ୍ ସାଇଜ ଅଛି?', answer: '<p>Available in 1L, 5L, 15L, and 15 kg tins for bulk wholesale orders. Contact us for custom packaging requirements.</p>', answer_or: '' },
-    { question: 'Is this oil certified and quality-tested?', question_or: 'ଏହି ତେଲ ଗୁଣ ପ୍ରମାଣିତ କି?', answer: '<p>Yes, our oil meets FSSAI standards and is quality-tested at each production batch. Look for the FSSAI license number on the packaging.</p>', answer_or: '' },
+  skincare: [
+    { question: 'Is this product suitable for all skin types?', question_or: '', answer: '<p>This product is formulated for normal to combination skin. If you have sensitive or acne-prone skin, we recommend a patch test on the inner forearm 24 hours before first use.</p>', answer_or: '' },
+    { question: 'What is the shelf life and how should it be stored?', question_or: '', answer: '<p>Unopened, the product stays good until the expiry date printed on the pack. Once opened, use within the period shown by the jar symbol (typically 6-12 months). Store in a cool, dry place away from direct sunlight.</p>', answer_or: '' },
+    { question: 'Is this product genuine and sealed?', question_or: '', answer: '<p>Yes. Every product we supply is sourced from authorised distributors and reaches you factory-sealed with the batch number and expiry printed on the pack.</p>', answer_or: '' },
+    { question: 'Is it tested on animals?', question_or: '', answer: '<p>Please refer to the brand markings on the pack. We stock both cruelty-free certified and conventional brands — get in touch if you need cruelty-free options specifically.</p>', answer_or: '' },
+    { question: 'What pack sizes are available for bulk orders?', question_or: '', answer: '<p>Single pieces are available at retail rates, and bulk is sold by the box or pack. Contact us for the current bulk rate on your preferred size.</p>', answer_or: '' },
   ],
-  pulse: [
-    { question: 'What is the protein content of this dal?', question_or: 'ଏହି ଡାଲ\' ର ପ୍ରୋଟିନ ପରିମାଣ କ\'ଣ?', answer: '<p>This dal is a rich source of plant protein, containing approximately 22–25g of protein per 100g serving, making it ideal for B2B bulk supply to restaurants and households.</p>', answer_or: '' },
-    { question: 'What is the average cooking time?', question_or: 'ରାନ୍ଧିବା ପାଇଁ ଗଡ଼ ସମୟ କ\'ଣ?', answer: '<p>After proper soaking for 4–6 hours, this dal cooks in approximately 20–30 minutes on a stovetop, or 8–10 minutes in a pressure cooker.</p>', answer_or: '' },
-    { question: 'How should bulk pulses be stored?', question_or: 'ଥୋକ ଡାଲ\' ସଂରକ୍ଷଣ ଉପାୟ?', answer: '<p>Store in a cool, dry, airtight container away from moisture and pests. Ideal storage temperature is below 25°C. Properly stored pulses last 12–18 months.</p>', answer_or: '' },
-    { question: 'What varieties do you stock?', question_or: 'ଆପଣ ମାନଙ୍କ ପାଖରେ କ\'ଣ ଥରି ଅଛି?', answer: '<p>We stock a full range including Toor Dal, Moong Dal, Chana Dal, Masoor Dal, Urad Dal, and Rajma. Contact us for current availability and wholesale pricing.</p>', answer_or: '' },
-    { question: 'What is the minimum wholesale order quantity?', question_or: 'ଥୋକ ଅର୍ଡର ର ଘୋଷିତ ସୀମା?', answer: '<p>Minimum order quantity for wholesale is 25 kg per variety. Custom packaging and labelling available for orders above 100 kg.</p>', answer_or: '' },
+  haircare: [
+    { question: 'Is this suitable for coloured or chemically treated hair?', question_or: '', answer: '<p>Check the pack for a colour-safe or sulphate-free marking. We stock ranges specifically formulated for coloured, keratin-treated and chemically processed hair — ask us for recommendations.</p>', answer_or: '' },
+    { question: 'What is the shelf life?', question_or: '', answer: '<p>Typically 24-36 months unopened, and 12 months after opening. The exact expiry is printed on every pack.</p>', answer_or: '' },
+    { question: 'Do you supply salon and professional sizes?', question_or: '', answer: '<p>Yes. Alongside retail sizes we stock salon/professional litre packs. These are usually sold by the box — contact us for professional pricing.</p>', answer_or: '' },
+    { question: 'Are these products genuine brand stock?', question_or: '', answer: '<p>Yes, sourced from authorised distributors with batch numbers intact. We do not deal in refills or repackaged goods.</p>', answer_or: '' },
+    { question: 'What is the minimum for bulk pricing?', question_or: '', answer: '<p>Bulk rates apply from one full box or pack. The exact quantity per box is shown on the product page when you choose the bulk option.</p>', answer_or: '' },
   ],
-  atta: [
-    { question: 'What type of wheat is used in this atta?', question_or: 'ଏହି ଆଟାରେ କ\'ଣ ଗହମ ବ୍ୟବହାର ହୋଇଛି?', answer: '<p>This atta is made from premium whole wheat (sharbati/MP wheat) milled to retain the bran and germ for maximum nutritional value.</p>', answer_or: '' },
-    { question: 'What is the shelf life of this atta?', question_or: 'ଏହି ଆଟାର ଶୈଲ୍ଫ ଲାଇଫ୍ କ\'ଣ?', answer: '<p>When stored in a cool, dry, airtight container, the shelf life is 3–4 months from the milling date. Always store away from moisture and direct sunlight.</p>', answer_or: '' },
-    { question: 'Is this atta organic?', question_or: 'ଏହି ଆଟା ଅର୍ଗାନିକ୍ କି?', answer: '<p>This atta is made from conventionally grown wheat. We also offer certified organic atta — please contact us for organic variants and pricing.</p>', answer_or: '' },
-    { question: 'What is the grinding process?', question_or: 'ଆଟା ପ୍ରସ୍ତୁତ ପ୍ରକ୍ରିୟା?', answer: '<p>The wheat is cleaned, sorted, and stone-ground (chakki milling) to produce a fine yet nutritious flour with a natural wheat aroma.</p>', answer_or: '' },
-    { question: 'What pack sizes are available for wholesale?', question_or: 'ଥୋକ ର ପ୍ୟାକ୍ ସାଇଜ?', answer: '<p>Available in 1 kg, 5 kg, 10 kg, 25 kg, and 50 kg bags for wholesale buyers. Branded and unbranded packaging available on request.</p>', answer_or: '' },
+  makeup: [
+    { question: 'What shades are available?', question_or: '', answer: '<p>Available shades are listed on the product page. If a shade you need is not shown, contact us — we can usually source it from the full brand range.</p>', answer_or: '' },
+    { question: 'Is this long-wear or transfer-proof?', question_or: '', answer: '<p>Wear time varies by formula and is stated on the pack. Matte and long-wear formulas typically last 6-8 hours; check the individual product description.</p>', answer_or: '' },
+    { question: 'How should makeup be stored?', question_or: '', answer: '<p>Keep in a cool, dry place away from direct sunlight and heat. Extreme heat can separate cream and liquid formulas, so avoid leaving stock in a hot vehicle or near a window.</p>', answer_or: '' },
+    { question: 'Are products sealed and within expiry?', question_or: '', answer: '<p>Yes. All stock is factory-sealed with a clearly printed batch number and expiry date. We do not supply short-expiry or tester stock.</p>', answer_or: '' },
+    { question: 'Can I mix shades within one bulk box?', question_or: '', answer: '<p>Mixed-shade boxes can often be arranged for regular buyers. Contact us with your shade split and we will confirm availability.</p>', answer_or: '' },
   ],
-  spice: [
-    { question: 'Where do your spices come from?', question_or: 'ଆପଣ ଙ୍କ ମସଲା କୋଉଠୁ ଆସେ?', answer: '<p>Our spices are sourced directly from prime growing regions — turmeric from Erode/Salem, pepper from Kerala, cumin from Rajasthan — ensuring superior quality and freshness.</p>', answer_or: '' },
-    { question: 'How fresh are the spices?', question_or: 'ମସଲା କ\'ଣ ତଜା ଅଛି?', answer: '<p>We process and pack spices in small batches to ensure maximum freshness. Each batch is date-coded; typical freshness window post-packing is 6–12 months.</p>', answer_or: '' },
-    { question: 'Are these spices ground or whole?', question_or: 'ଏହି ମସଲା ଗ୍ରାଉଣ୍ଡ ନା ଗୋଟା?', answer: '<p>Available in both ground (powder) and whole forms. Ground spices are freshly milled for maximum aroma. Specify your preference when ordering.</p>', answer_or: '' },
-    { question: 'What is the shelf life?', question_or: 'ଶୈଲ୍ଫ ଲାଇଫ୍ କ\'ଣ?', answer: '<p>Ground spices: 12 months. Whole spices: 18–24 months. Always store in airtight containers away from heat, moisture, and light.</p>', answer_or: '' },
-    { question: 'Do you have FSSAI/organic certification?', question_or: 'FSSAI ସାର୍ଟିଫିକେଟ ଅଛି କି?', answer: '<p>Yes, all our spice products carry FSSAI certification. Organic-certified variants are available for select spices — contact us for details.</p>', answer_or: '' },
+  salon: [
+    { question: 'Is this a professional or retail product?', question_or: '', answer: '<p>This is professional salon stock intended for trained use. Usage directions and any required dilution ratios are printed on the pack.</p>', answer_or: '' },
+    { question: 'Do you supply salons and parlours directly?', question_or: '', answer: '<p>Yes. We supply salons, parlours and beauty academies with bulk pricing on box and pack quantities. Get in touch to discuss regular supply.</p>', answer_or: '' },
+    { question: 'What safety precautions apply?', question_or: '', answer: '<p>Always follow the manufacturer directions on the pack, carry out any recommended patch test, and use gloves where indicated. Keep out of reach of children.</p>', answer_or: '' },
+    { question: 'What is the shelf life?', question_or: '', answer: '<p>Most professional products last 24-36 months unopened. The batch number and expiry are printed on every pack.</p>', answer_or: '' },
+    { question: 'Are bulk rates available?', question_or: '', answer: '<p>Yes — choose the bulk option on the product page to see box and pack rates, or contact us for a quote on larger regular orders.</p>', answer_or: '' },
   ],
-  sugar: [
-    { question: 'What type of sugar is this?', question_or: 'ଏହା କ\'ଣ ଧରଣର ଚିନି?', answer: '<p>This is refined white sugar (M30 / S30 grade) produced from sugarcane. We also supply raw cane sugar, khandsari, and natural jaggery (gur) — available on request.</p>', answer_or: '' },
-    { question: 'What is the glycemic index?', question_or: 'ଗ୍ଲାଇସେମିକ ଇଣ୍ଡେକ୍ସ?', answer: '<p>Refined white sugar has a glycemic index of approximately 65. For lower GI alternatives, consider our jaggery or coconut sugar options.</p>', answer_or: '' },
-    { question: 'What bulk pricing is available?', question_or: 'ଥୋକ ଦର?', answer: '<p>Wholesale pricing available for orders of 50 kg and above. Volume discounts apply at 200 kg, 500 kg, and 1 MT+ quantities. Contact our sales team for current rates.</p>', answer_or: '' },
-    { question: 'Does it have quality certifications?', question_or: 'ଗୁଣ ସର୍ଟିଫିକେଟ ଅଛି?', answer: '<p>Our sugar meets BIS standards and FSSAI requirements. Packed under hygienically controlled conditions with batch tracking for traceability.</p>', answer_or: '' },
-    { question: 'What are the available pack sizes?', question_or: 'ପ୍ୟାକ ସାଇଜ?', answer: '<p>Available in 1 kg, 5 kg, 25 kg, and 50 kg bags. Bulk unpackaged supply in gunny bags (50 kg) available for large wholesale buyers.</p>', answer_or: '' },
+  fragrance: [
+    { question: 'Is this an original branded fragrance?', question_or: '', answer: '<p>Yes. We supply only genuine branded stock through authorised channels, sealed with the batch code intact. We do not deal in first-copy or replica fragrances.</p>', answer_or: '' },
+    { question: 'How long does the fragrance last?', question_or: '', answer: '<p>Longevity depends on the concentration. Eau de Toilette typically lasts 3-5 hours and Eau de Parfum 6-8 hours, varying with skin type and climate.</p>', answer_or: '' },
+    { question: 'How should fragrances be stored?', question_or: '', answer: '<p>Store upright in a cool, dark place. Heat and sunlight break down fragrance oils, so keep stock away from windows and direct light.</p>', answer_or: '' },
+    { question: 'What sizes do you stock?', question_or: '', answer: '<p>Sizes vary by brand and are listed on the product page. Deodorants and body sprays are typically sold by the box for bulk buyers.</p>', answer_or: '' },
+    { question: 'Are testers available?', question_or: '', answer: '<p>Tester units can sometimes be arranged for regular retail buyers. Contact us to check current availability.</p>', answer_or: '' },
   ],
-  water: [
-    { question: 'What is the water source?', question_or: 'ଜଳ ଉତ୍ସ କ\'ଣ?', answer: '<p>Our packaged water is sourced from a protected underground aquifer and treated with multi-stage purification to ensure purity and consistent mineral balance.</p>', answer_or: '' },
-    { question: 'What purification method is used?', question_or: 'ଶୁଦ୍ଧୀକରଣ ପ୍ରକ୍ରିୟା?', answer: '<p>The water goes through a 7-stage purification process including microfiltration, UV treatment, reverse osmosis, and ozonation before packaging, ensuring zero bacteria and virus contamination.</p>', answer_or: '' },
-    { question: 'Is it BIS certified?', question_or: 'BIS ସାର୍ଟିଫିକେଟ ଅଛି?', answer: '<p>Yes, our packaged water is BIS certified under IS 14543 and bears the ISI mark. The license number is printed on every bottle label.</p>', answer_or: '' },
-    { question: 'What bottle sizes are available?', question_or: 'ବୋତଲ ସାଇଜ?', answer: '<p>Available in 250 ml, 500 ml, 1 litre, 2 litre, 5 litre, and 20 litre jars. Customized label and private label options available for bulk B2B orders.</p>', answer_or: '' },
-    { question: 'What is the minimum order for wholesale?', question_or: 'ଥୋକ ଅର୍ଡର ର ଘୋଷିତ ସୀମା?', answer: '<p>Minimum wholesale order is 1 carton (24 bottles for 1L). Volume discounts available starting from 10 cartons. Call us for bulk van-load pricing.</p>', answer_or: '' },
+  grooming: [
+    { question: 'Is this suitable for sensitive skin?', question_or: '', answer: '<p>Check the pack for a sensitive-skin or fragrance-free marking. We stock ranges made for sensitive skin — ask us if you need specific recommendations.</p>', answer_or: '' },
+    { question: 'What is the shelf life?', question_or: '', answer: '<p>Typically 24-36 months unopened. The expiry date and batch number are printed on every pack.</p>', answer_or: '' },
+    { question: 'Do you stock complete grooming kits?', question_or: '', answer: '<p>Yes, we stock both individual products and combo kits. Kits are usually sold by the box at bulk rates.</p>', answer_or: '' },
+    { question: 'Are the products genuine?', question_or: '', answer: '<p>Yes, sourced from authorised distributors and supplied factory-sealed with batch numbers intact.</p>', answer_or: '' },
+    { question: 'What is the minimum for bulk pricing?', question_or: '', answer: '<p>Bulk rates start from one full box or pack. The quantity per box is shown when you select the bulk option on the product page.</p>', answer_or: '' },
   ],
 }
 
 function getTemplates(categoryName: string): FaqTemplate[] {
   const name = categoryName.toLowerCase()
-  if (name.includes('oil') || name.includes('ghee') || name.includes('vanaspati')) return TEMPLATES.oil
-  if (name.includes('pulse') || name.includes('dal') || name.includes('lentil') || name.includes('bean')) return TEMPLATES.pulse
-  if (name.includes('atta') || name.includes('flour') || name.includes('maida') || name.includes('wheat')) return TEMPLATES.atta
-  if (name.includes('spice') || name.includes('masala') || name.includes('pepper') || name.includes('turmeric')) return TEMPLATES.spice
-  if (name.includes('sugar') || name.includes('jaggery') || name.includes('gur') || name.includes('sweetener')) return TEMPLATES.sugar
-  if (name.includes('water') || name.includes('bottle') || name.includes('mineral')) return TEMPLATES.water
-  return TEMPLATES.oil // fallback
+  if (name.includes('hair') || name.includes('shampoo') || name.includes('conditioner')) return TEMPLATES.haircare
+  if (name.includes('makeup') || name.includes('make-up') || name.includes('cosmetic') || name.includes('lip') || name.includes('nail')) return TEMPLATES.makeup
+  if (name.includes('salon') || name.includes('parlour') || name.includes('parlor') || name.includes('professional')) return TEMPLATES.salon
+  if (name.includes('perfume') || name.includes('fragrance') || name.includes('deo') || name.includes('body spray')) return TEMPLATES.fragrance
+  if (name.includes('groom') || name.includes('shav') || name.includes('beard') || name.includes('men')) return TEMPLATES.grooming
+  return TEMPLATES.skincare // fallback — skincare covers the broadest range
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type FaqRow = ProductFAQ
 
-const inputCls = 'w-full px-4 py-2.5 bg-surface-container rounded-xl border border-outline-variant font-body-md text-body-md text-on-surface placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors'
+const inputCls = 'w-full px-4 py-2.5 bg-surface-container rounded-xl border border-outline-variant font-body-md text-body-md text-on-surface placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
@@ -240,15 +239,16 @@ export default function FaqClient({
     showToast(`Added ${newFaqs.length} common FAQs!`)
   }
 
+  // Mirrors getTemplates() above — keep the two in step so the button label
+  // names the template set that will actually be inserted.
   const templateLabel = (() => {
     const n = categoryName.toLowerCase()
-    if (n.includes('oil') || n.includes('ghee')) return 'Edible Oil'
-    if (n.includes('pulse') || n.includes('dal')) return 'Pulses'
-    if (n.includes('atta') || n.includes('flour')) return 'Atta'
-    if (n.includes('spice') || n.includes('masala')) return 'Spices'
-    if (n.includes('sugar') || n.includes('jaggery')) return 'Sugar'
-    if (n.includes('water') || n.includes('bottle')) return 'Water'
-    return categoryName || 'Common'
+    if (n.includes('hair') || n.includes('shampoo') || n.includes('conditioner')) return 'Haircare'
+    if (n.includes('makeup') || n.includes('make-up') || n.includes('cosmetic') || n.includes('lip') || n.includes('nail')) return 'Makeup'
+    if (n.includes('salon') || n.includes('parlour') || n.includes('parlor') || n.includes('professional')) return 'Salon'
+    if (n.includes('perfume') || n.includes('fragrance') || n.includes('deo') || n.includes('body spray')) return 'Fragrance'
+    if (n.includes('groom') || n.includes('shav') || n.includes('beard') || n.includes('men')) return 'Grooming'
+    return 'Skincare'
   })()
 
   return (

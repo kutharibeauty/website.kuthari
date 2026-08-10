@@ -33,10 +33,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!data) return { title: 'Product Not Found' }
 
   const { product, category } = data
-  const title = product.meta_title ?? `${product.name} — Wholesale Price | Kuthari Beauty Store`
+  const title = product.meta_title ?? `${product.name} | Kuthari Beauty Store`
   const description =
     product.meta_description ??
-    `Buy ${product.name} (${product.unit}) at ₹${product.price} wholesale price${product.brand ? ` — ${product.brand}` : ''}. Bulk order with secure online payment & fast delivery. ${product.description ? product.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) : ''}`.trim()
+    `Buy ${product.name} (${product.unit}) from ₹${product.price}${product.brand ? ` — ${product.brand}` : ''}. Single piece or bulk, with secure online payment & fast delivery. ${product.description ? product.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) : ''}`.trim()
   const keywords = getProductKeywords(product.tags ?? null, category?.slug)
   const ogImage = product.images?.[0]
 

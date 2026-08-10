@@ -7,23 +7,23 @@ import LoginImageMarquee from '@/components/auth/LoginImageMarquee'
 import Logo from '@/components/layout/Logo'
 
 export const metadata: Metadata = {
-  title: 'Login / Sign Up — KUTHARI BEAUTY STORE Wholesale Account',
+  title: 'Login / Sign Up — KUTHARI BEAUTY STORE',
   description:
-    'Log in or create your Kuthari Beauty Store account to order wholesale cosmetics, skincare, haircare and salon supplies in bulk. Manage orders, track deliveries and shop at wholesale prices.',
+    'Log in or create your Kuthari Beauty Store account to order cosmetics, skincare, haircare and salon products — retail or bulk. Manage orders and track deliveries.',
   // TODO(Phase 2): replace with real cosmetics/salon SEO keywords.
   keywords: [
     'Kuthari Beauty Store login',
     'Kuthari Beauty Store account',
-    'wholesale cosmetics account',
+    'cosmetics store account',
     'bulk order login',
-    'wholesale salon supplies distributor signup',
+    'beauty store signup',
     'Kuthari Beauty Store sign up',
   ],
   alternates: { canonical: '/login' },
 }
 
 const PERKS = [
-  { icon: Package, label: 'Bulk Wholesale', sub: 'Best prices on large orders' },
+  { icon: Package, label: 'Retail & Bulk', sub: 'One piece, or a full box' },
   { icon: Truck, label: 'Fast Dispatch', sub: 'Next-day delivery across Odisha' },
   { icon: ShieldCheck, label: 'Secure Orders', sub: '100% secure online payment' },
   { icon: Zap, label: '500+ Retailers', sub: 'Trusted by businesses statewide' },
@@ -52,17 +52,17 @@ export default function LoginPage() {
         <div className="relative z-10 flex-1 flex flex-col justify-center px-10 xl:px-14">
           <div className="mb-8">
             <span className="inline-block text-[10px] font-black uppercase tracking-[0.2em] text-white/40 border border-white/15 px-3 py-1.5 rounded-full mb-6">
-              Wholesale Platform
+              Beauty Store
             </span>
             <h1 className="text-4xl xl:text-5xl font-black text-white tracking-tight leading-[1.08] mb-4">
-              Odisha&apos;s Most
+              Your Everyday
               <br />
-              Trusted Wholesale
+              Beauty Store,
               <br />
-              <span className="text-white/50">Distributor.</span>
+              <span className="text-white/50">Delivered.</span>
             </h1>
             <p className="text-sm text-white/50 font-medium leading-relaxed max-w-sm">
-              Sign in to access your wholesale account, track bulk orders, and manage your business deliveries — all in one place.
+              Sign in to shop single pieces or full boxes, track your orders and manage deliveries — all in one place.
             </p>
           </div>
 
@@ -104,7 +104,7 @@ export default function LoginPage() {
               <Logo className="h-12 w-auto" />
             </Link>
             <p className="text-xs text-on-surface-variant font-medium mt-1 tracking-wide">
-              Kuthari Beauty Store · Wholesale · Odisha
+              Kuthari Beauty Store · Retail & Bulk · Odisha
             </p>
           </div>
 

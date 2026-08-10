@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
 import type { DeliveryVehicle } from '@/types/database.types'
 
-const inputCls = 'w-full px-3 py-2.5 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors'
+const inputCls = 'w-full px-3 py-2.5 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
 
 export default function DeliveryVehiclesClient({ initial }: { initial: DeliveryVehicle[] }) {
   const [vehicles, setVehicles] = useState<DeliveryVehicle[]>(initial)

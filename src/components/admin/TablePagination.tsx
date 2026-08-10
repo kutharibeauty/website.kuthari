@@ -16,7 +16,7 @@ export function PageSizeSelect({
       <select
         value={pageSize}
         onChange={(e) => onChange(parseInt(e.target.value, 10))}
-        className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary transition-colors appearance-none"
+        className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 appearance-none"
         aria-label="Rows per page"
       >
         {PAGE_SIZE_OPTIONS.map((n) => (

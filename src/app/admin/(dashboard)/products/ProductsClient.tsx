@@ -305,7 +305,7 @@ export default function ProductsClient({
             placeholder="Search name or SKU…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors"
+            className="w-full pl-11 pr-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200"
           />
         </div>
 
@@ -313,7 +313,7 @@ export default function ProductsClient({
           <select
             value={categoryFilter}
             onChange={e => setCategoryFilter(e.target.value)}
-            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary transition-colors appearance-none"
+            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 appearance-none"
           >
             <option value="all">All Categories</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -327,7 +327,7 @@ export default function ProductsClient({
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value as StatusFilter)}
-            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary transition-colors appearance-none"
+            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 appearance-none"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -342,7 +342,7 @@ export default function ProductsClient({
           <select
             value={stockFilter}
             onChange={e => setStockFilter(e.target.value as StockFilter)}
-            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary transition-colors appearance-none"
+            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 appearance-none"
           >
             <option value="all">All Stock</option>
             <option value="in_stock">In Stock</option>
@@ -371,7 +371,7 @@ export default function ProductsClient({
           <select
             value={pageSize}
             onChange={e => setPageSize(parseInt(e.target.value, 10))}
-            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary transition-colors appearance-none"
+            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 appearance-none"
             aria-label="Products per page"
           >
             {PAGE_SIZE_OPTIONS.map(n => <option key={n} value={n}>{n} / page</option>)}
@@ -476,7 +476,7 @@ export default function ProductsClient({
                 <tr
                   key={product.id}
                   className={cn(
-                    'transition-colors group',
+                    'transition-colors duration-150 group hover:shadow-[inset_3px_0_0_0_var(--color-primary)]',
                     idx !== paged.length - 1 ? 'border-b-2 border-table-border' : '',
                     selectedIds.has(product.id)
                       ? 'bg-primary/5'

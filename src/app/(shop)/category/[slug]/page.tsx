@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const category = await getCategoryBySlug(slug)
   if (!category) return { title: 'Category Not Found' }
 
-  const title = `${category.name} Wholesale Price — Bulk Order | Kuthari Beauty Store`
-  const description = `Buy ${category.name} in bulk at Kuthari Beauty Store — best wholesale prices with secure online payment and fast delivery. Shop our full range of ${category.name.toLowerCase()} at wholesale rates.`
+  const title = `${category.name} — Buy Online | Kuthari Beauty Store`
+  const description = `Shop ${category.name} at Kuthari Beauty Store — buy a single piece at retail price or order in bulk. Secure online payment and delivery across India.`
   const keywords = getCategoryKeywords(slug)
   const ogImage = category.image_url
     ? [{ url: category.image_url, width: 1200, height: 630, alt: category.name }]
@@ -107,7 +107,7 @@ export default async function CategoryPage({ params }: PageProps) {
       ? {
           '@context': 'https://schema.org',
           '@type': 'ItemList',
-          name: `${category.name} — Wholesale Products in Odisha`,
+          name: `${category.name} — Kuthari Beauty Store`,
           numberOfItems: products.length,
           itemListElement: products.map((p, i) => ({
             '@type': 'ListItem',

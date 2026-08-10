@@ -8,7 +8,7 @@ import { useToastStore } from '@/store/toastStore'
 import type { Coupon } from '@/types/database.types'
 import { ArrowLeft, Loader2, AlertCircle, X, Percent, IndianRupee, Info } from 'lucide-react'
 
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
 
 function toDateInput(iso: string | null) {
   if (!iso) return ''
@@ -155,17 +155,17 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full md:w-auto">
           <Link
             href="/admin/coupons"
-            className="px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-xs uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+            className="flex-1 md:flex-none text-center px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-xs uppercase tracking-widest hover:border-primary/40 hover:text-primary hover:-translate-y-0.5 transition-all duration-200 active:scale-95"
           >
             Cancel
           </Link>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-opacity disabled:opacity-60 active:scale-95 shadow-sm"
+            className="gold-sheen relative overflow-hidden flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:hover:translate-y-0 active:scale-95 shadow-sm"
           >
             {saving && <Loader2 size={16} className="animate-spin" />}
             {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Coupon'}

@@ -108,10 +108,9 @@ export async function POST(request: Request) {
     .select('*')
     .in('id', productIds)
 
-  type DbVariant = { label: string; price: number; mrp: number | null }
   type DbProduct = {
     id: string; name: string; price: number; mrp: number | null; unit: string
-    images: string[] | null; slug: string; is_active: boolean; variants: DbVariant[] | null
+    images: string[] | null; slug: string; is_active: boolean
     pack_type: string | null; unit_type: string | null; units_per_pack: number | null
     pieces_per_secondary: number | null; secondary_price: number | null; secondary_mrp: number | null
     units_per_hanger: number | null; hangers_per_pack: number | null
@@ -122,9 +121,9 @@ export async function POST(request: Request) {
     ((dbProducts as DbProduct[] | null) ?? []).map((p) => [p.id, p]),
   )
 
-  // Resolve each cart line to authoritative product/variant pricing. Flag any
-  // line that's unavailable — product deleted/inactive, or a selected variant
-  // that no longer exists — by its CART LINE id so the client can drop it.
+  // Resolve each cart line to authoritative pricing. Flag any line that's
+  // unavailable — product deleted/inactive, or a buy option that no longer
+  // exists — by its CART LINE id so the client can drop it.
   const unavailableIds: string[] = []
   const orderItems: OrderItem[] = []
   for (const i of items) {
@@ -147,16 +146,14 @@ export async function POST(request: Request) {
         : buyOption.label
       stockUnits = i.quantity
     } else if (i.variant) {
-      const variant = (product.variants ?? []).find((v) => v.label === i.variant)
-      if (!variant) { unavailableIds.push(i.id); continue }
-      price = variant.price
-      mrp = variant.mrp ?? null
-      unit = variant.label
+      // A stored buy-option label that no longer resolves (the admin changed the
+      // product's packaging since it went in the cart).
+      unavailableIds.push(i.id); continue
     }
     orderItems.push({
       product_id: pid,
       name: product.name,
-      price,   // authoritative DB (variant) price
+      price,   // authoritative DB price for the chosen buy option
       mrp,
       quantity: i.quantity,
       unit,

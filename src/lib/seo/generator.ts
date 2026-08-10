@@ -17,14 +17,14 @@ export function getCategoryKeywords(slug: string, categoryName?: string): string
   return uniq([
     ...(name
       ? [
-          `wholesale ${name}`,
-          `${name} wholesale price`,
+          `buy ${name} online`,
+          `${name} price`,
+          `${name} online store`,
           `buy ${name} in bulk`,
-          `${name} distributor`,
         ]
       : []),
     ...MASTER_KEYWORDS.brand.slice(0, 4),
-    ...MASTER_KEYWORDS.wholesale.slice(0, 5),
+    ...MASTER_KEYWORDS.retail.slice(0, 5),
     ...MASTER_KEYWORDS.categories.slice(0, 4),
     ...MASTER_KEYWORDS.cities.slice(0, 6),
     ...MASTER_KEYWORDS.nearMe.slice(0, 4),
@@ -40,9 +40,9 @@ export function getProductKeywords(tags: string[] | null, categorySlug?: string)
   const catName = categorySlug ? categorySlug.replace(/-/g, ' ') : ''
   return uniq([
     ...(tags ?? []),
-    ...(catName ? [`wholesale ${catName}`, `${catName} bulk order`] : []),
+    ...(catName ? [`buy ${catName} online`, `${catName} bulk order`] : []),
     ...MASTER_KEYWORDS.brand.slice(0, 4),
-    ...MASTER_KEYWORDS.wholesale.slice(0, 4),
+    ...MASTER_KEYWORDS.retail.slice(0, 4),
     ...MASTER_KEYWORDS.categories.slice(0, 3),
     ...MASTER_KEYWORDS.cities.slice(0, 3),
     ...MASTER_KEYWORDS.buyIntent.slice(0, 3),
@@ -52,8 +52,9 @@ export function getProductKeywords(tags: string[] | null, categorySlug?: string)
 /** Site-wide keywords for the homepage — the broadest coverage. */
 export const HOMEPAGE_KEYWORDS: string[] = uniq([
   ...MASTER_KEYWORDS.brand,
-  ...MASTER_KEYWORDS.wholesale,
+  ...MASTER_KEYWORDS.retail,
   ...MASTER_KEYWORDS.categories,
+  ...MASTER_KEYWORDS.bulk,
   ...MASTER_KEYWORDS.cities,
   ...MASTER_KEYWORDS.nearMe,
   ...MASTER_KEYWORDS.buyIntent,
@@ -64,10 +65,10 @@ export const HOMEPAGE_KEYWORDS: string[] = uniq([
 /** Keywords for the search / all-products page. */
 export function getSearchKeywords(query?: string, categoryName?: string): string[] {
   return uniq([
-    ...(query ? [query, `${query} wholesale`, `buy ${query} in bulk`, `${query} wholesale price`] : []),
-    ...(categoryName ? [`${categoryName} wholesale`, `${categoryName} bulk order`] : []),
+    ...(query ? [query, `buy ${query} online`, `${query} price`, `buy ${query} in bulk`] : []),
+    ...(categoryName ? [`buy ${categoryName} online`, `${categoryName} bulk order`] : []),
     ...MASTER_KEYWORDS.brand.slice(0, 4),
-    ...MASTER_KEYWORDS.wholesale.slice(0, 6),
+    ...MASTER_KEYWORDS.retail.slice(0, 6),
     ...MASTER_KEYWORDS.nearMe.slice(0, 4),
   ])
 }

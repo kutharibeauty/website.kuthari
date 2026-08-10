@@ -9,7 +9,7 @@ import OrderDetailClient from './OrderDetailClient'
 // Private, per-customer page — noindex, but a clean title/description for tabs & shares.
 export const metadata: Metadata = {
   title: 'Order Details — Kuthari Beauty Store',
-  description: 'View your Kuthari Beauty Store wholesale order — items, delivery status, payment and invoice.',
+  description: 'View your Kuthari Beauty Store order — items, delivery status, payment and invoice.',
   robots: { index: false, follow: false },
 }
 

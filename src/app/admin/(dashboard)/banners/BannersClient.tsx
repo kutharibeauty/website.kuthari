@@ -21,7 +21,7 @@ type TrustBadge = { icon: string; text: string; text_or: string }
 type FooterLink  = { label: string; href: string }
 
 const TABS = ['Banners', 'Homepage', 'Footer', 'Announcements']
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -80,10 +80,11 @@ export default function BannersClient({
             key={i}
             onClick={() => setTab(i)}
             className={cn(
-              'px-6 py-3 font-black text-xs uppercase tracking-widest transition-all rounded-xl',
+              'px-6 py-3 font-black text-xs uppercase tracking-widest rounded-xl',
+              'transition-all duration-200 ease-out active:scale-95',
               tab === i
                 ? 'bg-primary text-white border-2 border-primary shadow-sm'
-                : 'bg-surface text-on-surface-variant border-2 border-transparent hover:border-table-border hover:bg-surface-card active:scale-95'
+                : 'bg-surface text-on-surface-variant border-2 border-transparent hover:border-table-border hover:bg-surface-card hover:-translate-y-0.5'
             )}
           >
             {t}
@@ -667,10 +668,10 @@ function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToas
       <CmsSection title="Hero Section">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <CmsField label="Hero Title">
-            <input type="text" value={hero.title_en} onChange={e => setHero(p => ({ ...p, title_en: e.target.value }))} className={inputCls} placeholder="Beautiful. Trusted. Wholesale." />
+            <input type="text" value={hero.title_en} onChange={e => setHero(p => ({ ...p, title_en: e.target.value }))} className={inputCls} placeholder="Beautiful. Trusted. Delivered." />
           </CmsField>
           <CmsField label="Hero Subtitle">
-            <input type="text" value={hero.subtitle_en} onChange={e => setHero(p => ({ ...p, subtitle_en: e.target.value }))} className={inputCls} placeholder="Your trusted wholesale beauty partner" />
+            <input type="text" value={hero.subtitle_en} onChange={e => setHero(p => ({ ...p, subtitle_en: e.target.value }))} className={inputCls} placeholder="Your trusted beauty store" />
           </CmsField>
         </div>
       </CmsSection>
@@ -764,7 +765,7 @@ function FooterTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToast:
       <CmsSection title="Contact Info">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <CmsField label="Tagline">
-            <input type="text" value={footer.tagline_en} onChange={e => setFooter(p => ({ ...p, tagline_en: e.target.value }))} className={inputCls} placeholder="Your wholesale partner" />
+            <input type="text" value={footer.tagline_en} onChange={e => setFooter(p => ({ ...p, tagline_en: e.target.value }))} className={inputCls} placeholder="Your trusted beauty store" />
           </CmsField>
           <CmsField label="Phone">
             <input type="text" value={footer.phone} onChange={e => setFooter(p => ({ ...p, phone: e.target.value }))} className={inputCls} placeholder="+91 XXXXX XXXXX" />

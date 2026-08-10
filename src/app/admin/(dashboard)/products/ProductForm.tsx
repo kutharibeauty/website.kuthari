@@ -14,6 +14,7 @@ import {
   horizontalListSortingStrategy, arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
 import type { Product, Category } from '@/types/database.types'
@@ -52,7 +53,6 @@ type FormState = {
   hangers_per_pack: string
   delivery_charge: string
   delivery_charge_enabled: boolean
-  variants: { label: string; price: string; mrp: string }[]
   description: string
   description_or: string
   meta_title: string
@@ -156,11 +156,6 @@ export default function ProductForm({
     hangers_per_pack: product?.hangers_per_pack?.toString() ?? '',
     delivery_charge: product?.delivery_charge != null ? product.delivery_charge.toString() : '',
     delivery_charge_enabled: product?.delivery_charge_enabled ?? false,
-    variants: (product?.variants ?? []).map(v => ({
-      label: v.label,
-      price: v.price?.toString() ?? '',
-      mrp: v.mrp != null ? v.mrp.toString() : '',
-    })),
     description: product?.description ?? '',
     description_or: product?.description_or ?? '',
     meta_title: product?.meta_title ?? '',
@@ -348,7 +343,7 @@ export default function ProductForm({
       units_per_pack: !isHangerModel && form.units_per_pack ? parseInt(form.units_per_pack, 10) : null,
       pieces_per_secondary: !isHangerModel && form.pieces_per_secondary ? parseInt(form.pieces_per_secondary, 10) : null,
       // Retail is independent of the packaging model — a product can be sold
-      // retail whether or not it also has box/pack levels. Blank = wholesale-only.
+      // retail whether or not it also has box/pack levels. Blank = bulk-only.
       retail_price: form.retail_price ? parseFloat(form.retail_price) : null,
       retail_mrp: form.retail_mrp ? parseFloat(form.retail_mrp) : null,
       secondary_price: !isHangerModel && form.secondary_price ? parseFloat(form.secondary_price) : null,
@@ -362,15 +357,8 @@ export default function ProductForm({
       // off (so re-enabling doesn't lose it); the flag controls whether it applies.
       delivery_charge: form.delivery_charge ? parseFloat(form.delivery_charge) : 0,
       delivery_charge_enabled: form.delivery_charge_enabled,
-      // Hanger products don't use weight/size variants — the hanger/box levels
-      // replace them.
-      variants: isHangerModel ? [] : form.variants
-        .filter(v => v.label.trim() && v.price !== '' && !isNaN(parseFloat(v.price)))
-        .map(v => ({
-          label: v.label.trim(),
-          price: parseFloat(v.price),
-          mrp: v.mrp !== '' && !isNaN(parseFloat(v.mrp)) ? parseFloat(v.mrp) : null,
-        })),
+      // Weight/size variants were removed — buying is Single piece vs a bulk pack.
+      variants: [],
       images: images.map(i => i.url),
       description: form.description || null,
       description_or: form.description_or || null,
@@ -420,9 +408,9 @@ export default function ProductForm({
             type="button"
             onClick={goBack}
             aria-label="Back to products"
-            className="p-2.5 rounded-xl border-2 border-table-border bg-surface-card hover:bg-surface-container-low transition-colors text-primary active:scale-95"
+            className="group/back p-2.5 rounded-xl border-2 border-table-border bg-surface-card hover:bg-surface-container-low hover:border-primary/40 transition-all duration-200 text-primary active:scale-95"
           >
-            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+            <span className="material-symbols-outlined text-[20px] inline-block transition-transform duration-200 group-hover/back:-translate-x-0.5">arrow_back</span>
           </button>
           <div>
             <h1 className="text-2xl md:text-3xl font-black text-primary tracking-tight capitalize">
@@ -433,18 +421,20 @@ export default function ProductForm({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        {/* Actions: full-width and side-by-side on mobile so neither is a
+            cramped tap target; right-aligned from md up. */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
           <button
             type="button"
             onClick={goBack}
-            className="px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-xs uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+            className="flex-1 md:flex-none px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-xs uppercase tracking-widest hover:border-primary/40 hover:text-primary hover:-translate-y-0.5 transition-all duration-200 active:scale-95"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-opacity disabled:opacity-60 active:scale-95 shadow-sm"
+            className="gold-sheen relative overflow-hidden flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:hover:translate-y-0 active:scale-95 shadow-sm"
           >
             {saving && <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>}
             {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Product'}
@@ -469,15 +459,29 @@ export default function ProductForm({
               <button
                 key={i}
                 onClick={() => setTab(i)}
+                aria-current={tab === i ? 'page' : undefined}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all font-black text-[10px] uppercase tracking-widest whitespace-nowrap',
+                  'group relative flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest whitespace-nowrap',
+                  'transition-all duration-200 ease-out active:scale-95',
                   tab === i
-                    ? 'bg-primary border-primary text-white shadow-sm'
-                    : 'bg-surface-card border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary',
+                    ? 'border-primary text-white shadow-sm'
+                    : 'bg-surface-card border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary hover:-translate-y-0.5',
                 )}
               >
+                {/* Sliding fill — one shared element, so switching tabs glides
+                    between them instead of blinking colour. */}
+                {tab === i && (
+                  <motion.span
+                    layoutId="adminTabFill"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                    className="absolute inset-0 -z-10 rounded-[10px] bg-primary"
+                  />
+                )}
                 <span
-                  className="material-symbols-outlined text-[16px]"
+                  className={cn(
+                    'material-symbols-outlined text-[16px] transition-transform duration-200',
+                    tab === i ? 'scale-110' : 'group-hover:scale-110',
+                  )}
                   style={{ fontVariationSettings: tab === i ? "'FILL' 1" : "'FILL' 0" }}
                 >
                   {t.icon}
@@ -494,7 +498,7 @@ export default function ProductForm({
 
         {/* Tab 0: Basic Info */}
         {tab === 0 && (
-          <div className="space-y-6">
+          <div key="tab-0" className="space-y-6 animate-rise">
             <Field label="Category" required>
               <select
                 value={form.category_id}
@@ -516,7 +520,7 @@ export default function ProductForm({
                     nameEdited.current = true
                     set('name', e.target.value)
                   }}
-                  placeholder="e.g. Sunflower Oil 5L"
+                  placeholder="e.g. Lakme Absolute Face Wash 100ml"
                   className={inputCls}
                 />
               </Field>
@@ -561,7 +565,7 @@ export default function ProductForm({
                   type="text"
                   value={form.brand}
                   onChange={e => set('brand', e.target.value)}
-                  placeholder="e.g. Ruchigold"
+                  placeholder="e.g. Lakme, L'Oreal, Himalaya"
                   className={inputCls}
                 />
               </Field>
@@ -675,7 +679,7 @@ export default function ProductForm({
             {!isHangerModel && (
             <div className="p-5 bg-surface-card rounded-2xl border-2 border-table-border space-y-6">
               <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest">
-                Wholesale Pack Details
+                Bulk Pack Details
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -820,10 +824,10 @@ export default function ProductForm({
             </div>
             )}
 
-            {/* ── Wholesale pricing ── */}
-            <div className="p-5 bg-surface-card rounded-2xl border-2 border-table-border space-y-4">
+            {/* ── Bulk pricing ── */}
+            <div className="card-lift animate-rise p-5 bg-surface-card rounded-2xl border-2 border-table-border space-y-4 hover:border-primary/25">
               <div>
-                <p className="font-black text-[10px] text-primary uppercase tracking-widest">Wholesale Price</p>
+                <p className="font-black text-[10px] text-primary uppercase tracking-widest">Bulk Price</p>
                 <p className="font-medium text-[11px] text-on-surface-variant mt-1">
                   The bulk rate. Always required — it is the base price for this product.
                 </p>
@@ -859,13 +863,13 @@ export default function ProductForm({
             </div>
 
             {/* ── Retail pricing ── */}
-            <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/20 space-y-4">
+            <div className="card-lift animate-rise stagger-1 p-5 bg-primary/5 rounded-2xl border-2 border-primary/20 space-y-4">
               <div>
                 <p className="font-black text-[10px] text-primary uppercase tracking-widest">Retail Price</p>
                 <p className="font-medium text-[11px] text-on-surface-variant mt-1">
                   The single-unit rate for walk-up customers. Set this and the customer
-                  sees <b>both</b> Retail and Wholesale on the product page and picks
-                  one. <b>Leave blank to sell this product wholesale-only.</b>
+                  sees <b>both</b> Single piece and Bulk on the product page and
+                  picks one. <b>Leave blank to sell this product in bulk only.</b>
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -895,71 +899,16 @@ export default function ProductForm({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Field label="Unit (English)" required hint='e.g. "1 kg", "5 L", "500 g"'>
+              <Field label="Unit (English)" required hint='e.g. "100 ml", "50 g", "1 piece"'>
                 <input
                   type="text"
                   value={form.unit}
                   onChange={e => set('unit', e.target.value)}
-                  placeholder="e.g. 1 kg"
+                  placeholder="e.g. 100 ml"
                   className={inputCls}
                 />
               </Field>
             </div>
-
-            {/* ── Weight / Size Variants (not for spices — they use hanger/pack) ── */}
-            {!isHangerModel && (
-            <div className="space-y-3 rounded-2xl border-2 border-table-border bg-surface-card p-5">
-              <div>
-                <p className="font-black text-xs text-primary uppercase tracking-widest">Weight / Size Variants</p>
-                <p className="font-medium text-[11px] text-on-surface-variant mt-1">
-                  Optional — add options like <b>5kg</b> / <b>10kg</b>, each with its own price. Customers pick one on the product page. Leave empty for a single-price product.
-                </p>
-              </div>
-
-              {form.variants.map((v, i) => (
-                <div key={i} className="flex flex-wrap items-center gap-2">
-                  <input
-                    type="text"
-                    value={v.label}
-                    onChange={e => set('variants', form.variants.map((x, j) => j === i ? { ...x, label: e.target.value } : x))}
-                    placeholder="Label (e.g. 10kg)"
-                    className={cn(inputCls, 'flex-1 min-w-[120px]')}
-                  />
-                  <input
-                    type="number" min={0} step="0.01"
-                    value={v.price}
-                    onChange={e => set('variants', form.variants.map((x, j) => j === i ? { ...x, price: e.target.value } : x))}
-                    placeholder="Price ₹"
-                    className={cn(inputCls, 'w-28')}
-                  />
-                  <input
-                    type="number" min={0} step="0.01"
-                    value={v.mrp}
-                    onChange={e => set('variants', form.variants.map((x, j) => j === i ? { ...x, mrp: e.target.value } : x))}
-                    placeholder="MRP ₹"
-                    className={cn(inputCls, 'w-28')}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => set('variants', form.variants.filter((_, j) => j !== i))}
-                    className="p-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition-colors active:scale-95"
-                    title="Remove variant"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={() => set('variants', [...form.variants, { label: '', price: '', mrp: '' }])}
-                className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-table-border rounded-xl font-black text-[10px] text-on-surface-variant uppercase tracking-widest hover:border-primary hover:text-primary transition-colors active:scale-[0.99]"
-              >
-                <span className="material-symbols-outlined text-[16px]">add</span>
-                Add Variant
-              </button>
-            </div>
-            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Field label={isHangerModel ? 'Stock Quantity (in units)' : 'Stock Quantity'} required>
@@ -1042,7 +991,7 @@ export default function ProductForm({
                 onChange={e => setAiPrompt(e.target.value)}
                 rows={2}
                 placeholder="Optional prompt — e.g. 'emphasise cold-pressed, great for restaurants, mention 15L bulk pack'"
-                className="w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-medium text-sm text-primary placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary transition-colors resize-none"
+                className="w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-medium text-sm text-primary placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 resize-none"
               />
               <div className="flex flex-wrap gap-2">
                 <button
@@ -1515,4 +1464,4 @@ function SortableImage({
 // and dimming the colour, an example like "Pouch" or "10" renders in the same
 // bold dark text as a real entry, and the admin can't tell an empty required
 // field from a completed one.
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'

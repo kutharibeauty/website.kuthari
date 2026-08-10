@@ -1,17 +1,21 @@
-// Two-level packaging: Box → (Hanger | Pack | Tin | Pouch) → Pieces.
+// How a product may be bought.
 //
-// Pure logic — no server imports, so both the product page (client) and the
-// order route (server) use it and can never disagree on price or piece counts.
+// This is a RETAIL-first store, so the customer first picks Single piece or
+// Bulk, and only then — if buying bulk — which bulk unit:
+//
+//   Single  -> retail_price / retail_mrp        (one piece)
+//   Bulk    -> Box → (Hanger | Pack | Tin | Pouch)
 //
 //   pack_type            the biggest unit sold, e.g. "Box"
-//   unit_type            the lower unit a customer may also buy: Hanger/Pack/Tin
+//   unit_type            the lower bulk unit a customer may also buy
 //   units_per_pack       how many lower units are in one box      (e.g. 10)
 //   pieces_per_secondary how many pieces are in one lower unit     (e.g. 10)
 //
 // Everest 200gm: 10 packs/box × 10 pieces/pack   =   100 pieces/box
 // Small masala : 20 hangers/box × 60 pieces/hanger = 1,200 pieces/box
 //
-// Customers buy a Box or a lower unit — never single pieces.
+// Pure logic — no server imports, so both the product page (client) and the
+// order route (server) use it and can never disagree on price or piece counts.
 
 export interface PackagingProduct {
   pack_type?: string | null
@@ -26,8 +30,8 @@ export interface PackagingProduct {
   // and the pack price is derived. Takes precedence over the box model below.
   units_per_hanger?: number | null
   hangers_per_pack?: number | null
-  // Retail: a single-unit price offered alongside the wholesale price above.
-  // Null when the product is wholesale-only.
+  // Retail: a single-unit price offered alongside the bulk price above.
+  // Null when the product is sold in bulk only.
   retail_price?: number | null
   retail_mrp?: number | null
 }
@@ -87,11 +91,11 @@ export function piecesPerBox(p: PackagingProduct): number | null {
 }
 
 /**
- * The retail (single-unit) option, or null when the product is wholesale-only.
+ * The retail (single-unit) option, or null when the product is bulk-only.
  * Listed FIRST by getBuyOptions: this is a retail-first store, so a single
  * unit is the common purchase and should be the default selection.
  */
-function retailOption(p: PackagingProduct): BuyOption | null {
+export function retailOption(p: PackagingProduct): BuyOption | null {
   if (!hasRetailPrice(p)) return null
   return {
     level: 'retail',
@@ -107,16 +111,19 @@ function retailOption(p: PackagingProduct): BuyOption | null {
 
 /**
  * The levels a customer may buy at: retail first (when priced), then the
- * wholesale levels biggest-first. A product with no lower unit and no retail
+ * bulk levels biggest-first. A product with no lower unit and no retail
  * price yields just the box/base option.
  */
 export function getBuyOptions(p: PackagingProduct): BuyOption[] {
   const retail = retailOption(p)
-  return retail ? [retail, ...wholesaleBuyOptions(p)] : wholesaleBuyOptions(p)
+  return retail ? [retail, ...bulkBuyOptions(p)] : bulkBuyOptions(p)
 }
 
-/** The wholesale levels only — the pack/hanger model, unchanged. */
-function wholesaleBuyOptions(p: PackagingProduct): BuyOption[] {
+/**
+ * The BULK levels only — the box/hanger/pack model. Always at least one entry,
+ * since `price` (the bulk base price) is required on every product.
+ */
+export function bulkBuyOptions(p: PackagingProduct): BuyOption[] {
   // Spices — Box → Hanger → Piece. The customer buys a whole BOX or individual
   // HANGERS (never single pieces), and `price` is the price of ONE HANGER, so
   // the box price is derived: hangers-per-box × hanger price.

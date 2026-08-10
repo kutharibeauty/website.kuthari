@@ -19,7 +19,7 @@ import { useToastStore } from '@/store/toastStore'
 import { DEFAULT_PINCODE_DELIVERY_FEE } from '@/lib/cart/delivery'
 import type { PincodeRow } from './page'
 
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
 
 interface Props { initialRows: PincodeRow[] }
 
@@ -366,7 +366,7 @@ export default function PincodesClient({ initialRows }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search pincode, city, or area…"
-            className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-table-border bg-surface font-bold text-sm text-primary focus:outline-none focus:border-primary transition-colors placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40"
+            className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-table-border bg-surface font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40"
           />
         </div>
         {view === 'list' && <PageSizeSelect pageSize={pageSize} onChange={setPageSize} />}

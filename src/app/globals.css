@@ -215,6 +215,85 @@ details>summary::-webkit-details-marker {
   animation: heart-burst 0.55s ease-out forwards;
 }
 
+/* ── Shared entrance + interaction utilities ────────────────────────────────
+   Defined here rather than pulled from tailwindcss-animate (not a dependency),
+   so `animate-*` classes below are real and not silently inert. */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Section/card entrance. Pair with `stagger-N` for a cascade down a column. */
+@utility animate-rise {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* For content revealed BELOW its trigger (e.g. a second-step picker), so it
+   reads as unfolding downward from the control that opened it. */
+@utility animate-drop-in {
+  animation: drop-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Cascade helpers — cheap alternative to per-item motion components. */
+@utility stagger-1 { animation-delay: 40ms; }
+@utility stagger-2 { animation-delay: 80ms; }
+@utility stagger-3 { animation-delay: 120ms; }
+@utility stagger-4 { animation-delay: 160ms; }
+@utility stagger-5 { animation-delay: 200ms; }
+
+/* Admin surface card: subtle lift + shadow on hover, so panels feel handled
+   rather than static. Deliberately small — these are dense work surfaces. */
+@utility card-lift {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(27, 44, 61, 0.08);
+  }
+}
+
+/* Press feedback for icon-only / small controls that have no other affordance. */
+@utility press {
+  transition: transform 0.12s ease-out;
+
+  &:active {
+    transform: scale(0.94);
+  }
+}
+
+/* Everything above is decoration. Respect a reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @utility scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

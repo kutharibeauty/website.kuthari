@@ -7,7 +7,7 @@ import CheckoutClient from './CheckoutClient'
 
 export const metadata: Metadata = {
   title: 'Checkout — Kuthari Beauty Store',
-  description: 'Securely complete your Kuthari Beauty Store wholesale order with secure online payment and fast delivery across Odisha.',
+  description: 'Securely complete your Kuthari Beauty Store order with online payment and fast delivery across India.',
   robots: { index: false, follow: false },
 }
 

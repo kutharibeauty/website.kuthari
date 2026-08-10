@@ -8,48 +8,53 @@ import { useAuthPromptStore } from '@/store/authPromptStore'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
-import { getBuyOptions, describeSelection, type BuyOption } from '@/lib/products/packaging'
-import type { Product, ProductVariant } from '@/types/database.types'
+import { retailOption, bulkBuyOptions, describeSelection, type BuyOption } from '@/lib/products/packaging'
+import type { Product } from '@/types/database.types'
 
 /**
- * Client purchase panel: pricing box + weight/size variant selector + add-to-cart
- * / buy-now (desktop inline + mobile sticky). Price, MRP and unit all follow the
- * selected variant; the cart line is keyed per variant so 5kg and 10kg are
- * separate lines.
+ * Client purchase panel: buy-mode picker + pricing box + add-to-cart / buy-now
+ * (desktop inline + mobile sticky).
+ *
+ * Retail-first two-step selection:
+ *   1. Single piece  or  Bulk        (step hidden when there is no retail price)
+ *   2. if Bulk and the product has more than one bulk unit — Box / Pack / Hanger
+ *
+ * Price, MRP and unit all follow the selection, and the cart line is keyed by it
+ * so a Single and a Box are separate lines.
  */
 export default function ProductBuyPanel({ product }: { product: Product }) {
-  // Packaging levels the customer may buy at: the box, and (when configured) the
-  // lower unit — Hanger / Pack / Tin. Never single pieces.
-  const buyOptions = getBuyOptions(product)
-  const hasLevels = buyOptions.length > 1
-  const [levelIdx, setLevelIdx] = useState(0)
-  const activeOption: BuyOption = buyOptions[Math.min(levelIdx, buyOptions.length - 1)]
+  const retail = retailOption(product)
+  const bulkOptions = bulkBuyOptions(product)
+  const hasRetail = !!retail
+  const hasBulkChoice = bulkOptions.length > 1
 
-  // Weight/size variants (legacy) only apply when there's no packaging split.
-  const variants: ProductVariant[] = hasLevels ? [] : (product.variants ?? [])
-  const hasVariants = variants.length > 0
-  const [selIdx, setSelIdx] = useState(0)
+  // Which bulk unit is selected (only meaningful in bulk mode).
+  const [bulkIdx, setBulkIdx] = useState(0)
+  // Retail-first: default to Single whenever a retail price exists.
+  const [mode, setMode] = useState<'single' | 'bulk'>(hasRetail ? 'single' : 'bulk')
+
+  const activeBulk: BuyOption = bulkOptions[Math.min(bulkIdx, bulkOptions.length - 1)]
+  const activeOption: BuyOption = mode === 'single' && retail ? retail : activeBulk
+  // True whenever the selection carries a unit label worth showing (i.e. not a
+  // plain single-price product with no packaging at all).
+  const hasLevels = hasRetail || hasBulkChoice || !!product.pack_type
+
   const [qty, setQty] = useState(1)
   // Separate string state for the typed field so it can be cleared/empty while
   // editing (the numeric qty stays ≥1; we normalize the text on blur).
   const [qtyInput, setQtyInput] = useState('1')
-  const active: ProductVariant | null = hasVariants ? variants[Math.min(selIdx, variants.length - 1)] : null
 
   // Pieces contained in ONE of the selected unit (null until the admin sets it).
   const piecesEach = activeOption.pieces
 
-  const price = hasLevels ? activeOption.price : (active?.price ?? product.price)
-  const mrp = hasLevels ? activeOption.mrp : (active?.mrp ?? product.mrp)
-  const unit = hasLevels ? activeOption.label : (active?.label ?? product.unit)
+  const price = activeOption.price
+  const mrp = activeOption.mrp
+  const unit = activeOption.label
   const discount = mrp && mrp > price ? Math.round((1 - price / mrp) * 100) : null
   const outOfStock = product.stock_qty === 0
 
   const packLabel = activeOption.label
   const innerUnitLabel = 'Pieces'
-  // Show the "Buy unit" dropdown for packaging-based products — those sold by a
-  // named unit (Box / Hanger / Pack …). Legacy weight/size products keep their
-  // own "Select pack size" cards, so they're excluded here.
-  const showUnitPicker = !hasVariants && (hasLevels || !!product.pack_type)
   // Clamp any typed quantity to available stock (never accept an invalid amount).
   const clampQty = (n: number) => {
     if (!Number.isFinite(n) || n < 1) return 1
@@ -64,16 +69,14 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
   const showAuthPrompt = useAuthPromptStore((s) => s.show)
   const { isSignedIn, isLoaded } = useSupabaseUser()
 
-  // Each packaging level is its own cart line (a Box and a Hanger are separate).
-  const lineId = hasLevels
-    ? `${product.id}::${activeOption.label}`
-    : active ? `${product.id}::${active.label}` : product.id
+  // Each buy option is its own cart line (a Single and a Box are separate).
+  const lineId = hasLevels ? `${product.id}::${activeOption.label}` : product.id
   const cartItem = useCartStore((s) => s.items.find((i) => i.id === lineId))
 
   const buildItem = () => ({
     id: lineId,
     product_id: product.id,
-    variant: hasLevels ? activeOption.label : (active?.label ?? null),
+    variant: hasLevels ? activeOption.label : null,
     name: product.name,
     price,
     mrp,
@@ -193,45 +196,101 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
         </div>
       </div>
 
-      {/* ── Buy option: Retail / Box / Hanger / Pack ──
-           Cards, not a dropdown: on a retail-first store this is the primary
-           decision, so both rates and their savings need to be visible at a
-           glance rather than hidden behind a select. */}
-      {showUnitPicker && hasLevels && (
-        <div className="mb-6">
+      {/* ── Step 1: Single piece vs Bulk ──
+           Retail-first, so this is the primary decision. Hidden entirely when
+           the product has no retail price (bulk-only), leaving step 2 alone. */}
+      {hasRetail && retail && (
+        <div className="mb-5">
           <p className="block text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60 mb-3">
-            Choose how you want to buy
+            How would you like to buy?
           </p>
           <div className="grid grid-cols-2 gap-3">
-            {buyOptions.map((opt, i) => {
-              const sel = i === levelIdx
-              const off = opt.mrp && opt.mrp > opt.price
-                ? Math.round((1 - opt.price / opt.mrp) * 100)
-                : null
+            {([
+              { key: 'single' as const, tag: 'Retail', title: 'Single Piece', opt: retail },
+              { key: 'bulk' as const, tag: 'Bulk', title: hasBulkChoice ? 'Choose a pack' : activeBulk.label, opt: activeBulk },
+            ]).map(({ key, tag, title, opt }) => {
+              const sel = mode === key
+              const off = opt.mrp && opt.mrp > opt.price ? Math.round((1 - opt.price / opt.mrp) * 100) : null
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setMode(key)}
+                  aria-pressed={sel}
+                  className={cn(
+                    'group relative flex flex-col items-start gap-1 rounded-2xl border-2 p-4 text-left overflow-hidden',
+                    'transition-all duration-200 ease-out active:scale-[0.97] hover:-translate-y-0.5',
+                    sel
+                      ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27,44,61,0.06)]'
+                      : 'border-table-border hover:border-primary/40 hover:shadow-sm',
+                  )}
+                >
+                  {/* Selected tick */}
+                  <span
+                    className={cn(
+                      'absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black',
+                      'transition-all duration-200',
+                      sel ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
+                    )}
+                  >
+                    ✓
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">{tag}</span>
+                  <span className="font-black text-sm text-primary">{title}</span>
+                  <span className="flex items-baseline gap-1.5">
+                    <span className="font-black text-lg text-primary">₹{opt.price.toLocaleString('en-IN')}</span>
+                    {opt.mrp != null && opt.mrp > opt.price && (
+                      <span className="text-[11px] font-bold text-on-surface-variant/50 line-through">
+                        ₹{opt.mrp.toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </span>
+                  {off != null && (
+                    <span className="text-[10px] font-black uppercase tracking-wider text-success">{off}% off</span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Step 2: which bulk unit ──
+           Only when buying bulk AND the admin configured more than one bulk
+           unit for this product (e.g. Box and Hanger). */}
+      {mode === 'bulk' && hasBulkChoice && (
+        <div className="mb-6 animate-drop-in">
+          <p className="block text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60 mb-3">
+            Choose your bulk pack
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            {bulkOptions.map((opt, i) => {
+              const sel = i === bulkIdx
+              const off = opt.mrp && opt.mrp > opt.price ? Math.round((1 - opt.price / opt.mrp) * 100) : null
               return (
                 <button
                   key={opt.label}
                   type="button"
-                  onClick={() => setLevelIdx(i)}
+                  onClick={() => setBulkIdx(i)}
                   aria-pressed={sel}
-                  className={`relative flex flex-col items-start gap-1 rounded-2xl border-2 p-4 text-left transition-all active:scale-95 ${
+                  className={cn(
+                    'relative flex flex-col items-start gap-1 rounded-2xl border-2 p-4 text-left',
+                    'transition-all duration-200 ease-out active:scale-[0.97] hover:-translate-y-0.5',
                     sel
                       ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27,44,61,0.06)]'
-                      : 'border-table-border hover:border-primary/40'
-                  }`}
+                      : 'border-table-border hover:border-primary/40 hover:shadow-sm',
+                  )}
                 >
-                  <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">
-                    {opt.level === 'retail' ? 'Retail' : 'Wholesale'}
+                  <span
+                    className={cn(
+                      'absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black',
+                      'transition-all duration-200',
+                      sel ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
+                    )}
+                  >
+                    ✓
                   </span>
-                  {/* The unit name, but only when it adds something the tier tag
-                      above doesn't already say (the retail option's label IS
-                      "Retail", so printing it again just repeats the tag). */}
-                  {opt.level !== 'retail' && (
-                    <span className="font-black text-sm text-primary">{opt.label}</span>
-                  )}
-                  {opt.level === 'retail' && (
-                    <span className="font-black text-sm text-primary">Single unit</span>
-                  )}
+                  <span className="font-black text-sm text-primary">{opt.label}</span>
                   <span className="flex items-baseline gap-1.5">
                     <span className="font-black text-lg text-primary">₹{opt.price.toLocaleString('en-IN')}</span>
                     {opt.mrp != null && opt.mrp > opt.price && (
@@ -255,55 +314,6 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
         </div>
       )}
 
-      {/* ── Variant selector (pack-size cards with discount badge) ── */}
-      {hasVariants && (
-        <div className="mb-6">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60 mb-3">Select pack size</p>
-          <div className="flex flex-wrap gap-3">
-            {variants.map((v, i) => {
-              const isSel = i === selIdx
-              const vDiscount = v.mrp && v.mrp > v.price ? Math.round((1 - v.price / v.mrp) * 100) : null
-              return (
-                <button
-                  key={`${v.label}-${i}`}
-                  onClick={() => setSelIdx(i)}
-                  aria-pressed={isSel}
-                  className={cn(
-                    'relative flex flex-col items-center gap-1 min-w-[108px] px-4 pt-4 pb-3 rounded-2xl border-2 transition-all duration-200 active:scale-95',
-                    isSel
-                      ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27, 44, 61,0.06)]'
-                      : 'border-table-border hover:border-primary/40',
-                  )}
-                >
-                  {vDiscount && (
-                    <span
-                      className={cn(
-                        'absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wide shadow-sm',
-                        isSel ? 'bg-primary text-white' : 'bg-secondary text-on-secondary',
-                      )}
-                    >
-                      {vDiscount}% OFF
-                    </span>
-                  )}
-
-                  {/* Selected tick */}
-                  {isSel && (
-                    <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center text-[9px] font-black">✓</span>
-                  )}
-
-                  <span className={cn('font-black text-sm', isSel ? 'text-primary' : 'text-on-surface')}>{v.label}</span>
-                  <span className="flex items-baseline gap-1.5">
-                    <span className={cn('font-black text-base', isSel ? 'text-primary' : 'text-on-surface')}>₹{v.price}</span>
-                    {v.mrp && v.mrp > v.price && (
-                      <span className="text-xs text-on-surface-variant/40 line-through">₹{v.mrp}</span>
-                    )}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
 
       {/* ── Quantity / Boxes: +/- stepper + explicit typed field + live total (PRD #1) ── */}
       {!outOfStock && (
@@ -370,7 +380,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
 
       {/* ── Badges ── */}
       <div className="flex items-center gap-2 flex-wrap mb-5">
-        {!hasVariants && !hasLevels && (
+        {!hasLevels && (
           <span className="px-3 py-1.5 border border-table-border rounded-xl font-black text-[11px] uppercase tracking-wider text-on-surface-variant">
             {product.unit}{product.unit_or && ` / ${product.unit_or}`}
           </span>

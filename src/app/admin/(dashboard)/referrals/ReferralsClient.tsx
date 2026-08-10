@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { referralBenefitText, type ReferralConfig, type DiscountType } from '@/lib/referral/shared'
 
 const inputCls =
-  'w-full px-4 py-3 rounded-xl border-2 border-table-border bg-surface-card text-sm font-bold text-on-surface focus:outline-none focus:border-primary transition-colors'
+  'w-full px-4 py-3 rounded-xl border-2 border-table-border bg-surface-card text-sm font-bold text-on-surface focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
 const labelCls = 'text-[11px] font-black text-on-surface-variant/70 uppercase tracking-[0.1em] block mb-1.5'
 
 function TypeValue({

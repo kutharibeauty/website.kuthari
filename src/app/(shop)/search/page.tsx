@@ -17,11 +17,11 @@ interface PageProps {
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const { q } = await searchParams
   const title = q
-    ? `${q} — Wholesale Price | Kuthari Beauty Store`
-    : 'Search Wholesale Cosmetics — Skincare, Haircare, Makeup, Salon Supplies | Kuthari Beauty Store'
+    ? `${q} | Kuthari Beauty Store`
+    : 'Shop Cosmetics — Skincare, Haircare, Makeup & Salon Products | Kuthari Beauty Store'
   const description = q
-    ? `Buy ${q} at wholesale price. Bulk orders with secure online payment and fast delivery — Kuthari Beauty Store.`
-    : 'Search wholesale skincare, haircare, makeup, salon and grooming products at the best bulk prices. Secure online payment, fast delivery — Kuthari Beauty Store.'
+    ? `Buy ${q} online — single piece or bulk, with secure online payment and fast delivery from Kuthari Beauty Store.`
+    : 'Shop skincare, haircare, makeup, salon and grooming products. Buy a single piece at retail price or order in bulk — Kuthari Beauty Store.'
   return {
     title,
     description,
@@ -127,7 +127,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
               this panel. Dropping it also returns ~60px to the category list. */}
           <div className="mb-4 hidden lg:block flex-shrink-0">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">
-              Wholesale Platform
+              Beauty Store
             </p>
           </div>
 

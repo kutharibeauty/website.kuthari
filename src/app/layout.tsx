@@ -27,17 +27,17 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: 'KUTHARI BEAUTY STORE — Wholesale Cosmetics, Salon & Grooming Supplies',
+    default: 'KUTHARI BEAUTY STORE — Cosmetics, Skincare, Haircare & Salon Products',
     template: '%s | KUTHARI BEAUTY STORE',
   },
   // Placeholder copy — refine with the client's real coverage area/positioning in Phase 2.
   description:
-    'Kuthari Beauty Store is a trusted wholesale distributor of cosmetics, skincare, haircare, salon and grooming products. Buy in bulk at wholesale prices. Order online with secure payment.',
+    'Kuthari Beauty Store is your trusted store for cosmetics, skincare, haircare, salon and grooming products. Buy a single piece at retail price or order in bulk. Secure online payment, delivery across India.',
   // TODO(Phase 2): MASTER_KEYWORDS still lists grocery/commodity terms — replace with
   // real cosmetics/salon/grooming SEO keywords once the client confirms brands/categories.
   keywords: [
     ...MASTER_KEYWORDS.brand,
-    ...MASTER_KEYWORDS.wholesale,
+    ...MASTER_KEYWORDS.retail,
     ...MASTER_KEYWORDS.cities.slice(0, 6),
     ...MASTER_KEYWORDS.nearMe.slice(0, 4),
     ...MASTER_KEYWORDS.longTail.slice(0, 6),
@@ -74,15 +74,15 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: APP_URL,
     siteName: 'KUTHARI BEAUTY STORE',
-    title: 'KUTHARI BEAUTY STORE — Wholesale Cosmetics & Salon Supplies Distributor',
+    title: 'KUTHARI BEAUTY STORE — Cosmetics, Skincare & Salon Products Online',
     description:
-      'Wholesale prices on skincare, haircare, makeup, salon and grooming products. Secure online payment.',
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Kuthari Beauty Store — Wholesale Cosmetics & Salon Supplies' }],
+      'Skincare, haircare, makeup, salon and grooming products. Retail or bulk. Secure online payment.',
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Kuthari Beauty Store — Cosmetics, Skincare & Salon Products' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KUTHARI BEAUTY STORE — Wholesale Cosmetics & Salon Supplies Distributor',
-    description: 'Wholesale prices on skincare, haircare, makeup, salon and grooming products. Secure online payment.',
+    title: 'KUTHARI BEAUTY STORE — Cosmetics, Skincare & Salon Products Online',
+    description: 'Skincare, haircare, makeup, salon and grooming products. Retail or bulk. Secure online payment.',
     images: [OG_IMAGE],
   },
 }

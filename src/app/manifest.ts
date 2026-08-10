@@ -2,10 +2,10 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'KUTHARI BEAUTY STORE — Wholesale Cosmetics & Salon Supplies Distributor',
+    name: 'KUTHARI BEAUTY STORE — Cosmetics, Skincare & Salon Products',
     short_name: 'Kuthari Beauty Store',
     description:
-      'Trusted wholesale distributor of cosmetics, skincare, haircare, salon and grooming products. Bulk orders at wholesale prices with secure online payment.',
+      'Your trusted store for cosmetics, skincare, haircare, salon and grooming products. Buy single pieces or order in bulk, with secure online payment.',
     start_url: '/',
     display: 'standalone',
     background_color: '#faf6ee',

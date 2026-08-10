@@ -68,10 +68,10 @@ export default function HeroBanner({ banners }: Props) {
         >
           <div className="relative z-10 py-8 md:py-0 max-w-xl">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-[1.05] tracking-tight">
-              Stock up on wholesale beauty essentials
+              Everything for your beauty routine
             </h2>
             <p className="text-sm md:text-base text-white/85 font-medium mt-3 leading-relaxed max-w-md">
-              Bulk skincare, haircare, makeup &amp; salon supplies — direct from a trusted wholesale distributor.
+              Skincare, haircare, makeup &amp; salon products — buy a single piece, or save more by the box.
             </p>
             <Link
               href="/search"

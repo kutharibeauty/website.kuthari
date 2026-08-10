@@ -28,7 +28,7 @@ function qtyWithUnit(quantity: number, unit: string | null | undefined): string 
 // line below only renders when it's set) rather than guessed.
 const SELLER = {
   name: 'KUTHARI BEAUTY STORE',
-  tagline: 'Wholesale Cosmetics & Salon Supplies Distributor',
+  tagline: 'Cosmetics, Skincare & Salon Products',
   address: 'Marthapeta St, Sano Bazar, Back side of Ganesh Market, Brahmapur, Odisha - 760009',
   gstin: '',
   phone: '+91 98612 35276 · +91 78490 76520',

@@ -49,13 +49,6 @@ export type PackType = 'Box' | 'Box/Bale' | 'Bag' | 'Tin/Can' | 'Hanger' | 'Piec
 // (Bag, Piece, Bottle/Pouch, Tin/Can, Bottle, Pouch, Jar, Tin, Pack, Sachet, …).
 export type UnitType = string
 
-/** A selectable weight/size option, e.g. { label: '10kg', price: 480, mrp: 520 }. */
-export interface ProductVariant {
-  label: string
-  price: number
-  mrp: number | null
-}
-
 export interface Product {
   id: string
   name: string
@@ -88,8 +81,8 @@ export interface Product {
   /** Optional price for one lower unit; derived from price ÷ units_per_pack when null. */
   secondary_price: number | null
   secondary_mrp: number | null
-  /** Single-unit retail price, offered alongside the wholesale price above.
-   *  Null = this product is wholesale-only (migration 036). */
+  /** Single-unit retail price, offered alongside the bulk price above.
+   *  Null = this product is sold in bulk only (migration 036). */
   retail_price: number | null
   retail_mrp: number | null
   // Legacy box → pack → unit split (kept for backward compatibility).
@@ -103,7 +96,6 @@ export interface Product {
   // Optional per-product delivery charge (₹), applied only when enabled.
   delivery_charge: number | null
   delivery_charge_enabled: boolean
-  variants: ProductVariant[]
   created_at: string
   updated_at: string
   // When the CURRENT price took effect (migration 027). Optional: absent until

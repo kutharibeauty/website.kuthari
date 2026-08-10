@@ -154,7 +154,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
             placeholder="Search order # or customer…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary transition-colors"
+            className="w-full pl-11 pr-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200"
           />
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
@@ -164,7 +164,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
               type="date"
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
-              className="flex-1 sm:flex-none px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary transition-colors"
+              className="flex-1 sm:flex-none px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200"
             />
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -173,7 +173,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
               type="date"
               value={dateTo}
               onChange={e => setDateTo(e.target.value)}
-              className="flex-1 sm:flex-none px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary transition-colors"
+              className="flex-1 sm:flex-none px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200"
             />
           </div>
           {(dateFrom || dateTo) && (
@@ -220,7 +220,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
                     <tr
                       key={order.id}
                       className={cn(
-                        "group hover:bg-surface-container-low transition-colors",
+                        "group hover:bg-surface-container-low transition-colors duration-150 hover:shadow-[inset_3px_0_0_0_var(--color-primary)]",
                         idx !== filtered.length - 1 ? "border-b-2 border-table-border" : ""
                       )}
                     >

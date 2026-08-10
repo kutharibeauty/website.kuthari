@@ -557,7 +557,7 @@ export default function CartPage() {
                 <ShieldCheck size={13} strokeWidth={2.5} /> Secure
               </div>
               <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider">
-                <ShoppingBag size={13} strokeWidth={2.5} /> Wholesale
+                <ShoppingBag size={13} strokeWidth={2.5} /> Bulk
               </div>
             </div>
           </div>

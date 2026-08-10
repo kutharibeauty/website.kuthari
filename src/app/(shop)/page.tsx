@@ -25,23 +25,23 @@ export const metadata: Metadata = {
   // `absolute` bypasses the "%s | KUTHARI BEAUTY STORE…" template so the tab/SERP
   // title leads with the brand exactly as requested.
   title: {
-    absolute: 'KUTHARI BEAUTY STORE | Wholesale Cosmetics, Skincare, Haircare & Salon Supplies Distributor',
+    absolute: 'KUTHARI BEAUTY STORE | Buy Cosmetics, Skincare, Haircare & Salon Products Online',
   },
   description:
-    'KUTHARI BEAUTY STORE — a trusted wholesale distributor of cosmetics, skincare, haircare, makeup and salon/grooming products. Buy in bulk at the best wholesale prices. Secure online payment available.',
+    'KUTHARI BEAUTY STORE — your trusted beauty store for cosmetics, skincare, haircare, makeup and salon/grooming products. Buy a single piece at retail price, or order in bulk. Secure online payment, delivery across India.',
   keywords: HOMEPAGE_KEYWORDS,
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'KUTHARI BEAUTY STORE — Wholesale Cosmetics & Salon Supplies Distributor',
+    title: 'KUTHARI BEAUTY STORE — Cosmetics, Skincare & Salon Products Online',
     description:
-      'Wholesale cosmetics platform. Skincare, Haircare, Makeup, Salon & Grooming products — bulk orders at best prices. Secure online payment.',
+      'Skincare, Haircare, Makeup, Salon & Grooming products. Buy single pieces at retail price or order in bulk. Secure online payment.',
     url: '/',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KUTHARI BEAUTY STORE — Wholesale Cosmetics & Salon Supplies Distributor',
-    description: 'Bulk skincare, haircare, makeup & salon supplies at wholesale prices. Secure online payment.',
+    title: 'KUTHARI BEAUTY STORE — Cosmetics, Skincare & Salon Products Online',
+    description: 'Skincare, haircare, makeup & salon products. Retail or bulk. Secure online payment.',
     images: ['/og-image.jpg'],
   },
 }
@@ -56,7 +56,7 @@ const orgJsonLd = {
   url: APP_URL,
   logo: `${APP_URL}/images/logo-trimmed.webp`,
   description:
-    'A trusted wholesale distributor of cosmetics, skincare, haircare, makeup and salon/grooming products.',
+    'A trusted beauty store for cosmetics, skincare, haircare, makeup and salon/grooming products — sold retail and in bulk.',
   areaServed: [
     { '@type': 'State', name: 'Odisha' },
     { '@type': 'State', name: 'Andhra Pradesh' },
@@ -93,7 +93,7 @@ const localBizJsonLd = {
   email: 'smortika@gmail.com',
   currenciesAccepted: 'INR',
   paymentAccepted: 'UPI, Card, Netbanking',
-  slogan: 'Trusted Wholesale Beauty Partner',
+  slogan: 'Your Trusted Beauty Store',
   address: {
     '@type': 'PostalAddress',
     streetAddress: 'Marthapeta St, Sano Bazar, Back side of Ganesh Market',
@@ -108,7 +108,7 @@ const localBizJsonLd = {
     { '@type': 'State', name: 'Chhattisgarh' },
     { '@type': 'State', name: 'West Bengal' },
   ],
-  knowsAbout: ['Skincare', 'Haircare', 'Makeup', 'Salon & Grooming Products', 'Wholesale Cosmetics'],
+  knowsAbout: ['Skincare', 'Haircare', 'Makeup', 'Salon & Grooming Products', 'Cosmetics'],
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',

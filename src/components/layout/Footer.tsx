@@ -160,7 +160,7 @@ export default async function Footer() {
         <div className="mt-8 flex flex-col md:flex-row items-center gap-4 text-[10px] font-black tracking-[0.2em] text-on-surface-variant/70 uppercase">
           <span>© 2026 Kuthari Beauty Store</span>
           <span className="hidden md:inline">·</span>
-          <span>Wholesale Distributor</span>
+          <span>Retail &amp; Bulk Supplier</span>
           <span className="hidden md:inline">·</span>
           <span>Odisha</span>
         </div>
@@ -168,10 +168,7 @@ export default async function Footer() {
         {/* Developer credit — the last thing on the page. Styled from the same
             tokens as the rest of the site (cream card, table-border outline,
             primary on hover) rather than a fixed dark pill, so it belongs to
-            this cream band instead of sitting on top of it.
-
-            The pill is a container, not one big link: each name carries its own
-            destination, so a click never lands on the wrong person's site. */}
+            this cream band instead of sitting on top of it. */}
         <div className="group mt-6 inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border-2 border-table-border bg-surface-card px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant/70 transition-all duration-200 hover:border-primary/40 hover:shadow-sm">
           <span>Crafted with</span>
           <Heart
@@ -189,8 +186,6 @@ export default async function Footer() {
           >
             Jyotiranjan
           </a>
-          <span className="text-on-surface-variant/50">&amp;</span>
-          <span className="text-primary tracking-[0.12em] normal-case text-[11px]">Nani Reddy</span>
         </div>
       </div>
     </footer>
