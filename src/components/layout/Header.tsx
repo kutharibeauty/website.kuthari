@@ -47,7 +47,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
   }
 
   return (
-    <div className="sticky top-0 z-50 w-full bg-white border-b border-outline-variant/50 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transform-gpu backface-hidden will-change-transform">
+    <div className="sticky top-0 z-50 w-full bg-surface/85 backdrop-blur-xl border-b border-table-border/60 transform-gpu backface-hidden will-change-transform">
       <header className="w-full">
         <div className="mx-auto max-w-7xl flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-3">
 
@@ -57,8 +57,13 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
             {/* Brand name beside the mark, on every size. Kept nowrap inside the
                 shrink-0 logo block; the search bar is flex-1 so it gives up the
                 width instead of this wrapping or the row overflowing. */}
-            <span className="ml-2 font-black text-primary text-[13px] sm:text-sm lg:text-base uppercase tracking-wide leading-none whitespace-nowrap">
-              Kuthari Beauty Store
+            <span className="ml-2.5 flex flex-col leading-none whitespace-nowrap">
+              <span className="font-heading font-semibold text-primary text-[15px] sm:text-base lg:text-lg tracking-tight">
+                Kuthari
+              </span>
+              <span className="mt-0.5 text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.28em] text-on-surface-variant/70">
+                Beauty Store
+              </span>
             </span>
           </Link>
 
@@ -77,7 +82,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder=""
                 aria-label={t('nav.searchPlaceholder')}
-                className="w-full pl-11 pr-4 py-2.5 rounded-2xl bg-surface-container-low border border-transparent focus:border-primary/30 focus:bg-white text-sm font-medium text-primary placeholder:text-on-surface-variant/50 outline-none transition-colors"
+                className="w-full pl-11 pr-4 py-2.5 rounded-full bg-surface-container-low/70 border border-table-border/60 focus:border-primary/30 focus:bg-surface-card text-sm font-medium text-primary placeholder:text-on-surface-variant/50 outline-none transition-all duration-200"
               />
               {query === '' && <AnimatedSearchPlaceholder terms={terms} />}
             </div>
@@ -88,7 +93,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
 
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-container-low text-primary transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full border border-table-border/70 hover:border-primary/30 hover:bg-surface-container-low text-primary transition-all press"
               aria-label="Menu"
             >
               <Menu size={18} strokeWidth={2.5} />
@@ -102,13 +107,13 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
                 <span className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center">
                   <User size={14} strokeWidth={2.5} />
                 </span>
-                <span className="text-sm font-black text-primary">{t('nav.account')}</span>
+                <span className="text-[13px] font-semibold tracking-wide text-primary">{t('nav.account')}</span>
               </Link>
             )}
             {isLoaded && !isSignedIn && (
               <Link
                 href="/login"
-                className="flex items-center gap-1 px-4 py-2.5 rounded-xl hover:bg-surface-container-low text-sm font-black text-primary transition-colors"
+                className="link-underline flex items-center gap-1 px-2 py-2.5 text-[13px] font-semibold tracking-wide text-primary transition-colors"
               >
                 {t('nav.signIn')}
               </Link>
@@ -116,7 +121,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
 
             <Link
               href="/wishlist"
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low hover:bg-surface-container text-primary transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full border border-table-border/70 hover:border-primary/30 hover:bg-surface-container-low text-primary transition-all press"
               aria-label="Wishlist"
             >
               <Heart size={18} strokeWidth={2.5} />
@@ -124,7 +129,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
 
             <Link
               href="/shopping-list"
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low hover:bg-surface-container text-primary transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full border border-table-border/70 hover:border-primary/30 hover:bg-surface-container-low text-primary transition-all press"
               aria-label="Shopping list"
             >
               <ClipboardList size={18} strokeWidth={2.5} />
@@ -133,7 +138,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
             <Link
               href="/cart"
               data-cart-target
-              className="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-primary font-black text-sm transition-colors"
+              className="relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-white font-semibold text-[13px] tracking-wide hover:bg-primary-container transition-colors press"
             >
               <ShoppingCart size={18} strokeWidth={2.5} />
               {t('nav.myCart')}
@@ -144,7 +149,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     key={totalItems}
-                    className="absolute -top-1.5 -right-1.5 min-w-[18px] h-4.5 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center px-1"
+                    className="absolute -top-1.5 -right-1.5 min-w-[18px] h-4.5 bg-secondary text-on-secondary text-[9px] font-bold rounded-full flex items-center justify-center px-1 ring-2 ring-surface"
                   >
                     {totalItems}
                   </motion.span>
@@ -158,12 +163,12 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
             <Link
               href="/cart"
               data-cart-target
-              className="relative w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low text-primary transition-colors"
+              className="relative w-10 h-10 flex items-center justify-center rounded-full border border-table-border/70 text-primary transition-colors press"
               aria-label="Cart"
             >
               <ShoppingCart size={17} strokeWidth={2.5} />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-4.5 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center px-1">
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-4.5 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 ring-2 ring-surface">
                   {totalItems}
                 </span>
               )}
@@ -217,7 +222,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
                   // readers can't use — so name the field explicitly. Nothing
                   // visual changes.
                   aria-label={t('nav.searchPlaceholder')}
-                  className="w-full pl-11 pr-4 py-2.5 rounded-2xl bg-surface-container-low border border-transparent focus:border-primary/30 focus:bg-white text-sm font-medium text-primary placeholder:text-on-surface-variant/50 outline-none transition-colors"
+                  className="w-full pl-11 pr-4 py-2.5 rounded-full bg-surface-container-low/70 border border-table-border/60 focus:border-primary/30 focus:bg-surface-card text-sm font-medium text-primary placeholder:text-on-surface-variant/50 outline-none transition-all duration-200"
                 />
                 {query === '' && <AnimatedSearchPlaceholder terms={terms} />}
               </div>
@@ -233,7 +238,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden bg-white absolute top-full left-0 w-full border-b border-outline-variant/30 shadow-2xl"
+              className="overflow-hidden bg-surface absolute top-full left-0 w-full border-b border-table-border/60 shadow-[0_24px_48px_rgba(27,44,61,0.10)]"
             >
               <div className="mx-auto max-w-7xl px-6 py-8 flex flex-col gap-6">
                 {NAV.map(({ key, href }) => {
@@ -243,7 +248,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
                       key={href}
                       href={href}
                       onClick={() => setMenuOpen(false)}
-                      className={`text-2xl font-black uppercase tracking-tighter transition-all duration-300 flex items-center justify-between ${
+                      className={`font-heading text-2xl font-semibold tracking-tight transition-all duration-300 flex items-center justify-between hover:translate-x-1 ${
                         active ? 'text-primary' : 'text-on-surface-variant hover:text-primary'
                       }`}
                     >
@@ -264,11 +269,11 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
                       key={href}
                       href={href}
                       onClick={() => setMenuOpen(false)}
-                      className={`text-2xl font-black uppercase tracking-tighter transition-all duration-300 flex items-center justify-between ${
+                      className={`font-heading text-2xl font-semibold tracking-tight transition-all duration-300 flex items-center justify-between hover:translate-x-1 ${
                         active ? 'text-primary' : 'text-on-surface-variant hover:text-primary'
                       }`}
                     >
-                      <span className="flex items-center gap-3"><Icon size={22} strokeWidth={2.5} /> {label}</span>
+                      <span className="flex items-center gap-3"><Icon size={20} strokeWidth={1.75} /> {label}</span>
                       {active && <span className="w-2 h-2 rounded-full bg-primary" />}
                     </Link>
                   )
@@ -289,7 +294,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
                     <Link
                       href="/login"
                       onClick={() => setMenuOpen(false)}
-                      className="px-6 py-3 bg-primary text-white text-sm font-black uppercase tracking-[0.1em] rounded-full active:scale-95 transition-transform"
+                      className="gold-sheen relative overflow-hidden px-7 py-3 bg-primary text-white text-[13px] font-semibold tracking-wide rounded-full active:scale-95 transition-transform"
                     >
                       {t('nav.signIn')}
                     </Link>

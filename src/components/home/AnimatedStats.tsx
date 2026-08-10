@@ -43,12 +43,12 @@ function StatItem({
   const count = useCountUp(end, 1400, active)
   return (
     <div className="flex flex-col items-center text-center flex-1 px-1 sm:px-2 first:pl-0 last:pr-0">
-      <span className="text-xl sm:text-2xl md:text-3xl font-black text-primary leading-none tabular-nums tracking-tight">
+      <span className="font-heading text-3xl sm:text-4xl md:text-5xl font-semibold text-primary leading-none tabular-nums tracking-tight">
         {count}
         {suffix}
       </span>
-      <span className="text-[9px] sm:text-[10px] font-black text-secondary uppercase tracking-wider mt-1.5 leading-tight">{label}</span>
-      <span className="text-[8px] sm:text-[9px] font-medium text-secondary/60 leading-tight mt-0.5">{subLabel}</span>
+      <span className="text-[10px] sm:text-[11px] font-semibold text-on-surface-variant uppercase tracking-[0.16em] mt-3 leading-tight">{label}</span>
+      <span className="text-[10px] font-medium text-on-surface-variant/60 leading-tight mt-1">{subLabel}</span>
     </div>
   )
 }
@@ -58,18 +58,20 @@ export default function AnimatedStats() {
   const inView = useInView(ref, { once: true, margin: '-50px' })
 
   return (
-    <section ref={ref} className="px-4 max-w-7xl mx-auto w-full">
+    <section ref={ref} className="px-4 md:px-8 max-w-7xl mx-auto w-full">
       <motion.div
         initial={{ opacity: 0, y: 16, scale: 0.98 }}
         animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="bg-gradient-to-br from-surface-container-low to-surface-container border border-table-border/60 rounded-2xl py-6 px-4 shadow-[0_3px_8px_rgba(27, 44, 61,0.02)]"
+        className="py-12 md:py-16"
       >
-        <div className="flex divide-x divide-table-border/40">
+        <div className="rule-gold mb-10" />
+        <div className="flex divide-x divide-table-border/50">
           {STATS.map((stat) => (
             <StatItem key={stat.label} {...stat} active={inView} />
           ))}
         </div>
+        <div className="rule-gold mt-10" />
       </motion.div>
     </section>
   )

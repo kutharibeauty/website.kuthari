@@ -51,10 +51,14 @@ export interface BuyOption {
   level: BuyLevel
   /** Display + cart-variant label: "Retail", "Box", "Hanger", "Pack", "Tin". */
   label: string
-  /** Plural form for quantity copy. Absent = pluralise `label` normally. Set
-   *  for labels that are already mass nouns ("Retail" -> "Retail", not
-   *  "Retails"). */
+  /** Plural form for quantity copy. Absent = pluralise `label` normally. */
   pluralLabel?: string
+  /** What ONE of this option is called in running copy — "Price per piece",
+   *  "Number of pieces". Defaults to `label`, which is right for Box/Pack/
+   *  Hanger but wrong for the retail option, whose label is a price TIER
+   *  ("Retail") rather than a unit. */
+  unitNoun?: string
+  unitNounPlural?: string
   /** Price for ONE of this unit. */
   price: number
   mrp: number | null
@@ -99,8 +103,12 @@ export function retailOption(p: PackagingProduct): BuyOption | null {
   if (!hasRetailPrice(p)) return null
   return {
     level: 'retail',
+    // The cart/order variant key stays "Retail" — stable and distinct from any
+    // pack_type — while the copy below calls it a piece.
     label: RETAIL_LABEL,
     pluralLabel: RETAIL_LABEL,
+    unitNoun: 'piece',
+    unitNounPlural: 'pieces',
     price: p.retail_price as number,
     mrp: p.retail_mrp ?? null,
     // A retail line is one unit — printing a piece count here would imply it
@@ -189,9 +197,22 @@ export function pluralLabelOf(opt: BuyOption): string {
   return /(?:s|x|z|ch|sh)$/i.test(opt.label) ? `${opt.label}es` : `${opt.label}s`
 }
 
-/** "3 Hangers = 180 Pieces" — the line shown to the customer. */
+/** The noun for ONE of this option, for running copy. */
+export function unitNounOf(opt: BuyOption): string {
+  return opt.unitNoun ?? opt.label
+}
+
+/** The noun for MANY of this option, for running copy. */
+export function unitNounPluralOf(opt: BuyOption): string {
+  if (opt.unitNounPlural) return opt.unitNounPlural
+  if (opt.unitNoun) return /(?:s|x|z|ch|sh)$/i.test(opt.unitNoun) ? `${opt.unitNoun}es` : `${opt.unitNoun}s`
+  return pluralLabelOf(opt)
+}
+
+/** "3 Hangers = 180 Pieces" — the line shown to the customer. Uses the unit
+ *  NOUN, so the retail option reads "1 piece" rather than "1 Retail". */
 export function describeSelection(qty: number, opt: BuyOption, pieceWord = 'Pieces'): string {
-  const unit = qty === 1 ? opt.label : pluralLabelOf(opt)
+  const unit = qty === 1 ? unitNounOf(opt) : unitNounPluralOf(opt)
   if (opt.pieces == null) return `${qty} ${unit}`
   return `${qty} ${unit} = ${(qty * opt.pieces).toLocaleString('en-IN')} ${pieceWord}`
 }

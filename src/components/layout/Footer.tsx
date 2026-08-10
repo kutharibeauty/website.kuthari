@@ -36,7 +36,7 @@ export default async function Footer() {
         <div className="flex flex-col lg:flex-row gap-14 lg:gap-20">
           {/* Brand & Info */}
           <div className="flex flex-col flex-shrink-0">
-            <ul className="flex flex-col gap-6 text-sm font-black uppercase tracking-widest text-white/70">
+            <ul className="flex flex-col gap-6 text-[13px] font-medium tracking-wide text-white/65">
               <li className="flex items-center gap-4 group cursor-pointer hover:text-white transition-colors">
                 <MapPin size={24} strokeWidth={2.5} className="group-hover:rotate-12 transition-transform duration-300" />
                 <span className="max-w-[240px] leading-relaxed">
@@ -91,7 +91,7 @@ export default async function Footer() {
 
           {/* Useful Links */}
           <div className="flex flex-col flex-shrink-0">
-            <h5 className="font-black text-white text-sm uppercase tracking-wide mb-5">
+            <h5 className="text-[10px] font-semibold text-white/45 uppercase tracking-[0.22em] mb-6">
               Useful Links
             </h5>
             <ul className="flex flex-col gap-3">
@@ -112,12 +112,12 @@ export default async function Footer() {
           {categories.length > 0 && (
             <div className="flex flex-col flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-5">
-                <h5 className="font-black text-white text-sm uppercase tracking-wide">
+                <h5 className="text-[10px] font-semibold text-white/45 uppercase tracking-[0.22em]">
                   Categories
                 </h5>
                 <Link
                   href="/search"
-                  className="text-sm font-bold text-secondary hover:text-secondary/80 transition-colors"
+                  className="link-underline text-[11px] font-semibold tracking-wide text-secondary hover:text-secondary/80 transition-colors"
                 >
                   see all
                 </Link>
@@ -157,7 +157,7 @@ export default async function Footer() {
             Beauty Store
           </span>
         </Link>
-        <div className="mt-8 flex flex-col md:flex-row items-center gap-4 text-[10px] font-black tracking-[0.2em] text-on-surface-variant/70 uppercase">
+        <div className="mt-8 flex flex-col md:flex-row items-center gap-4 text-[10px] font-medium tracking-[0.22em] text-on-surface-variant/60 uppercase">
           <span>© 2026 Kuthari Beauty Store</span>
           <span className="hidden md:inline">·</span>
           <span>Retail &amp; Bulk Supplier</span>

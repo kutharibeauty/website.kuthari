@@ -8,7 +8,7 @@ import { useAuthPromptStore } from '@/store/authPromptStore'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
-import { retailOption, bulkBuyOptions, describeSelection, type BuyOption } from '@/lib/products/packaging'
+import { retailOption, bulkBuyOptions, describeSelection, unitNounOf, unitNounPluralOf, type BuyOption } from '@/lib/products/packaging'
 import type { Product } from '@/types/database.types'
 
 /**
@@ -54,6 +54,9 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
   const outOfStock = product.stock_qty === 0
 
   const packLabel = activeOption.label
+  // Nouns for running copy — "piece" for retail, "Box"/"Pack" for bulk.
+  const unitNoun = unitNounOf(activeOption)
+  const unitNounPlural = unitNounPluralOf(activeOption)
   const innerUnitLabel = 'Pieces'
   // Clamp any typed quantity to available stock (never accept an invalid amount).
   const clampQty = (n: number) => {
@@ -130,7 +133,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
           max={product.stock_qty || undefined}
           value={cartItem.quantity}
           onChange={(e) => { const n = parseInt(e.target.value, 10); updateQuantity(cartItem.id, clampQty(Number.isNaN(n) ? 1 : n)) }}
-          aria-label={hasLevels ? `Number of ${packLabel}` : 'Quantity'}
+          aria-label={hasLevels ? `Number of ${unitNounPlural}` : 'Quantity'}
           className="w-14 bg-transparent text-center font-black text-sm tracking-widest outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         <button onClick={() => updateQuantity(cartItem.id, clampQty(cartItem.quantity + 1))} className="w-11 h-full flex items-center justify-center rounded-full hover:bg-white/15 active:scale-95 transition" aria-label="Add one more">
@@ -142,11 +145,11 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
         onClick={handleAdd}
         disabled={outOfStock}
         className={cn(
-          'h-12 px-6 rounded-full border-2 border-primary text-primary font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed',
+          'h-12 px-7 rounded-full border border-primary text-primary font-semibold text-[13px] tracking-wide flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed',
           full && 'flex-1',
         )}
       >
-        <ShoppingCart size={16} /> Add
+        <ShoppingCart size={15} /> Add to cart
       </button>
     )
 
@@ -157,7 +160,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
         <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle,#000_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none" />
         <div className="relative z-10">
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/50 mb-2">
-            Price per {unit}
+            Price per {unitNoun}
           </p>
           <div className="flex items-end justify-between">
             <div className="flex items-baseline gap-3">
@@ -167,7 +170,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
               )}
             </div>
             {discount && (
-              <div className="bg-primary text-white font-black text-sm px-3 py-1.5 rounded-xl flex-shrink-0">Save {discount}%</div>
+              <div className="bg-secondary text-on-secondary font-semibold text-[11px] tracking-wide px-3 py-1.5 rounded-full flex-shrink-0">Save {discount}%</div>
             )}
           </div>
 
@@ -319,7 +322,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
       {!outOfStock && (
         <div className="mb-5 rounded-2xl border-2 border-table-border p-4">
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60 mb-3">
-            {hasLevels ? `Number of ${packLabel}s` : tField('Quantity', 'ପରିମାଣ')}
+            {hasLevels ? `Number of ${unitNounPlural}` : 'Quantity'}
           </p>
 
           <div className="flex items-center gap-4 flex-wrap">
@@ -354,10 +357,10 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
                 }}
                 onBlur={() => { const n = parseInt(qtyInput, 10); if (Number.isNaN(n) || n < 1) setQtyInput(String(currentQty)) }}
                 placeholder={hasLevels ? '10' : '10'}
-                aria-label={hasLevels ? `Type number of ${packLabel}` : 'Type quantity'}
+                aria-label={hasLevels ? `Type number of ${unitNounPlural}` : 'Type quantity'}
                 className="w-24 h-12 px-3 rounded-xl border-2 border-primary/40 bg-surface text-center font-black text-lg text-primary placeholder:text-on-surface-variant/30 outline-none focus:border-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              {hasLevels && <span className="text-sm font-bold text-on-surface-variant">{packLabel}s</span>}
+              {hasLevels && <span className="text-sm font-medium text-on-surface-variant">{unitNounPlural}</span>}
             </div>
           </div>
 
@@ -402,7 +405,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
         <button
           onClick={handleBuyNow}
           disabled={outOfStock}
-          className="flex-1 h-12 px-6 rounded-full bg-primary text-white font-black text-sm uppercase tracking-wider hover:opacity-90 transition-opacity shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="gold-sheen relative overflow-hidden flex-1 h-12 px-7 rounded-full bg-primary text-white font-semibold text-[13px] tracking-wide hover:opacity-90 transition-opacity shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Buy Now
         </button>
@@ -432,7 +435,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
           <button
             onClick={handleBuyNow}
             disabled={outOfStock}
-            className="flex-1 h-12 rounded-full bg-primary text-white font-black text-sm uppercase tracking-wider active:scale-95 transition-transform shadow-sm disabled:opacity-50"
+            className="flex-1 h-12 rounded-full bg-primary text-white font-semibold text-[13px] tracking-wide active:scale-95 transition-transform shadow-sm disabled:opacity-50"
           >
             Buy Now
           </button>

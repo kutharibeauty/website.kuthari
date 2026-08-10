@@ -15,15 +15,18 @@ import { parseOrderHours, DEFAULT_ORDER_HOURS, type OrderHoursConfig } from '@/l
 // about where it ships, not what is in the box. The product field is retained
 // in the schema but no longer feeds the total.
 
-// Defaults, used until an admin overrides them in Settings.
-export const FREE_DELIVERY_MIN = 1000
-export const FLAT_DELIVERY_FEE = 50
+// Defaults. These are Kuthari Beauty Store's ACTUAL trading terms, not neutral
+// placeholders — the admin can still override them in Settings, but with no
+// settings row present these are what customers see and are charged, so they
+// must match the real policy rather than fall back to something safer.
+export const FREE_DELIVERY_MIN = 1999
+export const FLAT_DELIVERY_FEE = 99
 /** Charged for any pincode the admin has not given an explicit rate. */
 export const DEFAULT_PINCODE_DELIVERY_FEE = 99
-// 0 = no minimum. The real value is admin-set in Settings (settings CMS row);
-// this fallback deliberately imposes NO minimum so a missing/broken config can
-// never lock customers out of checkout.
-export const MIN_ORDER_VALUE = 0
+/** Minimum order subtotal required to check out. Note this is a REAL gate: if
+ *  the settings row is missing, customers below it still cannot order — which
+ *  is correct, since it is the store's stated minimum. */
+export const MIN_ORDER_VALUE = 599
 
 export interface DeliveryConfig {
   /** Order subtotal at/above which delivery is free. */

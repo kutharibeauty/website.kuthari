@@ -215,6 +215,80 @@ details>summary::-webkit-details-marker {
   animation: heart-burst 0.55s ease-out forwards;
 }
 
+/* ── Editorial type & surface system ────────────────────────────────────────
+   The inherited look was built for a wholesale commodity trader: everything
+   set in `font-black uppercase tracking-widest` inside 2px boxes, which reads
+   as loud and industrial. A beauty store wants the opposite — quiet, airy,
+   editorial. These are the replacements; the palette is untouched. */
+
+/* Small label above a heading. Replaces `font-black uppercase tracking-widest`:
+   same role, but light weight and wide tracking instead of shouting. */
+@utility eyebrow {
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-on-surface-variant) 70%, transparent);
+}
+
+/* Section heading — the serif, in sentence case, with generous leading.
+   Replaces the uppercase black slab headings. */
+@utility display {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.12;
+  color: var(--color-primary);
+}
+
+/* A soft card: hairline border, generous radius, barely-there shadow that
+   deepens on hover. Replaces `border-2 border-table-border rounded-2xl`. */
+@utility card-soft {
+  background-color: var(--color-surface-card);
+  border: 1px solid color-mix(in srgb, var(--color-table-border) 75%, transparent);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgba(27, 44, 61, 0.04);
+  transition: box-shadow 0.3s ease-out, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease-out;
+}
+
+@utility card-soft-hover {
+  &:hover {
+    border-color: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    box-shadow: 0 16px 40px rgba(27, 44, 61, 0.10);
+    transform: translateY(-4px);
+  }
+}
+
+/* Thin gold rule used to separate editorial sections. */
+@utility rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-secondary) 55%, transparent), transparent);
+}
+
+/* Underline that grows from the left on hover — for quiet text links that
+   replace the old boxed uppercase buttons. */
+@utility link-underline {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  &:hover::after {
+    transform: scaleX(1);
+  }
+}
+
 /* ── Shared entrance + interaction utilities ────────────────────────────────
    Defined here rather than pulled from tailwindcss-animate (not a dependency),
    so `animate-*` classes below are real and not silently inert. */

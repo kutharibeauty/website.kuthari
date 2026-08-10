@@ -21,35 +21,36 @@ export default function ProductSection({ title, titleOr, products, viewAllHref }
   const displayTitle = tField(title, titleOr)
 
   return (
-    <section className="px-4 max-w-7xl mx-auto w-full">
+    <section className="px-4 md:px-8 max-w-7xl mx-auto w-full py-6 md:py-10">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-black uppercase tracking-wider text-primary">{displayTitle}</h3>
+      <div className="flex items-end justify-between mb-6">
+        <h3 className="display text-2xl md:text-[28px]">{displayTitle}</h3>
         {viewAllHref && (
           <Link
             href={viewAllHref}
-            className="text-xs font-bold text-primary hover:text-secondary underline underline-offset-3 flex items-center gap-1 transition-colors"
+            className="group/all link-underline text-[11px] font-semibold tracking-[0.14em] uppercase text-on-surface-variant hover:text-primary flex items-center gap-1.5 transition-colors flex-shrink-0"
           >
             {t('product.viewAll')}
-            <ArrowRight size={12} className="inline-block transition-transform duration-200 group-hover:translate-x-0.5" />
+            <ArrowRight size={12} className="transition-transform duration-200 group-hover/all:translate-x-0.5" />
           </Link>
         )}
       </div>
 
-      {/* Mobile: horizontal scroll */}
-      <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 md:hidden">
-        {products.map((p, i) => (
-          <motion.div
-            key={p.id}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.4, delay: Math.min(i, 8) * 0.05, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <ProductCard product={p} />
-          </motion.div>
+      {/* Mobile: horizontal scroll.
+           The whole row reveals as one. Per-card whileInView cannot work here:
+           cards past the second sit off-screen horizontally, never intersect
+           the viewport, and would stay at opacity 0 forever. */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 md:hidden"
+      >
+        {products.map((p) => (
+          <ProductCard key={p.id} product={p} />
         ))}
-      </div>
+      </motion.div>
 
       {/* Desktop: up to 5 + "View All" tile */}
       <div className="hidden md:flex gap-4 overflow-hidden py-2 px-1">
@@ -67,12 +68,12 @@ export default function ProductSection({ title, titleOr, products, viewAllHref }
         {products.length > 5 && viewAllHref && (
           <Link
             href={viewAllHref}
-            className="w-44 flex-shrink-0 rounded-2xl border-2 border-dashed border-outline-variant/60 hover:border-primary/50 bg-surface-container-low/40 hover:bg-surface-card flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:text-primary transition-all duration-500 shadow-none hover:shadow-[0_12px_32px_rgba(27, 44, 61,0.08)] group hover:-translate-y-1"
+            className="w-52 flex-shrink-0 rounded-[1.25rem] border border-dashed border-table-border hover:border-primary/40 bg-surface-container-low/40 hover:bg-surface-card flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:text-primary transition-all duration-300 group hover:-translate-y-1"
           >
             <div className="w-12 h-12 rounded-full bg-primary/5 group-hover:bg-primary/10 flex items-center justify-center transition-colors duration-500 ring-4 ring-transparent group-hover:ring-primary/5">
               <ArrowRight size={20} className="text-primary transition-transform duration-500 group-hover:translate-x-1" />
             </div>
-            <span className="text-sm font-black tracking-wide">{t('product.viewAll')}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em]">{t('product.viewAll')}</span>
           </Link>
         )}
       </div>

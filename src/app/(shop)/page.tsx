@@ -181,8 +181,8 @@ export default async function HomePage() {
         {/* 4. Shop by category — Blinkit-style horizontal strip (editable images) */}
         <section className="pt-2">
           <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-end justify-between">
-            <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter text-primary">Shop by Category</h3>
-            <Link href="/search" className="text-[10px] md:text-xs font-black uppercase tracking-widest text-primary hover:text-primary/70 underline underline-offset-4 transition-colors">
+            <h3 className="display text-2xl md:text-[32px]">Shop by category</h3>
+            <Link href="/search" className="link-underline text-[11px] font-semibold tracking-[0.14em] uppercase text-on-surface-variant hover:text-primary transition-colors flex-shrink-0">
               View All
             </Link>
           </div>

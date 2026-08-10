@@ -66,18 +66,22 @@ export default function HeroBanner({ banners }: Props) {
           className="relative w-full rounded-3xl overflow-hidden min-h-[200px] sm:min-h-[260px] md:min-h-[320px] flex items-center px-6 sm:px-10 md:px-16"
           style={{ backgroundColor: DEFAULT_BG }}
         >
-          <div className="relative z-10 py-8 md:py-0 max-w-xl">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-[1.05] tracking-tight">
+          <div className="relative z-10 py-10 md:py-0 max-w-xl">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-secondary">
+              Kuthari Beauty Store
+            </span>
+            <h2 className="font-heading text-[34px] sm:text-5xl md:text-[56px] font-semibold text-white leading-[1.08] tracking-tight mt-4">
               Everything for your beauty routine
             </h2>
-            <p className="text-sm md:text-base text-white/85 font-medium mt-3 leading-relaxed max-w-md">
+            <div className="h-px w-20 bg-secondary/60 mt-6" />
+            <p className="text-sm md:text-base text-white/70 font-normal mt-6 leading-relaxed max-w-md">
               Skincare, haircare, makeup &amp; salon products — buy a single piece, or save more by the box.
             </p>
             <Link
               href="/search"
-              className="gold-sheen relative overflow-hidden inline-flex items-center mt-6 px-6 py-3 rounded-xl bg-secondary text-on-secondary font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200 shadow-lg"
+              className="gold-sheen relative overflow-hidden inline-flex items-center mt-8 px-8 py-3.5 rounded-full bg-secondary text-on-secondary font-semibold text-[13px] tracking-wide hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
             >
-              Shop Now
+              Shop now
             </Link>
           </div>
           <div className="absolute -bottom-10 -right-10 w-56 h-56 radial-glow-gold pointer-events-none" />
@@ -128,7 +132,7 @@ export default function HeroBanner({ banners }: Props) {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-3xl sm:text-4xl md:text-5xl font-black leading-[1.05] tracking-tight"
+                  className="font-heading text-[32px] sm:text-5xl md:text-[52px] font-semibold leading-[1.08] tracking-tight"
                   style={{ color: banner.text_color }}
                 >
                   {title}
@@ -155,7 +159,7 @@ export default function HeroBanner({ banners }: Props) {
                 >
                   <Link
                     href={banner.link_url}
-                    className="gold-sheen relative overflow-hidden inline-flex items-center mt-6 px-6 py-3 rounded-xl bg-white text-primary font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200 shadow-lg"
+                    className="gold-sheen relative overflow-hidden inline-flex items-center mt-7 px-8 py-3.5 rounded-full bg-white text-primary font-semibold text-[13px] tracking-wide hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200 shadow-lg"
                   >
                     {ctaText}
                   </Link>

@@ -319,7 +319,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
               animate={{ scale: 1,    opacity: 1 }}
               exit={{    scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="absolute inset-0 flex items-center justify-between rounded-xl bg-primary text-white overflow-hidden"
+              className="absolute inset-0 flex items-center justify-between rounded-full bg-primary text-white overflow-hidden"
             >
               <button
                 onClick={(e) => handleChange(e, -1)}
@@ -350,7 +350,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
               onClick={handleAdd}
               disabled={disabled}
               className={cn(
-                'absolute inset-0 overflow-hidden flex items-center justify-center gap-2 rounded-xl font-black text-xs md:text-[13px] transition-all duration-300 active:scale-95 group/btn uppercase tracking-widest',
+                'absolute inset-0 overflow-hidden flex items-center justify-center gap-2 rounded-full font-semibold text-[13px] tracking-wide transition-all duration-300 active:scale-95 group/btn',
                 disabled
                   ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-50'
                   : flash
@@ -359,8 +359,8 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
               )}
               aria-label={t('product.addToCart')}
             >
-              <Plus size={16} strokeWidth={3} className="transition-transform duration-300 group-hover/btn:rotate-90" />
-              ADD
+              <Plus size={15} strokeWidth={2.5} className="transition-transform duration-300 group-hover/btn:rotate-90" />
+              Add to cart
             </motion.button>
           )}
         </AnimatePresence>
