@@ -575,36 +575,24 @@ function BannerFormModal({
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">Title EN</label>
-              <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className={inputCls} placeholder="Stock up on daily essentials" />
+              <label className="font-black text-xs text-primary uppercase tracking-widest">Title</label>
+              <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className={inputCls} placeholder="Stock up on beauty essentials" />
             </div>
             <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">Title Odia</label>
-              <input type="text" value={form.title_or} onChange={e => setForm(p => ({ ...p, title_or: e.target.value }))} className={inputCls} />
-            </div>
-            <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">Subtitle EN</label>
+              <label className="font-black text-xs text-primary uppercase tracking-widest">Subtitle</label>
               <input type="text" value={form.subtitle} onChange={e => setForm(p => ({ ...p, subtitle: e.target.value }))} className={inputCls} />
-            </div>
-            <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">Subtitle Odia</label>
-              <input type="text" value={form.subtitle_or} onChange={e => setForm(p => ({ ...p, subtitle_or: e.target.value }))} className={inputCls} />
             </div>
           </div>
 
           <div className="space-y-2">
             <label className="font-black text-xs text-primary uppercase tracking-widest">Link URL</label>
-            <input type="text" value={form.link_url} onChange={e => setForm(p => ({ ...p, link_url: e.target.value }))} className={inputCls} placeholder="/search?category=oils" />
+            <input type="text" value={form.link_url} onChange={e => setForm(p => ({ ...p, link_url: e.target.value }))} className={inputCls} placeholder="/search?category=skincare" />
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">CTA Text EN</label>
+              <label className="font-black text-xs text-primary uppercase tracking-widest">CTA Text</label>
               <input type="text" value={form.cta_text} onChange={e => setForm(p => ({ ...p, cta_text: e.target.value }))} className={inputCls} placeholder="Shop Now" />
-            </div>
-            <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">CTA Text Odia</label>
-              <input type="text" value={form.cta_text_or} onChange={e => setForm(p => ({ ...p, cta_text_or: e.target.value }))} className={inputCls} />
             </div>
           </div>
 
@@ -678,17 +666,11 @@ function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToas
     <div className="space-y-10 max-w-4xl">
       <CmsSection title="Hero Section">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <CmsField label="Hero Title (English)">
-            <input type="text" value={hero.title_en} onChange={e => setHero(p => ({ ...p, title_en: e.target.value }))} className={inputCls} placeholder="Fresh. Fast. Wholesale." />
+          <CmsField label="Hero Title">
+            <input type="text" value={hero.title_en} onChange={e => setHero(p => ({ ...p, title_en: e.target.value }))} className={inputCls} placeholder="Beautiful. Trusted. Wholesale." />
           </CmsField>
-          <CmsField label="Hero Title (Odia)">
-            <input type="text" value={hero.title_or} onChange={e => setHero(p => ({ ...p, title_or: e.target.value }))} className={inputCls} />
-          </CmsField>
-          <CmsField label="Hero Subtitle (English)">
-            <input type="text" value={hero.subtitle_en} onChange={e => setHero(p => ({ ...p, subtitle_en: e.target.value }))} className={inputCls} placeholder="Odisha's trusted wholesale distributor" />
-          </CmsField>
-          <CmsField label="Hero Subtitle (Odia)">
-            <input type="text" value={hero.subtitle_or} onChange={e => setHero(p => ({ ...p, subtitle_or: e.target.value }))} className={inputCls} />
+          <CmsField label="Hero Subtitle">
+            <input type="text" value={hero.subtitle_en} onChange={e => setHero(p => ({ ...p, subtitle_en: e.target.value }))} className={inputCls} placeholder="Your trusted wholesale beauty partner" />
           </CmsField>
         </div>
       </CmsSection>
@@ -715,14 +697,7 @@ function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToas
                   value={badge.text}
                   onChange={e => setBadges(prev => prev.map((b, j) => j === i ? { ...b, text: e.target.value } : b))}
                   className={cn(inputCls, 'flex-1 py-2.5')}
-                  placeholder="Badge text EN"
-                />
-                <input
-                  type="text"
-                  value={badge.text_or}
-                  onChange={e => setBadges(prev => prev.map((b, j) => j === i ? { ...b, text_or: e.target.value } : b))}
-                  className={cn(inputCls, 'flex-1 py-2.5')}
-                  placeholder="Badge text Odia"
+                  placeholder="Badge text"
                 />
               </div>
               <button onClick={() => setBadges(prev => prev.filter((_, j) => j !== i))} className="p-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition-colors self-end sm:self-auto active:scale-95">
@@ -788,11 +763,8 @@ function FooterTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToast:
     <div className="space-y-10 max-w-4xl">
       <CmsSection title="Contact Info">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <CmsField label="Tagline (English)">
+          <CmsField label="Tagline">
             <input type="text" value={footer.tagline_en} onChange={e => setFooter(p => ({ ...p, tagline_en: e.target.value }))} className={inputCls} placeholder="Your wholesale partner" />
-          </CmsField>
-          <CmsField label="Tagline (Odia)">
-            <input type="text" value={footer.tagline_or} onChange={e => setFooter(p => ({ ...p, tagline_or: e.target.value }))} className={inputCls} />
           </CmsField>
           <CmsField label="Phone">
             <input type="text" value={footer.phone} onChange={e => setFooter(p => ({ ...p, phone: e.target.value }))} className={inputCls} placeholder="+91 XXXXX XXXXX" />
@@ -962,7 +934,7 @@ function AnnouncementsTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; o
               type="text"
               value={line.text_or}
               onChange={e => setLine(i, 'text_or', e.target.value)}
-              placeholder="ଓଡ଼ିଆ (optional)"
+              placeholder="Optional"
               className={cn(inputCls, 'flex-1')}
             />
             <button

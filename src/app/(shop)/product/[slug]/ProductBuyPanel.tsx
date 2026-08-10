@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, Plus, Minus, ChevronDown } from 'lucide-react'
+import { ShoppingCart, Plus, Minus } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useAuthPromptStore } from '@/store/authPromptStore'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
@@ -193,27 +193,64 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
         </div>
       </div>
 
-      {/* ── Buy unit: Box / Hanger / Pack (dropdown) ── */}
-      {showUnitPicker && (
+      {/* ── Buy option: Retail / Box / Hanger / Pack ──
+           Cards, not a dropdown: on a retail-first store this is the primary
+           decision, so both rates and their savings need to be visible at a
+           glance rather than hidden behind a select. */}
+      {showUnitPicker && hasLevels && (
         <div className="mb-6">
-          <label htmlFor="buy-unit" className="block text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60 mb-3">
-            {tField('Buy unit', 'କିଣିବା ୟୁନିଟ୍')}
-          </label>
-          <div className="relative">
-            <select
-              id="buy-unit"
-              value={levelIdx}
-              onChange={(e) => setLevelIdx(parseInt(e.target.value, 10))}
-              className="w-full h-14 pl-4 pr-11 rounded-2xl border-2 border-table-border bg-surface font-black text-sm text-primary appearance-none outline-none focus:border-primary transition-colors cursor-pointer"
-            >
-              {buyOptions.map((opt, i) => (
-                <option key={opt.label} value={i}>
-                  {opt.label} — ₹{opt.price}
-                  {opt.pieces != null ? ` · ${opt.pieces.toLocaleString('en-IN')} pieces` : ''}
-                </option>
-              ))}
-            </select>
-            <ChevronDown size={18} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant" />
+          <p className="block text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60 mb-3">
+            Choose how you want to buy
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            {buyOptions.map((opt, i) => {
+              const sel = i === levelIdx
+              const off = opt.mrp && opt.mrp > opt.price
+                ? Math.round((1 - opt.price / opt.mrp) * 100)
+                : null
+              return (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => setLevelIdx(i)}
+                  aria-pressed={sel}
+                  className={`relative flex flex-col items-start gap-1 rounded-2xl border-2 p-4 text-left transition-all active:scale-95 ${
+                    sel
+                      ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27,44,61,0.06)]'
+                      : 'border-table-border hover:border-primary/40'
+                  }`}
+                >
+                  <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">
+                    {opt.level === 'retail' ? 'Retail' : 'Wholesale'}
+                  </span>
+                  {/* The unit name, but only when it adds something the tier tag
+                      above doesn't already say (the retail option's label IS
+                      "Retail", so printing it again just repeats the tag). */}
+                  {opt.level !== 'retail' && (
+                    <span className="font-black text-sm text-primary">{opt.label}</span>
+                  )}
+                  {opt.level === 'retail' && (
+                    <span className="font-black text-sm text-primary">Single unit</span>
+                  )}
+                  <span className="flex items-baseline gap-1.5">
+                    <span className="font-black text-lg text-primary">₹{opt.price.toLocaleString('en-IN')}</span>
+                    {opt.mrp != null && opt.mrp > opt.price && (
+                      <span className="text-[11px] font-bold text-on-surface-variant/50 line-through">
+                        ₹{opt.mrp.toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </span>
+                  {off != null && (
+                    <span className="text-[10px] font-black uppercase tracking-wider text-success">{off}% off</span>
+                  )}
+                  {opt.pieces != null && (
+                    <span className="text-[10px] font-bold text-on-surface-variant/60">
+                      {opt.pieces.toLocaleString('en-IN')} pieces
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}

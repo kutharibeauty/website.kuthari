@@ -12,6 +12,8 @@ export interface PincodeRow {
   city: string
   state: string
   delivery_days: number
+  /** Admin-set delivery charge for this pincode. null = use the default rate. */
+  delivery_charge: number | null
   is_active: boolean
   created_at: string
 }

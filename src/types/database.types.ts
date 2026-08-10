@@ -88,6 +88,10 @@ export interface Product {
   /** Optional price for one lower unit; derived from price ÷ units_per_pack when null. */
   secondary_price: number | null
   secondary_mrp: number | null
+  /** Single-unit retail price, offered alongside the wholesale price above.
+   *  Null = this product is wholesale-only (migration 036). */
+  retail_price: number | null
+  retail_mrp: number | null
   // Legacy box → pack → unit split (kept for backward compatibility).
   packs_per_box: number | null
   unit_type: UnitType | null

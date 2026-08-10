@@ -11,7 +11,6 @@ export interface AdminPermissions {
   manage_delivery_persons: boolean
   view_analytics: boolean
   view_abandoned_carts: boolean
-  view_unserviceable: boolean
   receive_order_emails: boolean
   export_data: boolean
 }
@@ -43,7 +42,6 @@ export const DEFAULT_PERMISSIONS: AdminPermissions = {
   manage_delivery_persons: false,
   view_analytics: true,
   view_abandoned_carts: true,
-  view_unserviceable: true,
   receive_order_emails: true,
   export_data: false,
 }
@@ -61,7 +59,6 @@ export const PERMISSION_LABELS: Record<keyof AdminPermissions, string> = {
   manage_delivery_persons: 'Manage Delivery Persons',
   view_analytics: 'View Analytics',
   view_abandoned_carts: 'View Abandoned Carts',
-  view_unserviceable: 'View Unserviceable Attempts',
   receive_order_emails: 'Receive Order Emails',
   export_data: 'Export Data (CSV)',
 }

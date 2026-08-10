@@ -164,9 +164,6 @@ export default async function CategoryPage({ params }: PageProps) {
           <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-[1.08]">
             {category.name}
           </h1>
-          {category.name_or && (
-            <p className="font-odia text-base text-white/50 mt-1.5">{category.name_or}</p>
-          )}
         </div>
       </section>
 

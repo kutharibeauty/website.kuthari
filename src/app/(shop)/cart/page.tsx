@@ -11,7 +11,8 @@ import {
 } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
-import { computeDeliveryFee, perProductDelivery } from '@/lib/cart/delivery'
+import { computeDeliveryFee } from '@/lib/cart/delivery'
+import { readSavedPincode } from '@/lib/cart/pincode-storage'
 import { useDeliveryConfig } from '@/hooks/useDeliveryConfig'
 import { useStoreOpen } from '@/hooks/useStoreOpen'
 import { formatMinute } from '@/lib/store-hours'
@@ -307,6 +308,14 @@ export default function CartPage() {
   const storeOpen = useStoreOpen()
   const router = useRouter()
 
+  // Delivery rate for the pincode the customer last checked in the header.
+  // undefined until read on mount (localStorage is client-only), which
+  // computeDeliveryFee treats the same as "no rate on file" → default.
+  const [savedPincodeCharge, setSavedPincodeCharge] = useState<number | null>(null)
+  useEffect(() => {
+    setSavedPincodeCharge(readSavedPincode()?.result.delivery_charge ?? null)
+  }, [])
+
   const [couponInput, setCouponInput] = useState('')
   const [appliedCoupon, setAppliedCoupon] = useState<CouponData | null>(null)
   const [couponError, setCouponError] = useState('')
@@ -352,8 +361,10 @@ export default function CartPage() {
   // Per-product delivery charges (if any) override the flat free-above-threshold
   // fee. When a fixed charge applies, the "add more for free delivery" prompt
   // doesn't make sense, so it's hidden.
-  const hasProductDelivery = perProductDelivery(items) > 0
-  const deliveryFee = computeDeliveryFee(items, subtotal, deliveryConfig)
+  // Estimate using the pincode the customer last checked in the header. The
+  // real charge is recomputed at checkout from the selected address, and again
+  // server-side when the order is placed.
+  const deliveryFee = computeDeliveryFee(subtotal, savedPincodeCharge, deliveryConfig)
   const total = Math.max(0, subtotal - discount) + deliveryFee
   const totalQty = items.reduce((s, i) => s + i.quantity, 0)
 
@@ -445,9 +456,9 @@ export default function CartPage() {
         {/* ── LEFT column ── */}
         <div className="lg:flex-1 flex flex-col gap-4">
 
-          {/* Free delivery banner — only when the flat fee applies (a fixed
-              per-product delivery charge can't be waived by adding more). */}
-          {!hasProductDelivery && (deliveryFee === 0 ? (
+          {/* Free delivery banner. The threshold beats every per-pincode rate,
+              so "add more for free delivery" is always achievable. */}
+          {deliveryFee === 0 ? (
             <div className="flex items-center gap-3 border-2 border-primary/30 bg-primary/5 rounded-2xl p-3.5">
               <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
                 <Truck size={15} className="text-white" />
@@ -463,7 +474,7 @@ export default function CartPage() {
                 Add <span className="font-black text-primary">₹{(deliveryConfig.freeDeliveryMin - subtotal).toLocaleString('en-IN')}</span> more for Free Delivery
               </span>
             </div>
-          ))}
+          )}
 
           {/* Items list */}
           <section>

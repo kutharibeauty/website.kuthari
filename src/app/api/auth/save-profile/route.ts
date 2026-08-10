@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   if (email !== undefined && email !== null && email !== '') {
     if (!isEmail(email)) return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
     const normalized = (email as string).trim().toLowerCase()
-    if (/@bcrtraders\.internal$/i.test(normalized)) {
+    if (/@kutharibeauty\.internal$/i.test(normalized)) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
     }
     cleanEmail = normalized

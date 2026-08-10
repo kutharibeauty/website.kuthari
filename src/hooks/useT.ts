@@ -1,25 +1,29 @@
 'use client'
 
-import { useLanguageStore } from '@/store/languageStore'
 import en from '@/locales/en.json'
-import or from '@/locales/or.json'
 
 type LocaleKey = keyof typeof en
 
-const locales = { en, od: or } as const
-
+/**
+ * Copy lookup. The site is English-only.
+ *
+ * `t` / `tField` are kept (rather than inlining English everywhere) because
+ * they are called from ~50 components, and `tField` still serves a real
+ * purpose: rows carry legacy `*_or` translation columns, and this is the one
+ * place that decides they are ignored.
+ */
 export function useT() {
-  const language = useLanguageStore((s) => s.language)
-  const locale = locales[language]
-
   function t(key: LocaleKey): string {
-    return locale[key] ?? en[key] ?? key
+    return en[key] ?? key
   }
 
-  function tField(enValue: string, orValue: string | null | undefined): string {
-    if (language === 'od' && orValue) return orValue
+  /** Returns the English value. The second argument is the legacy Odia column,
+   *  still accepted so the ~50 existing call sites keep compiling, and
+   *  deliberately ignored. */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function tField(enValue: string, _orValue?: string | null): string {
     return enValue
   }
 
-  return { t, tField, language }
+  return { t, tField, language: 'en' as const }
 }

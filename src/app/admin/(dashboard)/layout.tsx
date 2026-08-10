@@ -24,18 +24,10 @@ const fetchBadges = unstable_cache(
       const supabase = createAdminClient()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any
-      const [ordersRes, unserviceableRes] = await Promise.all([
-        db.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'placed'),
-        db.from('unserviceable_attempts')
-          .select('id', { count: 'exact', head: true })
-          .gte('created_at', new Date(Date.now() - 7 * 86_400_000).toISOString()),
-      ])
-      return {
-        orders: ordersRes.count ?? 0,
-        unserviceable: unserviceableRes.count ?? 0,
-      }
+      const ordersRes = await db.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'placed')
+      return { orders: ordersRes.count ?? 0 }
     } catch {
-      return { orders: 0, unserviceable: 0 }
+      return { orders: 0 }
     }
   },
   ['admin-badges'],
@@ -44,7 +36,7 @@ const fetchBadges = unstable_cache(
 
 /**
  * The actual notification items behind the header bell — the newest unhandled
- * orders and recent unserviceable-pincode requests. Cached globally (same data
+ * orders. Cached globally (same data
  * for every admin); the per-admin "viewed" state lives in the browser, and
  * per-admin permission filtering happens in the layout body below.
  */
@@ -54,13 +46,9 @@ const fetchNotifications = unstable_cache(
       const supabase = createAdminClient()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any
-      const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
       // select('*') on purpose — the live schema has drifted, and naming a
       // missing column fails the whole PostgREST query (see fetchBadges/homepage).
-      const [ordersRes, unserviceableRes] = await Promise.all([
-        db.from('orders').select('*').eq('status', 'placed').order('created_at', { ascending: false }).limit(15),
-        db.from('unserviceable_attempts').select('*').gte('created_at', weekAgo).order('created_at', { ascending: false }).limit(15),
-      ])
+      const ordersRes = await db.from('orders').select('*').eq('status', 'placed').order('created_at', { ascending: false }).limit(15)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const orders: AdminNotification[] = (ordersRes.data ?? []).map((o: any) => ({
         id: `order:${o.id}`,
@@ -72,17 +60,8 @@ const fetchNotifications = unstable_cache(
         href: `/admin/orders/${o.id}`,
         createdAt: o.created_at,
       }))
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const unserviceable: AdminNotification[] = (unserviceableRes.data ?? []).map((u: any) => ({
-        id: `unserviceable:${u.id}`,
-        kind: 'unserviceable' as const,
-        title: `Unserviceable PIN ${u.pincode ?? ''}`.trim(),
-        subtitle: [u.name, u.city].filter(Boolean).join(' · ') || 'Delivery request',
-        href: '/admin/unserviceable',
-        createdAt: u.created_at,
-      }))
-      // Newest first across both sources.
-      return [...orders, ...unserviceable].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      // Newest first.
+      return orders.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
     } catch {
       return []
     }
@@ -140,10 +119,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // Only surface a notification the admin is actually allowed to act on — an
   // admin who can't view orders shouldn't see (or click through to) order alerts.
   const canViewOrders = role === 'super_admin' || !!profile.permissions?.view_orders
-  const canViewUnserviceable = role === 'super_admin' || !!profile.permissions?.view_unserviceable
-  const notifications = allNotifications.filter((n) =>
-    n.kind === 'order' ? canViewOrders : canViewUnserviceable,
-  )
+  const notifications = canViewOrders ? allNotifications : []
 
   return (
     <>

@@ -1,24 +1,30 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Loader2, CheckCircle2 } from 'lucide-react'
+import { DEFAULT_PINCODE_DELIVERY_FEE } from '@/lib/cart/delivery'
 
 interface PincodeResult {
   serviceable: boolean
   city?: string
   state?: string
   delivery_days?: number
+  /** Admin-set rate for this pincode. null = none on file, use the default. */
+  delivery_charge?: number | null
 }
 
 interface Props {
   pincode: string
   onResult?: (result: PincodeResult | null) => void
-  isBulkSelected?: boolean
-  onBulkToggle?: (v: boolean) => void
 }
 
-export default function PincodeChecker({ pincode, onResult, isBulkSelected, onBulkToggle }: Props) {
+/**
+ * Shows the delivery charge for the address's pincode.
+ *
+ * Delivery is all-India, so this never blocks checkout — it exists purely to
+ * tell the customer what shipping to that pincode costs before they pay.
+ */
+export default function PincodeChecker({ pincode, onResult }: Props) {
   const [status, setStatus] = useState<'idle' | 'checking' | 'done'>('idle')
   const [result, setResult] = useState<PincodeResult | null>(null)
   const lastPincode = useRef('')
@@ -40,14 +46,6 @@ export default function PincodeChecker({ pincode, onResult, isBulkSelected, onBu
         setResult(data)
         setStatus('done')
         onResult?.(data)
-        if (!data.serviceable) {
-          // Fire-and-forget: log unserviceable attempt for admin visibility
-          void fetch('/api/unserviceable', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pincode }),
-          })
-        }
       })
       .catch(() => {
         setStatus('idle')
@@ -62,7 +60,7 @@ export default function PincodeChecker({ pincode, onResult, isBulkSelected, onBu
       <div className="flex items-center gap-2 mt-2">
         <Loader2 size={14} className="animate-spin text-on-surface-variant" />
         <span className="font-label-sm text-label-sm text-on-surface-variant">
-          Checking delivery availability…
+          Checking delivery charge…
         </span>
       </div>
     )
@@ -70,52 +68,18 @@ export default function PincodeChecker({ pincode, onResult, isBulkSelected, onBu
 
   if (!result) return null
 
-  if (result.serviceable) {
-    return (
-      <div className="flex items-center gap-2 mt-2">
-        <CheckCircle2 size={15} className="text-success flex-shrink-0" />
-        <span className="font-label-sm text-label-sm text-success">
-          Delivery available
-          {result.city ? ` to ${result.city}${result.state ? `, ${result.state}` : ''}` : ''}
-          {result.delivery_days ? ` (${result.delivery_days} day${result.delivery_days > 1 ? 's' : ''})` : ''}
-        </span>
-      </div>
-    )
-  }
+  const charge = result.delivery_charge ?? DEFAULT_PINCODE_DELIVERY_FEE
 
   return (
-    <div className="mt-2 space-y-2">
-      <div className="flex items-center gap-2">
-        <XCircle size={15} className="text-error flex-shrink-0" />
-        <span className="font-label-sm text-label-sm text-error">
-          Delivery not available to this pincode
-        </span>
-      </div>
-
-      {/* Bulk order option */}
-      <div className="bg-secondary-container/40 border border-secondary/30 rounded-lg p-3">
-        <label className="flex items-start gap-3 cursor-pointer">
-          <div
-            className={cn(
-              'mt-0.5 w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors',
-              isBulkSelected ? 'bg-primary border-primary' : 'border-outline',
-            )}
-            onClick={() => onBulkToggle?.(!isBulkSelected)}
-          >
-            {isBulkSelected && (
-              <svg viewBox="0 0 10 8" className="w-2.5 h-2.5 fill-on-primary">
-                <path d="M1 4l3 3 5-6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-          </div>
-          <div onClick={() => onBulkToggle?.(!isBulkSelected)}>
-            <p className="font-label-sm text-label-sm text-on-surface">Place as Bulk Order</p>
-            <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
-              Our team will contact you to arrange delivery for bulk orders to unserviceable areas.
-            </p>
-          </div>
-        </label>
-      </div>
+    <div className="flex items-center gap-2 mt-2">
+      <CheckCircle2 size={15} className="text-success flex-shrink-0" />
+      <span className="font-label-sm text-label-sm text-success">
+        Delivery available
+        {result.city ? ` to ${result.city}${result.state ? `, ${result.state}` : ''}` : ''}
+        {' — '}
+        {charge === 0 ? 'free' : `₹${charge.toLocaleString('en-IN')}`}
+        {result.delivery_days ? ` (${result.delivery_days} day${result.delivery_days > 1 ? 's' : ''})` : ''}
+      </span>
     </div>
   )
 }

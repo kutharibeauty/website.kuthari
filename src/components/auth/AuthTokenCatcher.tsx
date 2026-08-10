@@ -36,7 +36,7 @@ export default function AuthTokenCatcher() {
         window.history.replaceState(null, '', window.location.pathname + window.location.search)
 
         try {
-          const raw = sessionStorage.getItem('bcr_pending_profile')
+          const raw = sessionStorage.getItem('kbs_pending_profile')
           if (raw) {
             const pending = JSON.parse(raw)
             if (pending?.ts && Date.now() - pending.ts < 10 * 60 * 1000) {
@@ -46,7 +46,7 @@ export default function AuthTokenCatcher() {
                 body: JSON.stringify({ name: pending.name, ...(pending.email ? { email: pending.email } : {}) }),
               }).catch(() => {})
             }
-            sessionStorage.removeItem('bcr_pending_profile')
+            sessionStorage.removeItem('kbs_pending_profile')
           }
         } catch {}
 

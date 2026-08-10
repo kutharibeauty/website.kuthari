@@ -135,7 +135,7 @@ export default function AnalyticsCharts({
     const csv = sections.join('\n')
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
-    a.download = `bcr-analytics-${new Date().toISOString().slice(0, 10)}.csv`
+    a.download = `kuthari-analytics-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
   }
 

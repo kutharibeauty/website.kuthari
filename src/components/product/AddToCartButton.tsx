@@ -11,7 +11,7 @@ import { useFlyToCartStore } from '@/store/flyToCartStore'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
-import { getBuyOptions } from '@/lib/products/packaging'
+import { getBuyOptions, pluralLabelOf } from '@/lib/products/packaging'
 import type { Product } from '@/types/database.types'
 
 interface Props {
@@ -71,7 +71,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
       ? tField('Box', 'ବାକ୍ସ')
       : (product.pack_type || tField('unit', 'ୟୁନିଟ୍'))
   const unitWordPlural = hasLevels
-    ? pluralize(opt.label)
+    ? pluralLabelOf(opt)
     : isBoxUnit
       ? tField('Boxes', 'ବାକ୍ସ')
       : (product.pack_type ? pluralize(product.pack_type) : tField('units', 'ୟୁନିଟ୍'))
@@ -236,7 +236,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
             )}
 
             <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">
-              {`Select number of ${unitWordPlural}`}
+              {`Select quantity`}
             </p>
 
             {/* Quick options: 1 box / 10 boxes */}
@@ -265,7 +265,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
             {/* Custom number of boxes */}
             <div className="rounded-2xl border-2 border-primary/25 bg-primary/[0.04] p-3 mb-4">
               <label htmlFor="box-sheet-custom" className="block text-[10px] font-black uppercase tracking-widest text-primary mb-2">
-                {`Or enter custom ${unitWordPlural}`}
+                {`Or enter a custom quantity`}
               </label>
               <div className="flex items-center gap-3">
                 <input

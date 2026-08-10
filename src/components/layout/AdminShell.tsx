@@ -12,7 +12,6 @@ import NotificationBell, { type AdminNotification } from '@/components/admin/Not
 
 export interface AdminBadges {
   orders: number
-  unserviceable: number
 }
 
 interface Props {
@@ -22,7 +21,7 @@ interface Props {
   name?: string | null
   /** Server-resolved admin_profiles.permissions; ignored for super_admin. */
   permissions?: AdminPermissions | null
-  /** Header notification-bell items (new orders + unserviceable attempts). */
+  /** Header notification-bell items (new orders). */
   notifications?: AdminNotification[]
 }
 

@@ -279,12 +279,6 @@ export default function ReviewsClient({
                 </p>
               )}
 
-              {/* Odia body */}
-              {review.body_or && (
-                <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed border-t border-outline-variant/20 pt-3">
-                  {review.body_or}
-                </p>
-              )}
             </div>
           ))}
         </div>

@@ -1,40 +1,51 @@
 'use client'
 
 /**
- * Blinkit-style animated product wall for the mobile login screen.
- * Three rows of rounded product tiles auto-slide horizontally in alternating
- * directions, with soft fade edges. Purely decorative.
+ * Decorative animated tile wall for the mobile login screen.
+ *
+ * Three rows of rounded tiles auto-slide horizontally in alternating
+ * directions, with soft fade edges. Purely decorative — deliberately abstract
+ * (brand tints + the mirror mark) rather than product photography, so it makes
+ * no claim about what is actually in stock.
  */
 
-const BASE = '/images/loginpageimages'
-const IMAGES = [
-  `${BASE}/edible-oil.webp`,
-  `${BASE}/pulses.webp`,
-  `${BASE}/atta.webp`,
-  `${BASE}/spices.webp`,
-  `${BASE}/sugar.webp`,
-  `${BASE}/water.webp`,
+/** Alternating brand tints, cycled across the tiles. */
+const TINTS = [
+  'bg-secondary/15',
+  'bg-primary/8',
+  'bg-tertiary/12',
+  'bg-secondary/25',
+  'bg-primary/12',
+  'bg-tertiary/20',
 ]
 
-// Three shuffled rows so the wall doesn't look repetitive.
-const ROWS: { imgs: string[]; reverse: boolean; duration: number }[] = [
-  { imgs: [IMAGES[0], IMAGES[2], IMAGES[4], IMAGES[1], IMAGES[5], IMAGES[3]], reverse: false, duration: 32 },
-  { imgs: [IMAGES[3], IMAGES[5], IMAGES[0], IMAGES[4], IMAGES[2], IMAGES[1]], reverse: true, duration: 38 },
-  { imgs: [IMAGES[1], IMAGES[4], IMAGES[3], IMAGES[5], IMAGES[0], IMAGES[2]], reverse: false, duration: 28 },
+const ROWS: { offset: number; reverse: boolean; duration: number }[] = [
+  { offset: 0, reverse: false, duration: 32 },
+  { offset: 2, reverse: true, duration: 38 },
+  { offset: 4, reverse: false, duration: 28 },
 ]
 
-function Tile({ src }: { src: string }) {
+const TILES_PER_ROW = 6
+
+function Tile({ tint }: { tint: string }) {
   return (
-    <div className="flex-shrink-0 w-[60px] h-[60px] rounded-2xl bg-[#eef7f2] flex items-center justify-center p-2">
+    <div className={`flex-shrink-0 w-[60px] h-[60px] rounded-2xl ${tint} flex items-center justify-center p-2.5`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="" aria-hidden="true" loading="eager" className="max-w-full max-h-full object-contain" />
+      <img
+        src="/images/logo-icon.webp"
+        alt=""
+        aria-hidden="true"
+        loading="eager"
+        className="max-w-full max-h-full object-contain opacity-40"
+      />
     </div>
   )
 }
 
-function Row({ imgs, reverse, duration }: { imgs: string[]; reverse: boolean; duration: number }) {
+function Row({ offset, reverse, duration }: { offset: number; reverse: boolean; duration: number }) {
+  const tints = Array.from({ length: TILES_PER_ROW }, (_, i) => TINTS[(i + offset) % TINTS.length])
   // Duplicate the set so the -50% translate loops seamlessly.
-  const doubled = [...imgs, ...imgs]
+  const doubled = [...tints, ...tints]
   return (
     <div className="flex overflow-hidden">
       <div
@@ -44,8 +55,8 @@ function Row({ imgs, reverse, duration }: { imgs: string[]; reverse: boolean; du
           animationDirection: reverse ? 'reverse' : 'normal',
         }}
       >
-        {doubled.map((src, i) => (
-          <Tile key={i} src={src} />
+        {doubled.map((tint, i) => (
+          <Tile key={i} tint={tint} />
         ))}
       </div>
     </div>

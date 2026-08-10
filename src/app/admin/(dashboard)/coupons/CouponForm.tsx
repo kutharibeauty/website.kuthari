@@ -39,28 +39,6 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const showToast = useToastStore((s) => s.show)
-  const [translating, setTranslating] = useState(false)
-
-  async function translateToOdia() {
-    if (!form.description.trim()) { setError('Enter the English description first'); return }
-    setTranslating(true)
-    setError(null)
-    const res = await fetch('/api/ai/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields: { description: form.description.trim() } }),
-    })
-    if (res.ok) {
-      const { translations } = await res.json() as { translations: Record<string, string> }
-      if (translations.description) set('description_or', translations.description)
-      showToast('Translated to Odia!')
-    } else {
-      const d = await res.json().catch(() => ({})) as { error?: string }
-      setError(d.error ?? 'Translation failed')
-      showToast(d.error ?? 'Translation failed', 'error')
-    }
-    setTranslating(false)
-  }
 
   const [form, setForm] = useState<FormState>({
     code: coupon?.code ?? '',
@@ -244,15 +222,6 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
                   className={inputCls}
                 />
               </Field>
-              <Field label="Description (Odia)">
-                <input
-                  type="text"
-                  value={form.description_or}
-                  onChange={e => set('description_or', e.target.value)}
-                  placeholder="ଓଡ଼ିଆ ବିବରଣ…"
-                  className={inputCls}
-                />
-              </Field>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -268,29 +237,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
                   className={inputCls}
                 />
               </Field>
-              <Field label="Ticker Message (Odia)">
-                <input
-                  type="text"
-                  value={form.marquee_message_or}
-                  onChange={e => set('marquee_message_or', e.target.value)}
-                  placeholder="ଓଡ଼ିଆ ବାର୍ତ୍ତା…"
-                  className={inputCls}
-                />
-              </Field>
             </div>
-
-            <button
-              type="button"
-              onClick={translateToOdia}
-              disabled={translating}
-              title="Fill the Odia description from the English one using AI"
-              className="flex items-center gap-2 px-5 py-2.5 bg-surface-card border-2 border-primary/30 text-primary rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-primary/60 disabled:opacity-60 transition-all active:scale-95 w-max"
-            >
-              <span className={`material-symbols-outlined text-[16px] ${translating ? 'animate-spin' : ''}`}>
-                {translating ? 'progress_activity' : 'translate'}
-              </span>
-              {translating ? 'Translating…' : 'Translate to Odia'}
-            </button>
           </Section>
 
           {/* Discount */}

@@ -228,7 +228,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
       return
     }
     try {
-      sessionStorage.setItem('bcr_pending_profile', JSON.stringify({ name: name.trim(), email: email.trim(), ts: Date.now() }))
+      sessionStorage.setItem('kbs_pending_profile', JSON.stringify({ name: name.trim(), email: email.trim(), ts: Date.now() }))
     } catch {}
     window.location.href = loginUrl
   }

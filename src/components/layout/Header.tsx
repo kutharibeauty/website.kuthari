@@ -7,7 +7,6 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { useCartStore } from '@/store/cartStore'
 import { useT } from '@/hooks/useT'
-import LanguageToggle from './LanguageToggle'
 import HeaderLocation from './HeaderLocation'
 import Logo from './Logo'
 import AnimatedSearchPlaceholder from './AnimatedSearchPlaceholder'
@@ -86,7 +85,6 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
 
           {/* ── Right cluster (desktop) ── */}
           <div className="hidden lg:flex items-center gap-2 flex-shrink-0 ml-auto">
-            <LanguageToggle />
 
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -157,7 +155,6 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
 
           {/* ── Mobile right controls ── */}
           <div className="flex lg:hidden items-center gap-2 ml-auto flex-shrink-0">
-            <LanguageToggle />
             <Link
               href="/cart"
               data-cart-target

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
 import { HOMEPAGE_KEYWORDS } from '@/lib/seo/generator'
 import { getHomepageData } from '@/lib/data/homepage'
 import HeroBanner from '@/components/home/HeroBanner'
@@ -70,7 +69,7 @@ const orgJsonLd = {
       contactType: 'customer service',
       telephone: '+91-9861235276',
       email: 'smortika@gmail.com',
-      availableLanguage: ['English', 'Odia'],
+      availableLanguage: ['English'],
     },
   ],
   sameAs: [
@@ -157,29 +156,14 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
       />
 
-      {/* Faint Jagannath watermark behind the homepage content (glass effect).
-          Decorative only: fixed, non-interactive, very low opacity, sits BELOW
-          every card/section (z-0) so it just tints the cream gaps and never
-          covers or alters any existing UI. Needs a transparent-background PNG. */}
+      {/* Soft gold glow behind the homepage content, replacing BCR Traders'
+          Jagannath watermark. Decorative only: fixed, non-interactive, sits
+          BELOW every card/section (z-0) so it just tints the ivory gaps. */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-0 flex items-start justify-center overflow-hidden"
       >
-        {/* Same 1024x1024 artwork, re-encoded PNG -> WebP (1421 KB -> 153 KB) at
-            identical resolution, so it renders pixel-for-pixel as before. `sizes`
-            matches the CSS cap below so the browser fetches a variant near the
-            453-620px it actually displays instead of the full-size asset.
-            `loading="eager"` keeps the plain <img>'s current timing — next/image
-            would otherwise lazy-load it and make the watermark fade in late. */}
-        <Image
-          src="/images/jagannath-watermark.webp"
-          alt=""
-          width={1024}
-          height={1024}
-          loading="eager"
-          sizes="(max-width: 704px) 88vw, 620px"
-          className="mt-24 h-auto w-[min(88vw,620px)] max-w-none opacity-[0.12] select-none"
-        />
+        <div className="mt-24 h-[min(88vw,620px)] w-[min(88vw,620px)] radial-glow-gold" />
       </div>
 
       <div className="relative z-10 flex flex-col gap-6 py-4">

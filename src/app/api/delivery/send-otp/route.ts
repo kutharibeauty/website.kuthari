@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
   await sendSms(
     phone,
-    `Dear ${customerName}, your BCR Traders delivery OTP is ${otp}. Share only with your delivery person. Valid for 10 minutes.`,
+    `Dear ${customerName}, your Kuthari Beauty Store delivery OTP is ${otp}. Share only with your delivery person. Valid for 10 minutes.`,
   )
 
   return NextResponse.json({ ok: true, phone_last4: phone.slice(-4) })

@@ -61,9 +61,6 @@ export default function CategoryGrid({ categories }: Props) {
 
                   {/* Label */}
                   <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col">
-                    {language === 'od' && cat.name_or ? (
-                      <span className="font-odia text-[11px] text-white/75 leading-tight mb-0.5 truncate">{cat.name_or}</span>
-                    ) : null}
                     <span className="text-sm md:text-base font-black tracking-tight text-white truncate drop-shadow-sm">
                       {cat.name}
                     </span>

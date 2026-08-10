@@ -7,6 +7,7 @@ interface IncomingRow {
   city?: string
   state?: string
   delivery_days?: number | string
+  delivery_charge?: number | string | null
 }
 
 // POST — bulk CSV import of serviceable pincodes.
@@ -28,11 +29,13 @@ export async function POST(request: Request) {
       city: r.city as string,
       state: r.state || 'Odisha',
       delivery_days: Number(r.delivery_days) || 2,
+      // null = no rate on file (default applies); 0 = free delivery here.
+      delivery_charge: r.delivery_charge == null || r.delivery_charge === '' ? null : Number(r.delivery_charge),
       is_active: true,
     }))
 
   if (clean.length === 0) {
-    return Response.json({ error: 'No valid rows. Expected columns: pincode,area_name,city,state,delivery_days' }, { status: 400 })
+    return Response.json({ error: 'No valid rows. Expected columns: pincode,area_name,city,state,delivery_days,delivery_charge' }, { status: 400 })
   }
 
   const supabase = createAdminClient()

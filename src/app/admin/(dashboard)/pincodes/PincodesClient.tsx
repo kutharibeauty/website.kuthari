@@ -16,6 +16,7 @@ type AreaOption = {
 import { Loader2, Search, Download, Plus, Trash2, List, Map, Upload, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
+import { DEFAULT_PINCODE_DELIVERY_FEE } from '@/lib/cart/delivery'
 import type { PincodeRow } from './page'
 
 const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors'
@@ -27,13 +28,12 @@ export default function PincodesClient({ initialRows }: Props) {
   const [search, setSearch] = useState('')
   const [isAdding, setIsAdding] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [form, setForm] = useState({ pincode: '', area_name: '', city: '', state: '', delivery_days: '2' })
+  const [form, setForm] = useState({ pincode: '', area_name: '', city: '', state: '', delivery_days: '2', delivery_charge: '' })
   const [detecting, setDetecting] = useState(false)
   const [pinNotice, setPinNotice] = useState('')
   const [areaOptions, setAreaOptions] = useState<AreaOption[]>([])
 
-  // Pincode → area / city / state, scoped to Ganjam district. If the pincode is
-  // outside Ganjam we say so instead of filling it.
+  // Pincode → area / city / state, anywhere in India.
   async function detectByPincode(pincode: string) {
     setDetecting(true); setPinNotice('')
     try {
@@ -58,13 +58,13 @@ export default function PincodesClient({ initialRows }: Props) {
         setAreaOptions(opts.length > 1 ? opts : [])
       } else if (d?.found && d.inArea === false) {
         setAreaOptions([])
-        setPinNotice('This pincode is not in Ganjam district.')
+        setPinNotice('Could not find this pincode — enter the area and city manually.')
       }
     } catch { /* leave the fields for manual entry */ }
     finally { setDetecting(false) }
   }
 
-  // Area name → pincode. One Ganjam match auto-fills the pincode; several show a
+  // Area name → pincode. One match auto-fills the pincode; several show a
   // list to pick from. Debounced so we don't look up on every keystroke.
   const detectByArea = useDebouncedCallback(async (area: string) => {
     // 2 is enough now the directory is queried by substring locally.
@@ -131,12 +131,18 @@ export default function PincodesClient({ initialRows }: Props) {
       const res = await fetch('/api/pincodes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, delivery_days: Number(form.delivery_days) }),
+        body: JSON.stringify({
+          ...form,
+          delivery_days: Number(form.delivery_days),
+          // Blank = no rate on file, so the default applies. An explicit 0 is a
+          // real rate meaning free delivery to this pincode.
+          delivery_charge: form.delivery_charge.trim() === '' ? null : Number(form.delivery_charge),
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setRows((prev) => [data, ...prev])
-      setForm({ pincode: '', area_name: '', city: '', state: '', delivery_days: '2' })
+      setForm({ pincode: '', area_name: '', city: '', state: '', delivery_days: '2', delivery_charge: '' })
       setIsAdding(false)
       showToast('Pincode added successfully', 'success')
     } catch (err) {
@@ -177,11 +183,15 @@ export default function PincodesClient({ initialRows }: Props) {
     const text = await file.text()
     const lines = text.split('\n').slice(1).filter(Boolean)
     const toInsert = lines.map((line) => {
-      const [pincode, area_name, city, state, delivery_days] = line.split(',').map((s) => s.trim())
-      return { pincode, area_name: area_name || null, city, state: state || 'Odisha', delivery_days: Number(delivery_days) || 2 }
+      const [pincode, area_name, city, state, delivery_days, delivery_charge] = line.split(',').map((s) => s.trim())
+      return {
+        pincode, area_name: area_name || null, city, state: state || 'Odisha',
+        delivery_days: Number(delivery_days) || 2,
+        delivery_charge: delivery_charge === undefined || delivery_charge === '' ? null : Number(delivery_charge),
+      }
     }).filter((r) => /^\d{6}$/.test(r.pincode) && r.city)
 
-    if (!toInsert.length) { alert('No valid rows found. CSV format: pincode,area_name,city,state,delivery_days'); return }
+    if (!toInsert.length) { alert('No valid rows found. CSV format: pincode,area_name,city,state,delivery_days,delivery_charge'); return }
 
     const res = await fetch('/api/pincodes/bulk', {
       method: 'POST',
@@ -199,9 +209,9 @@ export default function PincodesClient({ initialRows }: Props) {
   }
 
   const exportCSV = () => {
-    const header = 'pincode,area_name,city,state,delivery_days,is_active'
+    const header = 'pincode,area_name,city,state,delivery_days,delivery_charge,is_active'
     const csvData = rows.map((r) =>
-      `${r.pincode},${r.area_name ?? ''},${r.city},${r.state},${r.delivery_days},${r.is_active}`
+      `${r.pincode},${r.area_name ?? ''},${r.city},${r.state},${r.delivery_days},${r.delivery_charge ?? ''},${r.is_active}`
     ).join('\n')
     const blob = new Blob([header + '\n' + csvData], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
@@ -322,6 +332,21 @@ export default function PincodesClient({ initialRows }: Props) {
               <label className="font-black text-[10px] text-primary uppercase tracking-widest">Delivery Days</label>
               <input type="number" min={1} max={7} value={form.delivery_days} onChange={(e) => setForm((f) => ({ ...f, delivery_days: e.target.value }))} className={inputCls} />
             </div>
+            <div className="space-y-2">
+              <label className="font-black text-[10px] text-primary uppercase tracking-widest">Delivery Charge (₹)</label>
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={form.delivery_charge}
+                onChange={(e) => setForm((f) => ({ ...f, delivery_charge: e.target.value }))}
+                placeholder={`Blank = ₹${DEFAULT_PINCODE_DELIVERY_FEE}`}
+                className={inputCls}
+              />
+              <p className="font-medium text-[10px] text-on-surface-variant/70 leading-relaxed">
+                Leave blank to charge the ₹{DEFAULT_PINCODE_DELIVERY_FEE} default. Enter <b>0</b> for free delivery here.
+              </p>
+            </div>
           </div>
           {error && <p className="font-bold text-sm text-error">{error}</p>}
           <div className="flex gap-4 pt-4 border-t-2 border-table-border">
@@ -354,8 +379,8 @@ export default function PincodesClient({ initialRows }: Props) {
             <table className="w-full text-left border-collapse whitespace-nowrap">
               <thead>
                 <tr className="bg-primary text-white">
-                  {['Pincode', 'Area', 'City', 'State', 'Days', 'Active', 'Actions'].map((h, i) => (
-                    <th key={h} className={cn("py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70", i < 6 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
+                  {['Pincode', 'Area', 'City', 'State', 'Days', 'Delivery ₹', 'Active', 'Actions'].map((h, i) => (
+                    <th key={h} className={cn("py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70", i < 7 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -417,8 +442,8 @@ export default function PincodesClient({ initialRows }: Props) {
                         <table className="w-full text-left border-collapse whitespace-nowrap">
                           <thead>
                             <tr className="bg-primary text-white">
-                              {['Pincode', 'Area', 'Days', 'Active', 'Actions'].map((h, i) => (
-                                <th key={h} className={cn("px-5 py-3 font-black text-[10px] uppercase tracking-[0.2em] text-white/70", i < 4 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
+                              {['Pincode', 'Area', 'Days', 'Delivery ₹', 'Active', 'Actions'].map((h, i) => (
+                                <th key={h} className={cn("px-5 py-3 font-black text-[10px] uppercase tracking-[0.2em] text-white/70", i < 5 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
                               ))}
                             </tr>
                           </thead>
@@ -428,6 +453,7 @@ export default function PincodesClient({ initialRows }: Props) {
                                 <td className="px-5 py-4 border-r border-table-border font-mono font-black text-xs text-primary tracking-widest">{row.pincode}</td>
                                 <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface">{row.area_name ?? '—'}</td>
                                 <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface-variant">{row.delivery_days}d</td>
+      <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface-variant">{row.delivery_charge == null ? <span className="text-on-surface-variant/50">₹{DEFAULT_PINCODE_DELIVERY_FEE}</span> : row.delivery_charge === 0 ? <span className="text-success">Free</span> : `₹${row.delivery_charge}`}</td>
                                 <td className="px-5 py-4 border-r border-table-border text-center">
                                   <button
                                     onClick={() => handleToggle(row)}
@@ -457,7 +483,7 @@ export default function PincodesClient({ initialRows }: Props) {
 
       {/* CSV format hint */}
       <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest">
-        CSV import format: <code className="bg-surface border-2 border-table-border px-2 py-1 rounded-lg text-primary mx-1 normal-case font-mono tracking-normal">pincode,area_name,city,state,delivery_days</code>
+        CSV import format: <code className="bg-surface border-2 border-table-border px-2 py-1 rounded-lg text-primary mx-1 normal-case font-mono tracking-normal">pincode,area_name,city,state,delivery_days,delivery_charge</code>
       </p>
     </div>
   )
@@ -481,6 +507,7 @@ function PincodeTableRow({
       <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface">{row.city}</td>
       <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface-variant">{row.state}</td>
       <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface-variant">{row.delivery_days}d</td>
+      <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface-variant">{row.delivery_charge == null ? <span className="text-on-surface-variant/50">₹{DEFAULT_PINCODE_DELIVERY_FEE}</span> : row.delivery_charge === 0 ? <span className="text-success">Free</span> : `₹${row.delivery_charge}`}</td>
       <td className="px-5 py-4 border-r border-table-border text-center">
         <button
           onClick={() => onToggle(row)}

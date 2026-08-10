@@ -54,7 +54,7 @@ export async function POST(request: Request) {
   // server-side so it can't be bypassed even if the client gate is skipped.
   // The email the customer typed at checkout is saved to their profile so all
   // order/status emails can reach them (phone-only signups otherwise have none).
-  const isRealEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && !/@bcrtraders\.internal$/i.test(e)
+  const isRealEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && !/@kutharibeauty\.internal$/i.test(e)
   const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
 
   if (isRealEmail(cleanEmail)) {
@@ -212,9 +212,20 @@ export async function POST(request: Request) {
     )
   }
 
+  // Delivery is priced by destination. Look the address's pincode rate up here
+  // rather than trusting anything the client sent — this is the figure actually
+  // charged. A pincode with no row (or no rate set) falls back to the default.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: pinRow } = await (adminDb as any)
+    .from('serviceable_pincodes')
+    .select('delivery_charge')
+    .eq('pincode', address.pincode)
+    .eq('is_active', true)
+    .maybeSingle()
+
   const deliveryFee = computeDeliveryFee(
-    [...deliveryByProduct.values()].map((c) => ({ delivery_charge: c })),
     subtotal,
+    (pinRow as { delivery_charge: number | null } | null)?.delivery_charge ?? null,
     deliveryConfig,
   )
 
@@ -373,7 +384,7 @@ export async function POST(request: Request) {
     if (!rzp?.payment_id || !rzp.order_id || !rzp.signature) {
       // Phase 1 — start the payment. No order is created until it succeeds.
       try {
-        const rzOrder = await createCheckoutOrder(amountPaise, `bcr_${profileId.slice(0, 8)}_${Date.now()}`)
+        const rzOrder = await createCheckoutOrder(amountPaise, `kbs_${profileId.slice(0, 8)}_${Date.now()}`)
         return Response.json({
           needs_payment: true,
           razorpay: {

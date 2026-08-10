@@ -43,16 +43,6 @@ export interface AdminRecipient {
   name: string
 }
 
-export interface UnserviceableEmailData {
-  id: string
-  customerName: string | null
-  phone: string
-  pincode: string
-  city: string | null
-  cartItems: OrderItem[] | null
-  cartValue: number | null
-}
-
 export interface LowStockEmailData {
   products: Array<{ id: string; name: string; sku: string | null; stockQty: number; lowStockThreshold: number }>
 }
@@ -198,18 +188,6 @@ export async function sendOrderStatusAdmin(data: OrderEmailData, admins: AdminRe
     from: FROM,
     to: admins.map(a => a.email),
     subject: `📦 Order ${title} — #${data.orderNumber}`,
-    html,
-  })
-}
-
-export async function sendUnserviceableAlert(data: UnserviceableEmailData, admins: AdminRecipient[]): Promise<void> {
-  if (!admins.length) return
-  const { default: Template } = await import('./templates/unserviceable-pincode-admin')
-  const html = await renderTemplate(Template as unknown as React.ComponentType<Record<string, unknown>>, { ...data, siteUrl: SITE_URL })
-  await resend.emails.send({
-    from: FROM,
-    to: admins.map(a => a.email),
-    subject: `⚠️ Unserviceable Pincode — ${data.pincode} | ${data.phone}`,
     html,
   })
 }

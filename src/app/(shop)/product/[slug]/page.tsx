@@ -7,8 +7,8 @@ import {
   getProductReviews,
   getRelatedProducts,
 } from '@/lib/data/product'
-import { getServiceableRegions } from '@/lib/data/shipping'
 import { RETURN_POLICY_JSONLD } from '@/lib/seo/return-policy'
+import { DEFAULT_PINCODE_DELIVERY_FEE } from '@/lib/cart/delivery'
 import { getProductKeywords } from '@/lib/seo/generator'
 import ProductImageGallery from '@/components/product/ProductImageGallery'
 import ProductBreadcrumb from '@/components/product/ProductBreadcrumb'
@@ -88,11 +88,10 @@ export default async function ProductPage({ params }: PageProps) {
 
   const { product, category } = pageData
 
-  const [faqs, { reviews, stats }, related, serviceableRegions] = await Promise.all([
+  const [faqs, { reviews, stats }, related] = await Promise.all([
     getProductFAQs(product.id),
     getProductReviews(product.id, 10),
     category ? getRelatedProducts(category.id, product.id, 4) : Promise.resolve([]),
-    getServiceableRegions(),
   ])
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.kutharibeauty.com'
@@ -141,14 +140,19 @@ export default async function ProductPage({ params }: PageProps) {
       hasMerchantReturnPolicy: RETURN_POLICY_JSONLD,
       shippingDetails: {
         '@type': 'OfferShippingDetails',
-        // Delivery is gated on the serviceable_pincodes allow-list, so this
-        // names the states actually served rather than claiming all of India.
+        // Delivery is all-India — no region restriction.
         shippingDestination: {
           '@type': 'DefinedRegion',
           addressCountry: 'IN',
-          ...(serviceableRegions.length > 0 ? { addressRegion: serviceableRegions } : {}),
         },
-        shippingRate: { '@type': 'MonetaryAmount', value: '0', currency: 'INR' },
+        // The default rate. Individual pincodes can be cheaper (or free) and the
+        // whole order ships free above the admin's threshold, but the standard
+        // rate is the honest figure to advertise.
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: String(DEFAULT_PINCODE_DELIVERY_FEE),
+          currency: 'INR',
+        },
         deliveryTime: {
           '@type': 'ShippingDeliveryTime',
           handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
@@ -279,9 +283,6 @@ export default async function ProductPage({ params }: PageProps) {
             <h1 className="text-2xl lg:text-3xl font-black text-primary leading-tight tracking-tight mb-2">
               {product.name}
             </h1>
-            {product.name_or && (
-              <p className="font-odia text-base text-on-surface-variant/70 mb-2">{product.name_or}</p>
-            )}
 
             {/* SKU */}
             {product.sku && (

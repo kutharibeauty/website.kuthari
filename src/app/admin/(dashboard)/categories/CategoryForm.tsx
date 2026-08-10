@@ -45,32 +45,6 @@ export default function CategoryForm({
   const [error, setError] = useState<string | null>(null)
   const showToast = useToastStore((s) => s.show)
   const [uploadingImage, setUploadingImage] = useState(false)
-  const [translating, setTranslating] = useState(false)
-
-  async function translateToOdia() {
-    const fields: Record<string, string> = {}
-    if (form.name.trim()) fields.name = form.name.trim()
-    if (form.description.trim()) fields.description = form.description.trim()
-    if (Object.keys(fields).length === 0) { setError('Enter the English name first'); return }
-    setTranslating(true)
-    setError(null)
-    const res = await fetch('/api/ai/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields }),
-    })
-    if (res.ok) {
-      const { translations } = await res.json() as { translations: Record<string, string> }
-      if (translations.name) set('name_or', translations.name)
-      if (translations.description) set('description_or', translations.description)
-      showToast('Translated to Odia!')
-    } else {
-      const d = await res.json().catch(() => ({})) as { error?: string }
-      setError(d.error ?? 'Translation failed')
-      showToast(d.error ?? 'Translation failed', 'error')
-    }
-    setTranslating(false)
-  }
 
   const [form, setForm] = useState<FormState>({
     name: category?.name ?? '',
@@ -222,29 +196,7 @@ export default function CategoryForm({
                   className={inputCls}
                 />
               </Field>
-              <Field label="Name (Odia)">
-                <input
-                  type="text"
-                  value={form.name_or}
-                  onChange={e => set('name_or', e.target.value)}
-                  placeholder="ଓଡ଼ିଆ ନାମ…"
-                  className={inputCls}
-                />
-              </Field>
             </div>
-
-            <button
-              type="button"
-              onClick={translateToOdia}
-              disabled={translating}
-              title="Fill the Odia name & description from the English fields using AI"
-              className="flex items-center gap-2 px-5 py-2.5 bg-surface-card border-2 border-primary/30 text-primary rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-primary/60 disabled:opacity-60 transition-all active:scale-95 w-max"
-            >
-              <span className={`material-symbols-outlined text-[16px] ${translating ? 'animate-spin' : ''}`}>
-                {translating ? 'progress_activity' : 'translate'}
-              </span>
-              {translating ? 'Translating…' : 'Translate to Odia'}
-            </button>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Field label="Slug" hint="URL path — auto-generated from name">
@@ -342,13 +294,6 @@ export default function CategoryForm({
                 content={form.description}
                 onChange={v => set('description', v)}
                 placeholder="Describe this category…"
-              />
-            </Field>
-            <Field label="Description (Odia)">
-              <RichTextEditor
-                content={form.description_or}
-                onChange={v => set('description_or', v)}
-                placeholder="ଓଡ଼ିଆ ବିବରଣ…"
               />
             </Field>
             <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest">

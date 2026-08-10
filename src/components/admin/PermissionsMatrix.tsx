@@ -7,7 +7,7 @@ import { PERMISSION_LABELS } from '@/types/admin.types'
 const GROUPS: { label: string; keys: (keyof AdminPermissions)[] }[] = [
   { label: 'Orders', keys: ['view_orders', 'update_order_status'] },
   { label: 'Catalogue', keys: ['manage_products', 'manage_categories', 'manage_banners', 'manage_cms', 'manage_coupons'] },
-  { label: 'Operations', keys: ['manage_pincodes', 'manage_delivery_persons', 'view_abandoned_carts', 'view_unserviceable'] },
+  { label: 'Operations', keys: ['manage_pincodes', 'manage_delivery_persons', 'view_abandoned_carts'] },
   { label: 'Team & Data', keys: ['manage_admin_profiles', 'view_analytics', 'receive_order_emails', 'export_data'] },
 ]
 

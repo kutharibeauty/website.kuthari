@@ -3,9 +3,10 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
 
-// BCR only serves Ganjam district, Odisha — every lookup is scoped to it.
-const DISTRICT = 'ganjam'
-const STATE = 'odisha'
+// Delivery is all-India, so lookups are NOT geographically scoped. The local
+// `ganjam_post_offices` table (migration 028) is kept only as a fast local
+// cache for the home district; anything it doesn't cover falls through to
+// India Post's national directory.
 const PIN_RE = /^\d{6}$/
 
 export interface LookupOption {
@@ -41,14 +42,10 @@ const toOption = (r: Row): LookupOption => ({
   office_type: r.office_type,
 })
 
-// ── Fallback: India Post's public API ────────────────────────────────────────
-// Only used when the local directory table isn't reachable (e.g. migration 028
-// and its seed haven't been run yet), so the admin screen keeps working.
+// ── India Post's public API ──────────────────────────────────────────────────
+// Serves every pincode outside the locally cached home district, and covers the
+// case where the local directory table isn't reachable at all.
 interface Office { Name?: string; District?: string; Division?: string; State?: string; Pincode?: string }
-
-const inGanjam = (o: Office) =>
-  (o.District ?? '').trim().toLowerCase() === DISTRICT &&
-  (o.State ?? '').trim().toLowerCase() === STATE
 
 async function postal(path: string): Promise<Office[] | null> {
   try {
@@ -67,7 +64,7 @@ async function postal(path: string): Promise<Office[] | null> {
 }
 
 /**
- * GET /api/pincodes/lookup — admin-gated, scoped to Ganjam district.
+ * GET /api/pincodes/lookup — admin-gated, covers all of India.
  *
  *   ?pincode=760003 → { found, inArea, area, city, state, areas, options }
  *       `options` lists EVERY area that pincode covers (one pincode here covers
@@ -79,8 +76,8 @@ async function postal(path: string): Promise<Office[] | null> {
  *       repeat across the district, so each option carries its pincode and
  *       office type to disambiguate.
  *
- * Served from our own copy of the India Post directory (migration 028), which
- * removes a per-lookup network call to a third-party API.
+ * Served from our own copy of the India Post directory for the home district
+ * (migration 028), falling back to India Post's national API for the rest.
  */
 export async function GET(req: NextRequest) {
   const { userId, sessionClaims } = await auth()
@@ -98,10 +95,9 @@ export async function GET(req: NextRequest) {
   const db = createAdminClient() as any
 
   /**
-   * True when the directory table exists but holds nothing — i.e. migration 028
-   * ran without its seed. Zero rows would otherwise read as a confident "not in
-   * Ganjam", so this tells a half-applied migration apart from a real miss and
-   * lets the caller fall back instead of answering wrongly.
+   * True when the local directory table exists but holds nothing — i.e.
+   * migration 028 ran without its seed. Only used to keep the log/flow honest;
+   * either way an unmatched pincode falls through to India Post.
    */
   let emptyCache: boolean | null = null
   const directoryIsEmpty = async (): Promise<boolean> => {
@@ -121,11 +117,9 @@ export async function GET(req: NextRequest) {
       .eq('pincode', pincode)
       .limit(30)
 
-    if (!error && data && !(data.length === 0 && (await directoryIsEmpty()))) {
-      if (data.length === 0) {
-        // Present in no Ganjam row => it's a real pincode we simply don't serve.
-        return NextResponse.json({ found: true, inArea: false, options: [] })
-      }
+    // A hit in the local cache answers immediately; anything else (including
+    // zero rows, since we now serve every pincode) falls through to India Post.
+    if (!error && data && data.length > 0) {
       const options = (data as Row[])
         .sort((a, b) => typeRank(a.office_type) - typeRank(b.office_type) || a.area_name.localeCompare(b.area_name))
         .map(toOption)
@@ -141,16 +135,15 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Directory unavailable — fall back to India Post.
+    // Not in the local cache — ask India Post, nationally.
+    await directoryIsEmpty() // keeps the half-applied-migration signal observable
     const offices = await postal(`pincode/${pincode}`)
     if (!offices || offices.length === 0) return NextResponse.json({ found: false })
-    const ganjam = offices.filter(inGanjam)
-    if (ganjam.length === 0) return NextResponse.json({ found: true, inArea: false, options: [] })
-    const options: LookupOption[] = ganjam.map((o) => ({
+    const options: LookupOption[] = offices.map((o) => ({
       area: o.Name ?? '',
       pincode: o.Pincode ?? pincode,
       city: o.Division || o.District || null,
-      state: o.State ?? 'Odisha',
+      state: o.State ?? '',
     }))
     return NextResponse.json({
       found: true,
@@ -176,7 +169,7 @@ export async function GET(req: NextRequest) {
       .ilike('area_name', `%${term}%`)
       .limit(40)
 
-    if (!error && data && !(data.length === 0 && (await directoryIsEmpty()))) {
+    if (!error && data && data.length > 0) {
       const lower = area.toLowerCase()
       const options = (data as Row[])
         // Names that START with what was typed are the likelier intent, so they
@@ -191,17 +184,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ found: options.length > 0, options })
     }
 
-    // Directory unavailable — fall back to India Post (needs a near-exact name).
+    // Not in the local cache — ask India Post, nationally (needs a near-exact name).
     if (area.length < 3) return NextResponse.json({ found: false, options: [] })
     const offices = await postal(`postoffice/${encodeURIComponent(area)}`)
     if (!offices) return NextResponse.json({ found: false, options: [] })
     const seen = new Set<string>()
     const options: LookupOption[] = []
-    for (const o of offices.filter(inGanjam)) {
+    for (const o of offices) {
       const key = `${o.Name}|${o.Pincode}`
       if (seen.has(key) || !o.Pincode) continue
       seen.add(key)
-      options.push({ area: o.Name ?? '', pincode: o.Pincode, city: o.Division || o.District || null, state: o.State ?? 'Odisha' })
+      options.push({ area: o.Name ?? '', pincode: o.Pincode, city: o.Division || o.District || null, state: o.State ?? '' })
     }
     return NextResponse.json({ found: options.length > 0, options: options.slice(0, 15) })
   }

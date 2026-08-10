@@ -258,10 +258,6 @@ body:has([data-flush-footer]) footer {
   margin-top: 0;
 }
 
-@utility font-odia {
-  font-family: 'Noto Sans Odia', sans-serif;
-}
-
 body {
   background-color: var(--color-background);
   color: var(--color-on-background);

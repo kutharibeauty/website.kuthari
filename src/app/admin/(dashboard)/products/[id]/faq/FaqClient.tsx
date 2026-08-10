@@ -106,33 +106,7 @@ export default function FaqClient({
   const [addingBulk, setAddingBulk] = useState(false)
 
   const [addForm, setAddForm] = useState({ question: '', question_or: '', answer: '', answer_or: '' })
-  const [translating, setTranslating] = useState(false)
 
-  async function translateAddForm() {
-    const fields: Record<string, string> = {}
-    if (addForm.question.trim()) fields.question = addForm.question.trim()
-    if (addForm.answer.trim()) fields.answer = addForm.answer.trim()
-    if (Object.keys(fields).length === 0) { showToast('Enter the English question & answer first'); return }
-    setTranslating(true)
-    const res = await fetch('/api/ai/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields }),
-    })
-    if (res.ok) {
-      const { translations } = await res.json() as { translations: Record<string, string> }
-      setAddForm(prev => ({
-        ...prev,
-        question_or: translations.question ?? prev.question_or,
-        answer_or: translations.answer ?? prev.answer_or,
-      }))
-      showToast('Translated to Odia!')
-    } else {
-      const d = await res.json().catch(() => ({})) as { error?: string }
-      showToast(d.error ?? 'Translation failed')
-    }
-    setTranslating(false)
-  }
   const [editForm, setEditForm] = useState<Partial<FaqRow>>({})
 
   const sensors = useSensors(
@@ -342,18 +316,6 @@ export default function FaqClient({
             form={addForm}
             onChange={patch => setAddForm(prev => ({ ...prev, ...patch }))}
           />
-          <button
-            type="button"
-            onClick={translateAddForm}
-            disabled={translating}
-            title="Fill the Odia question & answer from the English fields using AI"
-            className="flex items-center gap-2 px-4 py-2 bg-surface-container border border-primary/30 text-primary rounded-full font-body-md text-body-md hover:border-primary/60 disabled:opacity-60 transition-colors w-max"
-          >
-            <span className={`material-symbols-outlined text-[16px] ${translating ? 'animate-spin' : ''}`}>
-              {translating ? 'progress_activity' : 'translate'}
-            </span>
-            {translating ? 'Translating…' : 'Translate to Odia'}
-          </button>
           <div className="flex gap-3">
             <button onClick={() => setShowAdd(false)} className="flex-1 py-2.5 border border-outline-variant rounded-full font-body-md text-body-md text-on-surface-variant hover:bg-surface-container transition-colors">
               Cancel
@@ -565,16 +527,6 @@ function FaqFormFields({
             className={inputCls}
           />
         </div>
-        <div className="space-y-1.5">
-          <label className="font-label-md text-label-md text-on-surface font-medium">Question (Odia)</label>
-          <input
-            type="text"
-            value={form.question_or}
-            onChange={e => onChange({ question_or: e.target.value })}
-            placeholder="ଓଡ଼ିଆ ପ୍ରଶ୍ନ…"
-            className={inputCls}
-          />
-        </div>
       </div>
 
       <div className="space-y-1.5">
@@ -588,14 +540,6 @@ function FaqFormFields({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <label className="font-label-md text-label-md text-on-surface font-medium">Answer (Odia)</label>
-        <MiniRichText
-          content={form.answer_or}
-          onChange={v => onChange({ answer_or: v })}
-          placeholder="ଓଡ଼ିଆ ଉତ୍ତର…"
-        />
-      </div>
     </div>
   )
 }

@@ -28,6 +28,8 @@ interface PincodeResult {
   city?: string
   state?: string
   delivery_days?: number
+  /** Admin-set rate for this pincode. null = none on file, use the default. */
+  delivery_charge?: number | null
 }
 
 export default function CheckoutClient({ profileId, initialEmail = '' }: Props) {
@@ -49,7 +51,6 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
   const [loadingAddresses, setLoadingAddresses] = useState(true)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [pincodeResult, setPincodeResult] = useState<PincodeResult | null>(null)
-  const [isBulk, setIsBulk] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Address | null>(null)
   const [gstEnabled, setGstEnabled] = useState(false)
@@ -119,7 +120,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
   // free at/above the admin threshold, else the flat fee. (Previously this only
   // summed per-product charges, so it showed FREE for sub-threshold orders while
   // the cart showed the flat fee.) The server recomputes it authoritatively.
-  const deliveryFee = computeDeliveryFee(items, subtotal, deliveryConfig)
+  const deliveryFee = computeDeliveryFee(subtotal, pincodeResult?.delivery_charge ?? null, deliveryConfig)
   const grandTotal = Math.max(0, subtotal - couponDiscount - referralDiscount - creditApplied) + deliveryFee
   // Address + serviceability gate the button. The email is captured in a popup
   // at "Place Order" (PRD #3/#4) — every order/status update is sent to it.
@@ -132,7 +133,9 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
   const razorpayEnabled = deliveryConfig.razorpayEnabled
   // No Cash on Delivery — every order pays online, so checkout can't proceed
   // at all until the admin has Razorpay configured and enabled.
-  const canPlace = !!selectedId && (pincodeResult?.serviceable === true || isBulk) && gstOk && !belowMinOrder && storeOpen && razorpayEnabled
+  // Delivery is all-India, so the destination never blocks checkout — the
+  // pincode lookup only decides the delivery charge.
+  const canPlace = !!selectedId && gstOk && !belowMinOrder && storeOpen && razorpayEnabled
   const openLabel = formatMinute(deliveryConfig.orderHours.openMinute)
   const closeLabel = formatMinute(deliveryConfig.orderHours.closeMinute)
 
@@ -232,9 +235,10 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
     }
   }
 
+  // Switching address invalidates the looked-up delivery charge until the new
+  // address's pincode is re-checked.
   useEffect(() => {
     setPincodeResult(null)
-    setIsBulk(false)
   }, [selectedId])
 
   // Clicking "Place Order" opens the email popup first — the customer must enter
@@ -251,7 +255,6 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
     items,
     notes: notes.trim() || undefined,
     transport_details: transportDetails || undefined,
-    is_bulk: isBulk,
     coupon_code: validCouponCode || undefined,
     email: email.trim() || undefined,
     gstin: gstEnabled ? gstin.trim().toUpperCase() || undefined : undefined,
@@ -521,8 +524,6 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                           <PincodeChecker
                             pincode={addr.pincode}
                             onResult={setPincodeResult}
-                            isBulkSelected={isBulk}
-                            onBulkToggle={setIsBulk}
                           />
                         </div>
                       )}
@@ -552,11 +553,6 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                 <p className="text-xs font-medium text-on-surface-variant/60 mt-1 leading-relaxed">
                   Our dedicated fleet delivers your order directly to your premises.
                 </p>
-                {isBulk && (
-                  <p className="text-[11px] font-black text-primary/70 mt-2 uppercase tracking-wider">
-                    ★ Bulk order — our team will call you to confirm delivery.
-                  </p>
-                )}
               </div>
             </div>
           </section>
@@ -929,11 +925,6 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                   : `Pay ₹${grandTotal.toFixed(0)}`}
               </button>
 
-              {!canPlace && selectedId && pincodeResult?.serviceable === false && !isBulk && (
-                <p className="text-[11px] font-medium text-white/40 text-center mt-3">
-                  Select bulk order above to proceed with this address
-                </p>
-              )}
               {gstEnabled && !gstOk && (
                 <p className="text-[11px] font-medium text-white/40 text-center mt-3">
                   Enter a valid GSTIN and business name to continue

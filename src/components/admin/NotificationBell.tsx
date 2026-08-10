@@ -7,12 +7,12 @@ import { cn } from '@/lib/utils'
 
 /**
  * A single admin notification. `id` is a stable, namespaced key
- * (`order:<uuid>` / `unserviceable:<uuid>`) so the viewed-set survives across
+ * (`order:<uuid>`) so the viewed-set survives across
  * refreshes and never collides between the two sources.
  */
 export interface AdminNotification {
   id: string
-  kind: 'order' | 'unserviceable'
+  kind: 'order'
   title: string
   subtitle: string
   href: string
@@ -25,7 +25,7 @@ export interface AdminNotification {
  * migration and can't drift the schema. The list is pruned to the currently
  * live ids on every mount so it can never grow without bound.
  */
-const STORAGE_KEY = 'bcr_admin_viewed_notifications'
+const STORAGE_KEY = 'kbs_admin_viewed_notifications'
 
 function readViewedIds(): string[] {
   if (typeof window === 'undefined') return []

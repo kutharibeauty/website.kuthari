@@ -26,7 +26,7 @@ export default async function CheckoutPage() {
   const { data: profile } = await (admin as any).from('profiles').select('email').eq('id', profileId).maybeSingle()
   const rawEmail = (profile?.email as string | null) ?? ''
   // Ignore the internal placeholder emails created for phone-only signups.
-  const initialEmail = /@bcrtraders\.internal$/i.test(rawEmail) ? '' : rawEmail
+  const initialEmail = /@kutharibeauty\.internal$/i.test(rawEmail) ? '' : rawEmail
 
   return <CheckoutClient profileId={profileId} initialEmail={initialEmail} />
 }

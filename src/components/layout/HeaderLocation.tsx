@@ -2,41 +2,37 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
-  MapPin, ChevronDown, CheckCircle2, XCircle, Loader2, X, LocateFixed,
+  MapPin, ChevronDown, CheckCircle2, Loader2, X, LocateFixed,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-interface PincodeResult {
-  serviceable: boolean
-  area?: string | null
-  city?: string | null
-  state?: string | null
-}
-
-const STORAGE_KEY = 'bcr_pincode'
+import {
+  readSavedPincode, writeSavedPincode, clearSavedPincode,
+  type SavedPincode, type SavedPincodeResult as PincodeResult,
+} from '@/lib/cart/pincode-storage'
+import { DEFAULT_PINCODE_DELIVERY_FEE } from '@/lib/cart/delivery'
+import { useDeliveryConfig } from '@/hooks/useDeliveryConfig'
 
 function useSavedPincode() {
-  const [saved, setSaved] = useState<{ pincode: string; result: PincodeResult } | null>(null)
+  const [saved, setSaved] = useState<SavedPincode | null>(null)
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (raw) setSaved(JSON.parse(raw))
-    } catch {}
+    setSaved(readSavedPincode())
   }, [])
   const save = (pincode: string, result: PincodeResult) => {
     const entry = { pincode, result }
     setSaved(entry)
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entry)) } catch {}
+    writeSavedPincode(entry)
   }
   const clear = () => {
     setSaved(null)
-    try { localStorage.removeItem(STORAGE_KEY) } catch {}
+    clearSavedPincode()
   }
   return { saved, save, clear }
 }
 
 export default function HeaderLocation({ className = '' }: { className?: string }) {
   const { saved, save, clear } = useSavedPincode()
+  const freeDeliveryMin = useDeliveryConfig().freeDeliveryMin
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
   const [status, setStatus] = useState<'idle' | 'checking' | 'done'>('idle')
@@ -70,13 +66,6 @@ export default function HeaderLocation({ className = '' }: { className?: string 
       setResult(data)
       setStatus('done')
       save(pin, data)
-      if (!data.serviceable) {
-        void fetch('/api/unserviceable', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pincode: pin }),
-        })
-      }
     } catch {
       setStatus('idle')
     }
@@ -147,10 +136,9 @@ export default function HeaderLocation({ className = '' }: { className?: string 
     setOpen(false)
   }
 
-  const titleLine = saved?.result.serviceable
+  // Delivery is all-India, so a saved pincode is always deliverable.
+  const titleLine = saved
     ? `Delivering to ${saved.result.city ?? saved.result.area ?? 'your area'}`
-    : saved
-    ? 'Not serviceable here'
     : 'Select delivery location'
 
   const subLine = saved
@@ -210,8 +198,7 @@ export default function HeaderLocation({ className = '' }: { className?: string 
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2">
                 {status === 'checking' && <Loader2 size={18} className="animate-spin text-primary" />}
-                {status === 'done' && result?.serviceable && <CheckCircle2 size={18} className="text-emerald-500" />}
-                {status === 'done' && !result?.serviceable && <XCircle size={18} className="text-error" />}
+                {status === 'done' && <CheckCircle2 size={18} className="text-emerald-500" />}
               </div>
             </div>
 
@@ -234,34 +221,27 @@ export default function HeaderLocation({ className = '' }: { className?: string 
             )}
 
             {status === 'done' && result && (
-              <div
-                className={`flex items-start gap-3 rounded-xl px-4 py-3 text-xs ${
-                  result.serviceable
-                    ? 'bg-emerald-500/10 border border-emerald-500/20'
-                    : 'bg-error/10 border border-error/20'
-                }`}
-              >
-                {result.serviceable ? (
-                  <>
-                    <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-emerald-600 text-[13px]">Delivery available!</p>
-                      <p className="text-[11px] font-medium text-emerald-600/80 mt-1">
-                        We deliver to <span className="font-bold">{[result.area, result.city, result.state].filter(Boolean).join(', ')}</span>
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <XCircle size={16} className="text-error flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-error text-[13px]">Not serviceable yet</p>
-                      <p className="text-[11px] font-medium text-error/80 mt-1">
-                        We don&apos;t deliver to pincode {input} currently. You can place a bulk order and we&apos;ll contact you.
-                      </p>
-                    </div>
-                  </>
-                )}
+              <div className="flex items-start gap-3 rounded-xl px-4 py-3 text-xs bg-emerald-500/10 border border-emerald-500/20">
+                <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-emerald-600 text-[13px]">Delivery available!</p>
+                  <p className="text-[11px] font-medium text-emerald-600/80 mt-1">
+                    {[result.area, result.city, result.state].filter(Boolean).length > 0 ? (
+                      <>We deliver to <span className="font-bold">{[result.area, result.city, result.state].filter(Boolean).join(', ')}</span></>
+                    ) : (
+                      <>We deliver to pincode <span className="font-bold">{input}</span></>
+                    )}
+                  </p>
+                  <p className="text-[11px] font-medium text-emerald-600/80 mt-1">
+                    Delivery charge:{' '}
+                    <span className="font-bold">
+                      {result.delivery_charge === 0
+                        ? 'Free'
+                        : `₹${(result.delivery_charge ?? DEFAULT_PINCODE_DELIVERY_FEE).toLocaleString('en-IN')}`}
+                    </span>
+                    {' '}· free above ₹{freeDeliveryMin.toLocaleString('en-IN')}
+                  </p>
+                </div>
               </div>
             )}
 

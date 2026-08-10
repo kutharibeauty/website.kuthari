@@ -1,4 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+// Admin (service-role) client on purpose, NOT the cookie-scoped one: every
+// helper here backs the product page, which is ISR (`revalidate = 60`). The
+// cookie client calls `cookies()`, which makes the render dynamic and fails it
+// with DYNAMIC_SERVER_USAGE. Same reasoning as the shop layout's cached chrome
+// query. Everything read here is public catalog data — no per-user rows.
+import { createAdminClient } from '@/lib/supabase/server'
 import { sanitizeRichText } from '@/lib/sanitize'
 import type { Category, Product, ProductFAQ, ProductReview } from '@/types/database.types'
 
@@ -14,7 +19,7 @@ export interface ProductPageData {
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductPageData | null> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: rawProduct } = await supabase
     .from('products')
@@ -47,7 +52,7 @@ export async function getProductBySlug(slug: string): Promise<ProductPageData | 
  * stored XSS, and exactly what gets a site flagged as a "deceptive page".
  */
 export async function getProductFAQs(productId: string): Promise<ProductFAQ[]> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data } = await supabase
     .from('product_faqs')
     .select('*')
@@ -66,7 +71,7 @@ export async function getProductReviews(
   productId: string,
   limit = 10,
 ): Promise<{ reviews: ProductReview[]; stats: RatingStats }> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data } = await supabase
     .from('reviews')
     .select('*')
@@ -100,7 +105,7 @@ export async function getRelatedProducts(
   excludeId: string,
   limit = 4,
 ): Promise<Product[]> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data } = await supabase
     .from('products')
     .select('*')

@@ -42,6 +42,8 @@ type FormState = {
   units_per_pack: string
   pieces_per_secondary: string
   secondary_price: string
+  retail_price: string
+  retail_mrp: string
   secondary_mrp: string
   packs_per_box: string
   unit_type: string
@@ -112,21 +114,14 @@ export default function ProductForm({
   const showToast = useToastStore((s) => s.show)
   const [generatingSeo, setGeneratingSeo] = useState(false)
   const [generatingDesc, setGeneratingDesc] = useState(false)
-  const [translating, setTranslating] = useState(false)
   const [aiPrompt, setAiPrompt] = useState('')
   const [tagInput, setTagInput] = useState('')
   const [images, setImages] = useState<ImageItem[]>(
     (product?.images ?? []).map(url => ({ id: makeId(), url })),
   )
   const [uploading, setUploading] = useState(false)
-  const [autoTranslatingName, setAutoTranslatingName] = useState(false)
-  // Becomes true once the admin edits the Odia name themselves, so the
-  // auto-translation below never overwrites a manual correction. Seeded true
-  // when editing a product that already has an Odia name, so opening it doesn't
-  // re-translate and clobber the saved value.
-  const nameOrTouched = useRef(!!product?.name_or)
   // True once the admin actually edits the English name in this session. The
-  // derived fields (slug, Odia name, meta title/description, keywords) then
+  // derived fields (slug, meta title/description, keywords) then
   // follow the name even when editing an existing product — but NOT on open, so
   // a saved slug/SEO is never clobbered just by viewing the product.
   const nameEdited = useRef(false)
@@ -151,6 +146,8 @@ export default function ProductForm({
     units_per_pack: product?.units_per_pack?.toString() ?? '',
     pieces_per_secondary: product?.pieces_per_secondary?.toString() ?? '',
     secondary_price: product?.secondary_price?.toString() ?? '',
+    retail_price: product?.retail_price?.toString() ?? '',
+    retail_mrp: product?.retail_mrp?.toString() ?? '',
     secondary_mrp: product?.secondary_mrp?.toString() ?? '',
     packs_per_box: product?.packs_per_box?.toString() ?? '',
     unit_type: product?.unit_type ?? '',
@@ -218,39 +215,6 @@ export default function ProductForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.name])
 
-  // Auto-translate the English name → Odia (name_or) as the admin types, using
-  // the same AI model as the manual "Translate to Odia" button. Debounced so we
-  // don't hit the API on every keystroke, and skipped once the admin edits the
-  // Odia name by hand so a manual correction is never clobbered.
-  useEffect(() => {
-    const en = form.name.trim()
-    if (!en || nameOrTouched.current) return
-    const handle = setTimeout(async () => {
-      try {
-        setAutoTranslatingName(true)
-        const res = await fetch('/api/ai/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fields: { name: en } }),
-        })
-        if (res.ok) {
-          const { translations } = await res.json() as { translations?: Record<string, string> }
-          // Apply only if the name hasn't changed since and the admin hasn't
-          // started editing the Odia field in the meantime.
-          if (translations?.name && !nameOrTouched.current) {
-            setForm(prev => (prev.name.trim() === en ? { ...prev, name_or: translations.name } : prev))
-          }
-        }
-      } catch {
-        // Silent — the manual "Translate to Odia" button remains available.
-      } finally {
-        setAutoTranslatingName(false)
-      }
-    }, 900)
-    return () => clearTimeout(handle)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.name])
-
   // NOTE: the old "Selling Price = Price per Pack ÷ Units per Pack" auto-calc was
   // removed. `price` is now the price of one full box, entered directly; the
   // lower unit's price is derived from it (see lib/products/packaging.ts).
@@ -311,7 +275,7 @@ export default function ProductForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.name])
 
-  // ── AI Description Generation (English + Odia) ────────────────────────────────
+  // ── AI Description Generation ─────────────────────────────────────────────────
 
   async function generateDescription() {
     if (!form.name.trim()) { setError('Enter a product name first'); setTab(0); return }
@@ -341,38 +305,6 @@ export default function ProductForm({
       showToast(d.error ?? 'Description generation failed', 'error')
     }
     setGeneratingDesc(false)
-  }
-
-  // ── AI Translate (English → Odia) ─────────────────────────────────────────────
-
-  async function translateToOdia() {
-    const fields: Record<string, string> = {}
-    if (form.name.trim()) fields.name = form.name.trim()
-    if (form.unit.trim()) fields.unit = form.unit.trim()
-    if (form.description.trim()) fields.description = form.description
-    if (form.meta_title.trim()) fields.meta_title = form.meta_title.trim()
-    if (form.meta_description.trim()) fields.meta_description = form.meta_description.trim()
-    if (Object.keys(fields).length === 0) { setError('Enter the English details first'); setTab(0); return }
-
-    setTranslating(true)
-    setError(null)
-    const res = await fetch('/api/ai/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields }),
-    })
-    if (res.ok) {
-      const { translations } = await res.json() as { translations: Record<string, string> }
-      if (translations.name) set('name_or', translations.name)
-      if (translations.unit) set('unit_or', translations.unit)
-      if (translations.description) set('description_or', translations.description)
-      showToast('Translated to Odia!')
-    } else {
-      const d = await res.json().catch(() => ({})) as { error?: string }
-      setError(d.error ?? 'Translation failed')
-      showToast(d.error ?? 'Translation failed', 'error')
-    }
-    setTranslating(false)
   }
 
   // ── Save ─────────────────────────────────────────────────────────────────────
@@ -415,6 +347,10 @@ export default function ProductForm({
       // products ended up claiming things like "1 Sachet = 1,200 pieces".
       units_per_pack: !isHangerModel && form.units_per_pack ? parseInt(form.units_per_pack, 10) : null,
       pieces_per_secondary: !isHangerModel && form.pieces_per_secondary ? parseInt(form.pieces_per_secondary, 10) : null,
+      // Retail is independent of the packaging model — a product can be sold
+      // retail whether or not it also has box/pack levels. Blank = wholesale-only.
+      retail_price: form.retail_price ? parseFloat(form.retail_price) : null,
+      retail_mrp: form.retail_mrp ? parseFloat(form.retail_mrp) : null,
       secondary_price: !isHangerModel && form.secondary_price ? parseFloat(form.secondary_price) : null,
       secondary_mrp: !isHangerModel && form.secondary_mrp ? parseFloat(form.secondary_mrp) : null,
       packs_per_box: !isHangerModel && form.packs_per_box ? parseInt(form.packs_per_box, 10) : null,
@@ -576,22 +512,11 @@ export default function ProductForm({
                   type="text"
                   value={form.name}
                   onChange={e => {
-                    // Editing the name re-derives everything that follows from
-                    // it. Clear nameOrTouched so the Odia name re-translates too.
+                    // Editing the name re-derives everything that follows from it.
                     nameEdited.current = true
-                    nameOrTouched.current = false
                     set('name', e.target.value)
                   }}
                   placeholder="e.g. Sunflower Oil 5L"
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Product Name (Odia)" hint={autoTranslatingName ? 'Translating…' : 'Auto-translated from the English name'}>
-                <input
-                  type="text"
-                  value={form.name_or}
-                  onChange={e => { nameOrTouched.current = true; set('name_or', e.target.value) }}
-                  placeholder="ଓଡ଼ିଆ ନାମ…"
                   className={inputCls}
                 />
               </Field>
@@ -895,33 +820,78 @@ export default function ProductForm({
             </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Field
-                label={isHangerModel ? 'Price per Hanger (₹)' : `Selling Price per ${form.pack_type || 'Box'} (₹)`}
-                required
-                hint={isHangerModel ? undefined : 'What the customer pays for one full box'}
-              >
-                <input
-                  type="number"
-                  value={form.price}
-                  min={0}
-                  step="0.01"
-                  onChange={e => set('price', e.target.value)}
-                  placeholder="e.g. 250.00"
-                  className={inputCls}
-                />
-              </Field>
-              <Field label={isHangerModel ? 'MRP (₹)' : `MRP per ${form.pack_type || 'Box'} (₹)`} hint="Optional — shows as strikethrough when set">
-                <input
-                  type="number"
-                  value={form.mrp}
-                  min={0}
-                  step="0.01"
-                  onChange={e => set('mrp', e.target.value)}
-                  placeholder="e.g. 300.00"
-                  className={inputCls}
-                />
-              </Field>
+            {/* ── Wholesale pricing ── */}
+            <div className="p-5 bg-surface-card rounded-2xl border-2 border-table-border space-y-4">
+              <div>
+                <p className="font-black text-[10px] text-primary uppercase tracking-widest">Wholesale Price</p>
+                <p className="font-medium text-[11px] text-on-surface-variant mt-1">
+                  The bulk rate. Always required — it is the base price for this product.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Field
+                  label={isHangerModel ? 'Price per Hanger (₹)' : `Selling Price per ${form.pack_type || 'Box'} (₹)`}
+                  required
+                  hint={isHangerModel ? undefined : 'What the customer pays for one full box'}
+                >
+                  <input
+                    type="number"
+                    value={form.price}
+                    min={0}
+                    step="0.01"
+                    onChange={e => set('price', e.target.value)}
+                    placeholder="e.g. 250.00"
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label={isHangerModel ? 'MRP (₹)' : `MRP per ${form.pack_type || 'Box'} (₹)`} hint="Optional — shows as strikethrough when set">
+                  <input
+                    type="number"
+                    value={form.mrp}
+                    min={0}
+                    step="0.01"
+                    onChange={e => set('mrp', e.target.value)}
+                    placeholder="e.g. 300.00"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* ── Retail pricing ── */}
+            <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/20 space-y-4">
+              <div>
+                <p className="font-black text-[10px] text-primary uppercase tracking-widest">Retail Price</p>
+                <p className="font-medium text-[11px] text-on-surface-variant mt-1">
+                  The single-unit rate for walk-up customers. Set this and the customer
+                  sees <b>both</b> Retail and Wholesale on the product page and picks
+                  one. <b>Leave blank to sell this product wholesale-only.</b>
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Field label="Retail Selling Price (₹)" hint="What one single unit costs">
+                  <input
+                    type="number"
+                    value={form.retail_price}
+                    min={0}
+                    step="0.01"
+                    onChange={e => set('retail_price', e.target.value)}
+                    placeholder="e.g. 320.00"
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Retail MRP (₹)" hint="Optional — shows as strikethrough when set">
+                  <input
+                    type="number"
+                    value={form.retail_mrp}
+                    min={0}
+                    step="0.01"
+                    onChange={e => set('retail_mrp', e.target.value)}
+                    placeholder="e.g. 399.00"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1065,7 +1035,7 @@ export default function ProductForm({
                 <h3 className="font-black text-sm text-primary uppercase tracking-widest">Generate with AI</h3>
               </div>
               <p className="font-medium text-xs text-on-surface-variant">
-                Writes the English &amp; Odia descriptions from the product details. Add an optional prompt to steer the tone or points to highlight.
+                Writes the product description from the details above. Add an optional prompt to steer the tone or points to highlight.
               </p>
               <textarea
                 value={aiPrompt}
@@ -1078,25 +1048,13 @@ export default function ProductForm({
                 <button
                   type="button"
                   onClick={generateDescription}
-                  disabled={generatingDesc || translating}
+                  disabled={generatingDesc}
                   className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 disabled:opacity-60 transition-all active:scale-95 shadow-sm"
                 >
                   <span className={`material-symbols-outlined text-[16px] ${generatingDesc ? 'animate-spin' : ''}`}>
                     {generatingDesc ? 'progress_activity' : 'auto_awesome'}
                   </span>
                   {generatingDesc ? 'Generating…' : 'Generate Description'}
-                </button>
-                <button
-                  type="button"
-                  onClick={translateToOdia}
-                  disabled={translating || generatingDesc}
-                  title="Fill the Odia (ଓଡ଼ିଆ) versions of name, unit and description from the English fields using AI"
-                  className="flex items-center gap-2 px-5 py-2.5 bg-surface-card border-2 border-primary/30 text-primary rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-primary/60 disabled:opacity-60 transition-all active:scale-95"
-                >
-                  <span className={`material-symbols-outlined text-[16px] ${translating ? 'animate-spin' : ''}`}>
-                    {translating ? 'progress_activity' : 'translate'}
-                  </span>
-                  {translating ? 'Translating…' : 'Translate to Odia'}
                 </button>
               </div>
             </div>
@@ -1106,13 +1064,6 @@ export default function ProductForm({
                 content={form.description}
                 onChange={v => set('description', v)}
                 placeholder="Describe the product in detail…"
-              />
-            </Field>
-            <Field label="Full Description (Odia)">
-              <RichTextEditor
-                content={form.description_or}
-                onChange={v => set('description_or', v)}
-                placeholder="ଓଡ଼ିଆ ବିବରଣ…"
               />
             </Field>
           </div>

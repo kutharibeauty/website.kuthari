@@ -15,7 +15,7 @@ export function isEmail(input: unknown): input is string {
 }
 
 export function isPlaceholderEmail(input: unknown): boolean {
-  return typeof input === 'string' && /@bcrtraders\.internal$/i.test(input)
+  return typeof input === 'string' && /@kutharibeauty\.internal$/i.test(input)
 }
 
 const NAME_RE = /^[\p{L}\p{M}\s'.-]+$/u

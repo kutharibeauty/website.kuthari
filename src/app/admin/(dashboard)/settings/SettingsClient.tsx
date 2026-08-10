@@ -210,16 +210,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
               type="text"
               value={settings.store_tagline}
               onChange={e => set('store_tagline', e.target.value)}
-              placeholder="Your wholesale partner"
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Tagline (Odia)">
-            <input
-              type="text"
-              value={settings.store_tagline_or}
-              onChange={e => set('store_tagline_or', e.target.value)}
-              placeholder="ଆପଣ ଙ୍କ ଥୋକ ସାଥୀ"
+              placeholder="Your trusted wholesale beauty partner"
               className={inputCls}
             />
           </Field>
@@ -402,7 +393,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
           />
         </Field>
         <p className="font-bold text-[10px] text-on-surface-variant">
-          New order notifications, low stock alerts, and unserviceable pincode reports are sent here.
+          New order notifications and low stock alerts are sent here.
         </p>
       </Section>
 

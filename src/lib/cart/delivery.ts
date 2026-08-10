@@ -3,15 +3,23 @@ import { parseOrderHours, DEFAULT_ORDER_HOURS, type OrderHoursConfig } from '@/l
 // Delivery-fee rule, shared by the cart, checkout and the order route so all
 // three agree on what the customer sees and is charged.
 //
-// If any item in the cart carries a per-product delivery charge (set by the
-// admin), the fee is the SUM of those charges — each product counted once,
-// regardless of quantity. This lets the admin put a specific charge (e.g. ₹100
-// for a heavy item) that overrides the flat fee. When no item has a charge, the
-// flat fee applies: free at/above FREE_DELIVERY_MIN, otherwise FLAT_DELIVERY_FEE.
+// Delivery is all-India and priced by DISTANCE, so the destination pincode's
+// rate decides the fee:
+//
+//   1. Subtotal at/above the admin's free-delivery threshold  -> free.
+//   2. Otherwise the pincode's own charge, when the admin set one for it.
+//      An explicit 0 means genuinely free delivery to that pincode.
+//   3. Otherwise DEFAULT_PINCODE_DELIVERY_FEE.
+//
+// Per-product delivery charges are deliberately NOT added on top: the charge is
+// about where it ships, not what is in the box. The product field is retained
+// in the schema but no longer feeds the total.
 
 // Defaults, used until an admin overrides them in Settings.
 export const FREE_DELIVERY_MIN = 1000
 export const FLAT_DELIVERY_FEE = 50
+/** Charged for any pincode the admin has not given an explicit rate. */
+export const DEFAULT_PINCODE_DELIVERY_FEE = 99
 // 0 = no minimum. The real value is admin-set in Settings (settings CMS row);
 // this fallback deliberately imposes NO minimum so a missing/broken config can
 // never lock customers out of checkout.
@@ -58,22 +66,32 @@ export function parseDeliveryConfig(settingsValue: unknown): DeliveryConfig {
   }
 }
 
-/** Sum of enabled per-product delivery charges (each product once). */
+/** Sum of enabled per-product delivery charges (each product once).
+ *  No longer part of the charged total — see the rule at the top of this file.
+ *  Kept because the admin product form still exposes the field. */
 export function perProductDelivery(items: Array<{ delivery_charge?: number | null }>): number {
   return items.reduce((sum, i) => sum + (Number(i.delivery_charge) || 0), 0)
 }
 
 /**
  * The delivery fee to display AND charge for a cart/order — the single rule the
- * cart, checkout and order route all share. Per-product charges (if any) win;
- * otherwise it's free at/above the admin threshold, else the flat fee.
+ * cart, checkout and order route all share.
+ *
+ * `pincodeCharge` is the destination pincode's admin-set rate: a number
+ * (including 0, meaning free to that pincode) when one is on file, or
+ * null/undefined when the pincode is unknown or not yet loaded — in which case
+ * the default rate applies.
  */
 export function computeDeliveryFee(
-  items: Array<{ delivery_charge?: number | null }>,
   subtotal: number,
+  pincodeCharge: number | null | undefined,
   config: DeliveryConfig = DEFAULT_DELIVERY_CONFIG,
 ): number {
-  const perProduct = perProductDelivery(items)
-  if (perProduct > 0) return perProduct
-  return subtotal >= config.freeDeliveryMin ? 0 : config.flatDeliveryFee
+  // Free-delivery threshold beats every per-pincode rate.
+  if (subtotal >= config.freeDeliveryMin) return 0
+  // `0` is a real rate (free to this pincode), so check for null/undefined and
+  // non-finite values explicitly rather than truthiness.
+  const rate = Number(pincodeCharge)
+  if (pincodeCharge != null && Number.isFinite(rate) && rate >= 0) return rate
+  return DEFAULT_PINCODE_DELIVERY_FEE
 }

@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     if (email !== undefined && email !== null && email !== '') {
       if (!isEmail(email)) return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
       safeEmail = email.trim().toLowerCase()
-      if (/@bcrtraders\.internal$/i.test(safeEmail)) {
+      if (/@kutharibeauty\.internal$/i.test(safeEmail)) {
         return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
       }
     }
@@ -115,9 +115,9 @@ export async function POST(request: Request) {
       if (staff.user_id) {
         userId = staff.user_id
         const { data: authData } = await supabaseAdmin.auth.admin.getUserById(userId)
-        userEmail = authData?.user?.email || `${submittedDigits}@bcrtraders.internal`
+        userEmail = authData?.user?.email || `${submittedDigits}@kutharibeauty.internal`
       } else {
-        const authEmail = `${submittedDigits}@bcrtraders.internal`
+        const authEmail = `${submittedDigits}@kutharibeauty.internal`
         const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
           phone: cleanPhone,
           email: authEmail,
@@ -185,7 +185,7 @@ export async function POST(request: Request) {
           ;({ data: authData } = await supabaseAdmin.auth.admin.getUserById(userId))
         }
       }
-      userEmail = authData?.user?.email || `${submittedDigits}@bcrtraders.internal`
+      userEmail = authData?.user?.email || `${submittedDigits}@kutharibeauty.internal`
       appMetadata = { role: 'customer', supabase_profile_id: userId }
     } else {
       // ── Customer signup ──
@@ -198,14 +198,14 @@ export async function POST(request: Request) {
       if (existingProfile) {
         userId = existingProfile.id
         const { data: authData } = await supabaseAdmin.auth.admin.getUserById(userId)
-        userEmail = authData?.user?.email || `${submittedDigits}@bcrtraders.internal`
+        userEmail = authData?.user?.email || `${submittedDigits}@kutharibeauty.internal`
 
         if (!existingProfile.name && safeName) {
           await supabaseAdmin.from('profiles').update({ name: safeName, ...(safeEmail && { email: safeEmail }) }).eq('id', userId)
         }
         needsName = !existingProfile.name && !safeName
       } else {
-        const authEmail = safeEmail ?? `${submittedDigits}@bcrtraders.internal`
+        const authEmail = safeEmail ?? `${submittedDigits}@kutharibeauty.internal`
         const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
           phone: cleanPhone,
           email: authEmail,
