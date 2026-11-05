@@ -10,7 +10,13 @@ import { createAdminClient } from '@/lib/supabase/server'
  * them, uploads fall back to the Supabase `product-images` bucket, so a missing
  * variable never breaks the admin.
  */
-const MEDIA_URL = process.env.NEXT_PUBLIC_MEDIA_URL?.replace(/\/+$/, '')
+// Tolerates a value saved without the scheme ("media.kutharibeauty.com"),
+// which once made every upload fail with "Failed to parse URL".
+const MEDIA_URL = (() => {
+  const raw = process.env.NEXT_PUBLIC_MEDIA_URL?.trim().replace(/\/+$/, '')
+  if (!raw) return undefined
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`
+})()
 const UPLOAD_SECRET = process.env.MEDIA_UPLOAD_SECRET
 
 /**
