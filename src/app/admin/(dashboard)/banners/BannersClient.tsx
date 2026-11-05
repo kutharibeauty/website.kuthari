@@ -445,7 +445,7 @@ function BannerFormModal({
             <label className="font-bold text-xs text-primary">Live Preview</label>
             <div
               className="relative overflow-hidden rounded-2xl p-5 flex flex-col justify-center border-2 border-table-border"
-              style={form.image_url ? { aspectRatio: '5 / 2' } : { backgroundColor: form.background_color, minHeight: 110 }}
+              style={form.image_url ? { aspectRatio: form.placement === 'mid_page' ? '4 / 5' : '5 / 2', maxHeight: form.placement === 'mid_page' ? 320 : undefined, marginInline: form.placement === 'mid_page' ? 'auto' : undefined } : { backgroundColor: form.background_color, minHeight: 110 }}
             >
               {form.image_url && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -550,7 +550,7 @@ function BannerFormModal({
           <div className="space-y-2">
             <label className="font-bold text-xs text-primary flex items-center">
               Banner Image
-              <span className="font-bold text-[12px] text-on-surface-variant ml-3 normal-case tracking-normal">Optional — text-only banners work fine</span>
+              <span className="font-bold text-[12px] text-on-surface-variant ml-3 normal-case tracking-normal">{form.placement === 'mid_page' ? 'Optional · 1080 × 1350 px (portrait 4:5)' : 'Hero banner · 2400 × 960 px (5:2)'}</span>
             </label>
             {form.image_url ? (
               <div className="relative inline-block group w-full">
@@ -805,7 +805,7 @@ function HomepageTab({ cmsContent, categories, onToast }: { cmsContent: CmsConte
 
       <CmsSection title="Offer banner (middle of the home page)">
         <p className="text-sm text-on-surface-variant -mt-2 mb-4">
-          A wide picture shown after the category shelves. Best at 1600 × 500 pixels or similar. Switch it off to hide it.
+          A wide picture shown after the category shelves. Design it at 2100 × 600 px and keep text and products in the middle 1600 px: phones trim the sides. Switch it off to hide it.
         </p>
         <div className="space-y-4">
           <div className="relative overflow-hidden rounded-2xl border-2 border-table-border bg-surface-container aspect-[16/5]">
