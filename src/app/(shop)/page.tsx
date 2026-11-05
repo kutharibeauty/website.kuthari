@@ -74,7 +74,7 @@ const orgJsonLd = {
   sameAs: [
     'https://www.instagram.com/k_beauty_store923/',
   ],
-  // Confirmed policy: no customer returns or exchanges. Same definition the
+  // No change-of-mind returns (damaged items are replaced). Same definition the
   // product offers emit, so the site states one policy from one source.
   hasMerchantReturnPolicy: RETURN_POLICY_JSONLD,
 }

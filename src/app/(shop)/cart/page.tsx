@@ -67,6 +67,11 @@ function CartItemRow({ item, onQtyChange, onRemove }: {
             <span className="inline-block text-[12px] font-black text-on-surface-variant/60 border border-table-border rounded-full px-2 py-0.5">
               {item.unit}
             </span>
+            {(item.min_qty ?? 1) > 1 && (
+              <span className="inline-block text-[12px] font-bold text-on-secondary-container bg-secondary-container rounded-full px-2 py-0.5">
+                Bulk price: min {item.min_qty}
+              </span>
+            )}
             {item.units_each && item.units_each > 1 && (
               <span className="inline-block text-[12px] font-black text-primary bg-primary/8 rounded-full px-2 py-0.5">
                 {(item.quantity * item.units_each).toLocaleString('en-IN')} units total
@@ -89,7 +94,9 @@ function CartItemRow({ item, onQtyChange, onRemove }: {
           {/* Qty stepper */}
           <div className="flex flex-shrink-0 items-center h-9 bg-primary text-white rounded-xl overflow-hidden border-2 border-primary">
             <button
-              onClick={() => onQtyChange(item.quantity - 1)}
+              // Below a bulk minimum the line is removed instead of left at a
+              // price the customer no longer qualifies for.
+              onClick={() => onQtyChange(item.quantity - 1 < (item.min_qty ?? 1) ? 0 : item.quantity - 1)}
               className="w-9 h-full flex items-center justify-center hover:bg-white/15 transition-colors active:scale-90"
               aria-label="Decrease"
             >
@@ -97,9 +104,9 @@ function CartItemRow({ item, onQtyChange, onRemove }: {
             </button>
             <input
               type="number"
-              min={1}
+              min={item.min_qty ?? 1}
               value={item.quantity}
-              onChange={(e) => { const n = parseInt(e.target.value, 10); onQtyChange(Number.isNaN(n) || n < 1 ? 1 : n) }}
+              onChange={(e) => { const n = parseInt(e.target.value, 10); const min = item.min_qty ?? 1; onQtyChange(Number.isNaN(n) || n < min ? min : n) }}
               aria-label="Quantity"
               className="w-10 text-center text-sm font-black bg-transparent text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />

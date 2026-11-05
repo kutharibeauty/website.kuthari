@@ -352,6 +352,23 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
       description: payMode === 'partial' ? 'Advance for your bulk order' : 'Order payment',
       prefill: { email: email.trim(), name: addr?.name || '', contact: addr?.phone || '' },
       theme: { color: '#292966' },
+      // UPI first: most customers here pay by UPI, so put it at the top and keep
+      // every other method below it.
+      config: {
+        display: {
+          blocks: {
+            upi: { name: 'Pay by UPI', instruments: [{ method: 'upi' }] },
+          },
+          sequence: ['block.upi'],
+          preferences: { show_default_blocks: true },
+        },
+      },
+      // Let a failed payment be retried in the same window, remember the
+      // customer's saved cards, and auto-read the OTP on Android.
+      retry: { enabled: true, max_count: 3 },
+      remember_customer: true,
+      send_sms_hash: true,
+      notes: { order_mode: payMode },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       handler: async (resp: any) => {
         // Phase 2 — verify the payment server-side, which creates the order.

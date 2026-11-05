@@ -15,7 +15,7 @@ export default async function OrderDetailPage({
   const { id } = await params
   const supabase = createAdminClient()
 
-  const [orderRes, deliveryRes] = await Promise.all([
+  const [orderRes, deliveryRes, issueRes] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any).from('orders').select('*').eq('id', id).maybeSingle(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,6 +25,8 @@ export default async function OrderDetailPage({
       .eq('role', 'delivery')
       .eq('is_active', true)
       .order('name'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).from('order_issues').select('id, status, reason').eq('order_id', id).maybeSingle(),
   ])
 
   if (!orderRes.data) notFound()
@@ -33,6 +35,7 @@ export default async function OrderDetailPage({
     <OrderDetailClient
       order={orderRes.data as unknown as Order & { notes: string | null }}
       deliveryPersons={deliveryRes.data ?? []}
+      issue={issueRes.data ?? null}
     />
   )
 }

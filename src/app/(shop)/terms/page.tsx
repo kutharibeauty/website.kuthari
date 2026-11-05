@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default async function TermsPage() {
   const { contact } = await getStoreContent()
-  const STORE = { name: 'Kuthari Beauty Store', address: contact.address, phones: contact.phones, email: contact.email, hours: contact.hours, updated: '4 November 2026' }
+  const STORE = { name: 'Kuthari Beauty Store', address: contact.address, phones: contact.phones, email: contact.email, hours: contact.hours, updated: '5 November 2026' }
   return (
     <LegalPage
       title="Terms of use"
@@ -54,8 +54,9 @@ export default async function TermsPage() {
           heading: 'Orders and payment',
           body: (
             <p>
-              An order is placed once payment succeeds through Razorpay. We confirm it shortly after. Cash on delivery
-              isn&apos;t offered. Coupons and referral codes follow the conditions shown with them, and only one can be
+              You can pay online through Razorpay or, when the shop offers it, in cash on delivery. Bulk orders may pay
+              part online and the rest in cash. An online order is placed once payment succeeds; we confirm every order
+              shortly after. Coupons and referral codes follow the conditions shown with them, and only one can be
               used on an order.
             </p>
           ),
@@ -70,11 +71,13 @@ export default async function TermsPage() {
           ),
         },
         {
-          heading: 'Cancellations, returns and refunds',
+          heading: 'Cancellations, replacements and refunds',
           body: (
             <p>
-              See our <Link href="/refund-policy">cancellations and refunds policy</Link>. In short: cancel before we
-              confirm, no returns on delivered products, and we put right anything that arrives damaged or wrong.
+              See our <Link href="/refund-policy">cancellations, replacements and refunds policy</Link>. In short: you
+              can cancel only until we confirm the order; online payments on cancelled orders are refunded; delivered
+              orders aren&apos;t refunded, but items that arrive damaged, faulty or wrong are replaced or exchanged when
+              reported within 48 hours with photos.
             </p>
           ),
         },

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import type { OrderStatus, OrderItem, Address } from '@/types/database.types'
+import { ISSUE_REASONS, ISSUE_STATUS_LABEL, type IssueReason, type IssueStatus } from '@/lib/orders/issues'
 import { ArrowLeft, Download, Clock, Phone, MapPin, Package, Edit3, Loader2 } from 'lucide-react'
 
 type DeliveryPerson = { id: string; name: string; phone: string }
@@ -25,6 +26,9 @@ type OrderDetail = {
   payment_status?: string | null
   amount_paid?: number | string | null
   amount_due?: number | string | null
+  payment_reference?: string | null
+  refund_status?: 'pending' | 'processed' | 'failed' | null
+  refund_amount?: number | string | null
   notes: string | null
   is_bulk: boolean
   estimated_delivery?: string | null
@@ -59,9 +63,11 @@ function fmt(n: number) {
 export default function OrderDetailClient({
   order: initialOrder,
   deliveryPersons,
+  issue = null,
 }: {
   order: OrderDetail
   deliveryPersons: DeliveryPerson[]
+  issue?: { id: string; status: IssueStatus; reason: IssueReason } | null
 }) {
   const [order, setOrder] = useState(initialOrder)
   const [newStatus, setNewStatus] = useState<OrderStatus>(initialOrder.status)
@@ -94,6 +100,21 @@ export default function OrderDetailClient({
     setUpdatingStatus(false)
   }
 
+  const [refunding, setRefunding] = useState(false)
+  async function refundNow() {
+    if (!confirm('Refund what this customer paid online? This cannot be undone.')) return
+    setRefunding(true)
+    const res = await fetch(`/api/orders/${order.id}/refund`, { method: 'POST' })
+    const d = await res.json().catch(() => ({})) as { error?: string; status?: 'pending' | 'processed' | 'failed'; amount?: number }
+    if (res.ok) {
+      setOrder(prev => ({ ...prev, refund_status: d.status ?? 'pending', refund_amount: d.amount ?? null, payment_status: 'refunded' }))
+      showToast('Refund started')
+    } else {
+      showToast(d.error ?? 'Refund failed')
+    }
+    setRefunding(false)
+  }
+
   async function saveNotes() {
     setSavingNotes(true)
     const res = await fetch(`/api/orders/${order.id}/status`, {
@@ -113,6 +134,19 @@ export default function OrderDetailClient({
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto w-full space-y-6 md:space-y-8 pb-12">
+
+      {issue && (
+        <Link
+          href={`/admin/returns/${issue.id}`}
+          className={cn(
+            'flex items-center justify-between gap-3 rounded-2xl border-2 p-4 font-bold text-sm transition-colors',
+            issue.status === 'requested' ? 'border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100' : 'border-table-border bg-surface-card text-primary hover:border-primary/40',
+          )}
+        >
+          <span>Customer reported: {ISSUE_REASONS[issue.reason]}</span>
+          <span className="shrink-0">{ISSUE_STATUS_LABEL[issue.status]} →</span>
+        </Link>
+      )}
 
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-table-border pb-6">
@@ -332,7 +366,31 @@ export default function OrderDetailClient({
                 value={order.payment_method === 'online' ? 'Paid online' : order.payment_method === 'partial' ? 'Part online, rest cash on delivery' : 'Cash on delivery'}
               />
               <Row label="Order total" value={fmt(order.total)} />
-              {(() => {
+              {order.refund_status ? (
+                <div className="flex items-center justify-between pt-2 border-t-2 border-table-border">
+                  <span className="font-bold text-[12px] text-on-surface-variant">Refund</span>
+                  <span className={cn(
+                    'px-3 py-1 rounded-lg border-2 font-bold text-[13px]',
+                    order.refund_status === 'processed' ? 'bg-success/10 text-success border-success/30'
+                      : order.refund_status === 'failed' ? 'bg-error/5 text-error border-error/30'
+                      : 'bg-surface-container text-on-surface-variant border-table-border',
+                  )}>
+                    {order.refund_amount ? `${fmt(Number(order.refund_amount))} ` : ''}
+                    {order.refund_status === 'processed' ? 'refunded' : order.refund_status === 'failed' ? 'refund failed' : 'refund on the way'}
+                  </span>
+                </div>
+              ) : null}
+              {(order.status === 'cancelled' || order.status === 'returned') && order.payment_reference
+                && order.payment_method !== 'cod' && (!order.refund_status || order.refund_status === 'failed') && (
+                <button
+                  onClick={refundNow}
+                  disabled={refunding}
+                  className="w-full py-3 rounded-xl border-2 border-error/40 text-error font-bold text-sm hover:bg-error/5 disabled:opacity-50"
+                >
+                  {refunding ? 'Refunding…' : order.refund_status === 'failed' ? 'Retry refund' : 'Refund online payment'}
+                </button>
+              )}
+              {order.payment_status !== 'refunded' && (() => {
                 const fullyPaid = order.payment_status === 'collected'
                 const paid = fullyPaid ? Number(order.total) : Number(order.amount_paid ?? (order.payment_method === 'online' ? order.total : 0))
                 const due = fullyPaid ? 0 : Number(order.amount_due ?? Number(order.total) - paid)

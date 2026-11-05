@@ -6,7 +6,8 @@
  * Only allowed on orders that are 'delivered'.
  *
  * ── NOT a customer returns feature ──────────────────────────────────────────
- * Kuthari Beauty Store's published policy is NO customer returns or exchanges —
+ * Kuthari Beauty Store's published policy is no change-of-mind returns (damaged or
+ * wrong items are replaced through order_issues, api/orders/[id]/issue) —
  * the Product JSON-LD
  * states schema.org/MerchantReturnNotPermitted (see lib/seo/return-policy.ts).
  * This endpoint is internal exception handling for the back office: an admin

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse, after } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { notifyOrderEvent } from '@/lib/resend/notify'
 import { restoreStockForOrder } from '@/lib/orders/stock'
+import { refundOrder } from '@/lib/orders/refund'
 
 /**
  * POST /api/orders/[id]/cancel — customer-initiated cancellation.
@@ -73,7 +74,11 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   // `after()`, not a bare `void`: on serverless a dropped promise here means the
   // customer's stock is never given back and the product stays falsely sold out.
   after(() => restoreStockForOrder(id))
-  after(() => notifyOrderEvent(id, 'cancelled'))
+  // Refund any online payment first, then email, so the order record is final.
+  after(async () => {
+    await refundOrder(id, 'Cancelled by customer')
+    await notifyOrderEvent(id, 'cancelled')
+  })
 
   return NextResponse.json({ ok: true })
 }

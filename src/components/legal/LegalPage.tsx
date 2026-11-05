@@ -35,7 +35,7 @@ export default function LegalPage({ title, accent, updated, intro, sections }: P
               <span className="text-indigo tabular-nums mr-3">{String(i + 1).padStart(2, '0')}</span>
               {s.heading}
             </h2>
-            <div className="text-[17px] leading-relaxed text-ink/85 [&_p+p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mt-1.5 [&_a]:font-semibold [&_a]:text-indigo [&_a]:underline [&_a]:underline-offset-4">
+            <div className="text-[17px] leading-relaxed text-ink/85 [&_p+p]:mt-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mt-1.5 [&_li]:pl-1 [&_a]:font-semibold [&_a]:text-indigo [&_a]:underline [&_a]:underline-offset-4">
               {s.body}
             </div>
           </li>

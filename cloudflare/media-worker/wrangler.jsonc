@@ -1,0 +1,15 @@
+{
+  // Image server for the store: R2 bucket `kuthari-media` behind a Worker.
+  // Deploy: npx wrangler deploy (from this folder)
+  // Secret: npx wrangler secret put UPLOAD_SECRET  (same value as MEDIA_UPLOAD_SECRET in the app)
+  //
+  // This Worker needs exactly two things: the MEDIA bucket below and the
+  // UPLOAD_SECRET secret. Never add the app's other keys (Supabase, Razorpay,
+  // Message Central…) here or in the dashboard. This file is committed to Git,
+  // and the Worker doesn't use them.
+  "name": "kuthari-media",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "kuthari-media" }]
+}

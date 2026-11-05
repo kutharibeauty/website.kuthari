@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
         hostname: '*.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      // Cloudflare R2 via the kuthari-media Worker (cloudflare/media-worker).
+      { protocol: 'https', hostname: 'kuthari-media.kuthari-dev.workers.dev' },
+      { protocol: 'https', hostname: 'media.kutharibeauty.com' },
     ],
     // Vercel's image optimizer is returning 402
     // (OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED) — the account's image-optimization

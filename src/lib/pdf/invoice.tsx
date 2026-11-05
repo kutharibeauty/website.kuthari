@@ -5,14 +5,13 @@ import {
 import type { OrderEmailData } from '@/lib/resend'
 import { LOGO_PNG } from './logo'
 
-// react-pdf's built-in Helvetica has no ₹ glyph (it renders as a blank box), so
-// the PDF uses "Rs." for amounts — reliable across all viewers.
+// react-pdf's built-in fonts have no ₹ glyph (it renders as a blank box), so the
+// PDF uses "Rs." for amounts — reliable across all viewers.
 const fmt = (n: number) =>
-  `Rs. ${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  `Rs. ${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
-// Qty column shows the unit with the count — "10 Boxes" — instead of a bare "10"
-// with the unit stacked under the item name. Uses just the unit LABEL (the part
-// before " · N pieces"), and pluralises it: 1 Box, 10 Boxes, 3 Hangers.
+// Qty column shows the unit with the count — "10 Boxes" — instead of a bare "10".
+// Uses just the unit LABEL (the part before " · N pieces"), pluralised.
 function qtyWithUnit(quantity: number, unit: string | null | undefined): string {
   const label = (unit ?? '').split('·')[0].trim()
   if (!label) return String(quantity)
@@ -23,326 +22,310 @@ function qtyWithUnit(quantity: number, unit: string | null | undefined): string 
 }
 
 // ── Seller (issuer) details ─────────────────────────────────────────────────
-// TODO: add the real GSTIN once the client provides one — printing another
-// business's GSTIN on this invoice would be wrong, so it's left blank (the
-// line below only renders when it's set) rather than guessed.
+// Add the real GSTIN once the client provides one. Until then the document is a
+// plain "Invoice": a "Tax Invoice" must carry the seller's GSTIN.
 const SELLER = {
-  name: 'KUTHARI BEAUTY STORE',
+  name: 'Kuthari Beauty Store',
   tagline: 'Cosmetics, Skincare & Salon Products',
   address: 'Marthapeta St, near Sano Bazar, Triveni Nagar, Brahmapur, Odisha 760009',
   gstin: '',
   phone: '+91 98612 35276',
   email: 'smortika@gmail.com',
+  web: 'www.kutharibeauty.com',
 }
 
 const STATUS_LABEL: Record<string, string> = {
   placed: 'Placed',
   confirmed: 'Confirmed',
   packed: 'Packed',
-  shipping: 'Out for Delivery',
-  out_for_delivery: 'Out for Delivery',
+  shipping: 'Out for delivery',
+  out_for_delivery: 'Out for delivery',
   delivered: 'Delivered',
   cancelled: 'Cancelled',
   returned: 'Returned',
 }
 
-// Sizes are scaled ~0.72x from the original A4 layout so the same design fits an
-// A5 page (A5 is ~71% of A4 per side). Proportions, colours and structure are
-// unchanged — only font sizes and spacing shrank. The diagonal brand watermark
-// was removed.
-const styles = StyleSheet.create({
-  page: {
-    backgroundColor: '#ffffff',
-    fontFamily: 'Helvetica',
-    fontSize: 8,
-    padding: 26,
-    color: '#1c1c17',
-  },
+const INK = '#292966'
+const INDIGO = '#5C5C99'
+const LAVENDER = '#A3A3CC'
+const PERI = '#CCCCFF'
+const PAPER = '#F7F7FC'
+const LINE = '#E3E3F0'
+const TEXT = '#26263A'
+const MUTED = '#6B6B85'
+
+const s = StyleSheet.create({
+  page: { backgroundColor: '#ffffff', fontFamily: 'Helvetica', fontSize: 8, padding: 26, paddingBottom: 40, color: TEXT },
 
   // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 10,
-  },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   brandRow: { flexDirection: 'row', alignItems: 'center' },
-  logo: { width: 23, height: 32, marginRight: 9 },
-  brandName: { fontSize: 15, fontFamily: 'Helvetica-Bold', color: '#1b2c3d', letterSpacing: 1 },
-  brandSub: { fontSize: 7, color: '#81756e', marginTop: 2 },
-  sellerLine: { fontSize: 7, color: '#4f453f', marginTop: 1.5 },
-  gstin: { fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#1b2c3d', marginTop: 3 },
+  logo: { width: 26, height: 36, marginRight: 9 },
+  brandName: { fontSize: 15, fontFamily: 'Times-Bold', color: INK },
+  brandSub: { fontSize: 7, color: INDIGO, fontFamily: 'Times-Italic', marginTop: 1 },
+  sellerBlock: { marginTop: 8 },
+  sellerLine: { fontSize: 7, color: MUTED, lineHeight: 1.45 },
+  sellerGstin: { fontSize: 7.5, fontFamily: 'Helvetica-Bold', color: INK, marginTop: 2 },
 
-  invoiceBox: { alignItems: 'flex-end' },
-  invoiceLabel: {
-    fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#ffffff',
-    backgroundColor: '#1b2c3d', padding: '3 8', borderRadius: 3,
-    textTransform: 'uppercase', letterSpacing: 1,
-  },
-  invoiceMetaLabel: { fontSize: 7, color: '#81756e', textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 6 },
-  invoiceMetaValue: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#1b2c3d', marginTop: 1 },
-  invoiceDate: { fontSize: 8, color: '#4f453f', marginTop: 4 },
+  docBox: { alignItems: 'flex-end' },
+  docTitle: { fontSize: 17, fontFamily: 'Times-Roman', color: INK, letterSpacing: 2.5, textTransform: 'uppercase' },
+  docMetaLabel: { fontSize: 6.5, color: MUTED, letterSpacing: 1, textTransform: 'uppercase', marginTop: 6 },
+  docMetaValue: { fontSize: 8.5, fontFamily: 'Helvetica-Bold', color: INK, marginTop: 1 },
+  pill: { marginTop: 7, backgroundColor: PERI, color: INK, fontFamily: 'Helvetica-Bold', fontSize: 7, padding: '2.5 8', borderRadius: 8, letterSpacing: 0.6, textTransform: 'uppercase' },
 
-  ruleThick: { borderBottom: '2 solid #1b2c3d', marginBottom: 11 },
+  band: { height: 3, backgroundColor: INK, marginTop: 12, marginBottom: 1 },
+  bandThin: { height: 1, backgroundColor: LAVENDER, marginBottom: 12 },
 
-  // Bill-to / meta
-  row: { flexDirection: 'row', marginBottom: 12 },
-  col: { flex: 1 },
-  label: { fontSize: 7, color: '#81756e', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 },
-  addressText: { fontSize: 8, color: '#3d2b1f', lineHeight: 1.6 },
-  nameText: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#1b2c3d', marginBottom: 2 },
-  buyerGstin: { fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#1b2c3d', marginTop: 3 },
+  // Parties
+  parties: { flexDirection: 'row', marginBottom: 12 },
+  party: { flex: 1, paddingRight: 10 },
+  label: { fontSize: 6.5, color: MUTED, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4, fontFamily: 'Helvetica-Bold' },
+  name: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: INK, marginBottom: 2 },
+  body: { fontSize: 7.5, color: TEXT, lineHeight: 1.5 },
+  bodyBold: { fontSize: 7.5, color: INK, fontFamily: 'Helvetica-Bold', lineHeight: 1.5 },
 
-  // COD box
-  paymentBox: {
-    backgroundColor: '#faf6ee',
-    border: '1 solid #b9862f',
-    borderRadius: 4,
-    padding: '7 9',
-    marginBottom: 12,
-  },
-  detailLabel: { fontSize: 7, color: '#81756e', textTransform: 'uppercase', letterSpacing: 0.6 },
-  detailValue: { fontSize: 8, color: '#3d2b1f', marginTop: 1, lineHeight: 1.4 },
+  // Notes
+  noteBox: { backgroundColor: PAPER, borderLeft: `2 solid ${LAVENDER}`, padding: '6 9', marginBottom: 12 },
+  noteLabel: { fontSize: 6.5, color: INDIGO, textTransform: 'uppercase', letterSpacing: 0.8, fontFamily: 'Helvetica-Bold' },
+  noteText: { fontSize: 7.5, color: TEXT, marginTop: 1.5, lineHeight: 1.45 },
 
-  // GST non-cancellable notice. Warmer/red-tinted vs the cream payment box, so
-  // it reads as a condition of sale rather than another routine detail.
-  gstNoticeBox: {
-    backgroundColor: '#fdf2f2',
-    border: '1 solid #dc2626',
-    borderRadius: 4,
-    padding: '6 9',
-    marginTop: 11,
-  },
-  gstNoticeTitle: {
-    fontSize: 8,
-    fontFamily: 'Helvetica-Bold',
-    color: '#dc2626',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  gstNoticeText: { fontSize: 7, color: '#7c2d2d', marginTop: 2, lineHeight: 1.45 },
-
-  // Items table
-  table: { marginBottom: 11 },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#1b2c3d',
-    padding: '5 6',
-  },
-  th: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#ffffff', textTransform: 'uppercase', letterSpacing: 0.5 },
-  thSl: { width: 18 },
-  thItem: { flex: 3 },
-  thNum: { flex: 1, textAlign: 'center' },
-  thPrice: { flex: 1.3, textAlign: 'right' },
-  tableRow: {
-    flexDirection: 'row',
-    padding: '7 6',
-    borderBottom: '1 solid #f0e9dc',
-    alignItems: 'flex-start',
-  },
-  tableRowAlt: { backgroundColor: '#fbf7ef' },
-  tdSl: { width: 18, fontSize: 8, color: '#81756e', lineHeight: 1.4 },
-  // The item cell is a column View; its children must NOT set `flex`, or the
-  // name collapses to zero height and the unit renders on top of it.
-  tdItemCell: { flex: 3, paddingRight: 6 },
-  tdItem: { fontSize: 8, color: '#1c1c17', lineHeight: 1.35 },
-  tdUnit: { fontSize: 7, color: '#81756e', marginTop: 2, lineHeight: 1.3 },
-  tdNum: { flex: 1, fontSize: 8, color: '#1c1c17', textAlign: 'center', lineHeight: 1.4 },
-  tdPrice: { flex: 1.3, fontSize: 8, color: '#1c1c17', textAlign: 'right', lineHeight: 1.4 },
-  tdPriceBold: { flex: 1.3, fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#1c1c17', textAlign: 'right', lineHeight: 1.4 },
+  // Items
+  table: { marginBottom: 10 },
+  thead: { flexDirection: 'row', backgroundColor: INK, padding: '5 6', borderRadius: 2 },
+  th: { fontSize: 6.5, fontFamily: 'Helvetica-Bold', color: '#ffffff', textTransform: 'uppercase', letterSpacing: 0.6 },
+  colSl: { width: 16 },
+  colItem: { flex: 3, paddingRight: 6 },
+  colQty: { flex: 1.1, textAlign: 'center' },
+  colRate: { flex: 1.2, textAlign: 'right' },
+  colAmt: { flex: 1.3, textAlign: 'right' },
+  tr: { flexDirection: 'row', padding: '6 6', borderBottom: `0.75 solid ${LINE}`, alignItems: 'flex-start' },
+  trAlt: { backgroundColor: PAPER },
+  td: { fontSize: 7.5, color: TEXT, lineHeight: 1.4 },
+  tdMuted: { fontSize: 7.5, color: MUTED, lineHeight: 1.4 },
+  tdBold: { fontSize: 7.5, color: INK, fontFamily: 'Helvetica-Bold', lineHeight: 1.4 },
 
   // Totals
-  totalsContainer: { marginLeft: 'auto', width: 160 },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
-  totalLabel: { fontSize: 8, color: '#4f453f' },
-  totalValue: { fontSize: 8, color: '#1c1c17' },
-  grandRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#1b2c3d',
-    borderRadius: 3,
-    padding: '5 8',
-    marginTop: 4,
-  },
-  grandLabel: { fontSize: 10, fontFamily: 'Helvetica-Bold', color: '#ffffff' },
+  totalsWrap: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  wordsBox: { flex: 1, paddingRight: 14 },
+  totals: { width: 170 },
+  tRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
+  tLabel: { fontSize: 7.5, color: MUTED },
+  tValue: { fontSize: 7.5, color: TEXT },
+  grand: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: INK, borderRadius: 3, padding: '6 8', marginTop: 4 },
+  grandLabel: { fontSize: 10, fontFamily: 'Times-Bold', color: '#ffffff' },
   grandValue: { fontSize: 10, fontFamily: 'Helvetica-Bold', color: '#ffffff' },
+  payRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2.5, borderBottom: `0.75 solid ${LINE}` },
+  payDue: { fontSize: 8, fontFamily: 'Helvetica-Bold', color: INK },
+
+  // GST notice
+  gstBox: { backgroundColor: '#FDECEA', border: '1 solid #B42318', borderRadius: 3, padding: '6 9', marginTop: 12 },
+  gstTitle: { fontSize: 7.5, fontFamily: 'Helvetica-Bold', color: '#B42318', letterSpacing: 0.4, textTransform: 'uppercase' },
+  gstText: { fontSize: 7, color: '#7A271A', marginTop: 2, lineHeight: 1.45 },
 
   // Footer
-  footer: {
-    borderTop: '1 solid #e5e1d9',
-    paddingTop: 9,
-    marginTop: 16,
-  },
-  footerThanks: { fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#1b2c3d', textAlign: 'center', marginBottom: 4 },
-  footerText: { fontSize: 7, color: '#81756e', textAlign: 'center', lineHeight: 1.5 },
-  footerNote: { fontSize: 6, color: '#a99f95', textAlign: 'center', marginTop: 4 },
+  thanks: { fontSize: 11, fontFamily: 'Times-Italic', color: INK, marginTop: 14 },
+  thanksSub: { fontSize: 7, color: MUTED, marginTop: 2, lineHeight: 1.4 },
+  footer: { position: 'absolute', left: 26, right: 26, bottom: 16, borderTop: `0.75 solid ${LINE}`, paddingTop: 5, flexDirection: 'row', justifyContent: 'space-between' },
+  footerText: { fontSize: 6, color: LAVENDER },
 })
+
+/** Whole rupees in Indian words, e.g. 1250 → "One thousand two hundred fifty". */
+function rupeesInWords(n: number): string {
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen']
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety']
+  const two = (x: number) => (x < 20 ? ones[x] : `${tens[Math.floor(x / 10)]}${x % 10 ? ` ${ones[x % 10]}` : ''}`)
+  const three = (x: number) => (x >= 100 ? `${ones[Math.floor(x / 100)]} hundred${x % 100 ? ` ${two(x % 100)}` : ''}` : two(x))
+  let r = Math.floor(n)
+  if (r === 0) return 'Zero'
+  const parts: string[] = []
+  const crore = Math.floor(r / 1e7); r %= 1e7
+  const lakh = Math.floor(r / 1e5); r %= 1e5
+  const thousand = Math.floor(r / 1e3); r %= 1e3
+  if (crore) parts.push(`${three(crore)} crore`)
+  if (lakh) parts.push(`${two(lakh)} lakh`)
+  if (thousand) parts.push(`${two(thousand)} thousand`)
+  if (r) parts.push(three(r))
+  const out = parts.join(' ')
+  return out.charAt(0).toUpperCase() + out.slice(1)
+}
+
+function paymentLines(data: OrderEmailData) {
+  const method = data.paymentMethod ?? 'online'
+  const delivered = data.status === 'delivered'
+  const paidOnline = method === 'online' ? data.total : Math.min(data.total, Number(data.amountPaid ?? 0))
+  const rest = Math.max(0, Math.round((data.total - paidOnline) * 100) / 100)
+  const label = method === 'cod' ? 'Cash on delivery' : method === 'partial' ? 'Part online, rest cash on delivery' : 'Paid online'
+  return { label, paidOnline, rest, delivered, method }
+}
 
 function InvoiceDocument({ data }: { data: OrderEmailData }) {
   const addr = data.address
   const discount = data.discount ?? 0
   const status = STATUS_LABEL[data.status ?? 'placed'] ?? 'Placed'
+  const pay = paymentLines(data)
 
   // COD totals are rounded to the nearest rupee, so the exact
   // (subtotal − discount + delivery) can sit a few paise off the grand total.
-  // Surface that gap as an explicit Round Off line so the invoice reconciles.
-  // Mirrors the order route's total math; it's 0 (and hidden) for whole-rupee
-  // orders, which is most of the catalogue.
+  // Show that gap as a Round Off line so the invoice reconciles.
   const exactTotal = Math.max(0, data.subtotal - discount) + data.deliveryFee
   const roundOff = Math.round((data.total - exactTotal) * 100) / 100
   const date = new Date(data.createdAt).toLocaleDateString('en-IN', {
-    year: 'numeric', month: 'long', day: 'numeric',
+    year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata',
   })
+  const title = SELLER.gstin ? 'Tax Invoice' : 'Invoice'
 
   return (
-    <Document title={`Kuthari Invoice ${data.orderNumber}`} author="Kuthari Beauty Store">
-      <Page size="A5" style={styles.page}>
+    <Document title={`Kuthari ${title} ${data.orderNumber}`} author={SELLER.name}>
+      <Page size="A5" style={s.page}>
 
-        {/* ── Header: logo + seller (left), invoice meta (right) ── */}
-        <View style={styles.header}>
+        {/* ── Header ── */}
+        <View style={s.header}>
           <View style={{ flex: 1 }}>
-            <View style={styles.brandRow}>
+            <View style={s.brandRow}>
               {/* eslint-disable-next-line jsx-a11y/alt-text */}
-              <Image style={styles.logo} src={LOGO_PNG} />
+              <Image style={s.logo} src={LOGO_PNG} />
               <View>
-                <Text style={styles.brandName}>{SELLER.name}</Text>
-                <Text style={styles.brandSub}>{SELLER.tagline}</Text>
+                <Text style={s.brandName}>{SELLER.name}</Text>
+                <Text style={s.brandSub}>{SELLER.tagline}</Text>
               </View>
             </View>
-            <Text style={styles.sellerLine}>{SELLER.address}</Text>
-            <Text style={styles.sellerLine}>{SELLER.phone} · {SELLER.email}</Text>
-            {SELLER.gstin && <Text style={styles.gstin}>GSTIN: {SELLER.gstin}</Text>}
+            <View style={s.sellerBlock}>
+              <Text style={s.sellerLine}>{SELLER.address}</Text>
+              <Text style={s.sellerLine}>{SELLER.phone} · {SELLER.email} · {SELLER.web}</Text>
+              {SELLER.gstin ? <Text style={s.sellerGstin}>GSTIN {SELLER.gstin}</Text> : null}
+            </View>
           </View>
 
-          <View style={styles.invoiceBox}>
-            <Text style={styles.invoiceLabel}>Tax Invoice</Text>
-            <Text style={styles.invoiceMetaLabel}>Invoice No.</Text>
-            <Text style={styles.invoiceMetaValue}>{data.orderNumber}</Text>
-            <Text style={styles.invoiceDate}>Date: {date}</Text>
-          </View>
-        </View>
-
-        <View style={styles.ruleThick} />
-
-        {/* ── Bill To + Payment ── */}
-        <View style={styles.row}>
-          <View style={styles.col}>
-            <Text style={styles.label}>Bill To</Text>
-            {data.gstBusinessName && (
-              <Text style={styles.nameText}>{data.gstBusinessName}</Text>
-            )}
-            <Text style={data.gstBusinessName ? styles.addressText : styles.nameText}>{addr.name}</Text>
-            <Text style={styles.addressText}>{addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}</Text>
-            <Text style={styles.addressText}>{addr.city}, {addr.state} — {addr.pincode}</Text>
-            <Text style={styles.addressText}>{addr.phone}</Text>
-            {data.gstin && (
-              <Text style={styles.buyerGstin}>GSTIN: {data.gstin}</Text>
-            )}
-          </View>
-          <View style={[styles.col, { alignItems: 'flex-end' }]}>
-            <Text style={styles.label}>Payment Method</Text>
-            <Text style={styles.addressText}>Online Payment</Text>
-            <Text style={[styles.label, { marginTop: 10 }]}>Order Status</Text>
-            <Text style={styles.addressText}>{status}</Text>
+          <View style={s.docBox}>
+            <Text style={s.docTitle}>{title}</Text>
+            <Text style={s.docMetaLabel}>Invoice no.</Text>
+            <Text style={s.docMetaValue}>{data.orderNumber}</Text>
+            <Text style={s.docMetaLabel}>Date</Text>
+            <Text style={s.docMetaValue}>{date}</Text>
+            <Text style={s.pill}>{status}</Text>
           </View>
         </View>
 
-        {/* ── Transport / lorry + order notes (replaces the amount-to-collect box) ── */}
+        <View style={s.band} />
+        <View style={s.bandThin} />
+
+        {/* ── Billed to / Payment ── */}
+        <View style={s.parties}>
+          <View style={s.party}>
+            <Text style={s.label}>Billed to</Text>
+            {data.gstBusinessName ? <Text style={s.name}>{data.gstBusinessName}</Text> : null}
+            <Text style={data.gstBusinessName ? s.bodyBold : s.name}>{addr.name}</Text>
+            <Text style={s.body}>{addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}</Text>
+            <Text style={s.body}>{addr.city}, {addr.state} {addr.pincode}</Text>
+            <Text style={s.body}>{addr.phone}</Text>
+            {data.gstin ? <Text style={[s.bodyBold, { marginTop: 2 }]}>GSTIN {data.gstin}</Text> : null}
+          </View>
+          <View style={[s.party, { paddingRight: 0 }]}>
+            <Text style={s.label}>Payment</Text>
+            <Text style={s.bodyBold}>{pay.label}</Text>
+            {pay.method !== 'cod' && <Text style={s.body}>Paid online: {fmt(pay.paidOnline)}</Text>}
+            {pay.rest > 0 && (
+              <Text style={s.body}>{pay.delivered ? 'Collected in cash' : 'Due on delivery'}: {fmt(pay.rest)}</Text>
+            )}
+          </View>
+        </View>
+
         {(data.transportDetails || data.notes) ? (
-          <View style={styles.paymentBox}>
+          <View style={s.noteBox}>
             {data.transportDetails ? (
               <>
-                <Text style={styles.detailLabel}>Transport / Bus</Text>
-                <Text style={styles.detailValue}>{data.transportDetails}</Text>
+                <Text style={s.noteLabel}>Transport / bus</Text>
+                <Text style={s.noteText}>{data.transportDetails}</Text>
               </>
             ) : null}
             {data.notes ? (
               <>
-                <Text style={[styles.detailLabel, data.transportDetails ? { marginTop: 5 } : {}]}>Order Notes</Text>
-                <Text style={styles.detailValue}>{data.notes}</Text>
+                <Text style={[s.noteLabel, data.transportDetails ? { marginTop: 5 } : {}]}>Order notes</Text>
+                <Text style={s.noteText}>{data.notes}</Text>
               </>
             ) : null}
           </View>
         ) : null}
 
-        {/* ── Items table ── */}
-        <View style={styles.table}>
-          <View style={styles.tableHeader}>
-            <Text style={[styles.th, styles.thSl]}>#</Text>
-            <Text style={[styles.th, styles.thItem]}>Item</Text>
-            <Text style={[styles.th, styles.thNum]}>Qty</Text>
-            <Text style={[styles.th, styles.thPrice]}>Unit Price</Text>
-            <Text style={[styles.th, styles.thPrice]}>Amount</Text>
+        {/* ── Items ── */}
+        <View style={s.table}>
+          <View style={s.thead}>
+            <Text style={[s.th, s.colSl]}>#</Text>
+            <Text style={[s.th, s.colItem]}>Item</Text>
+            <Text style={[s.th, s.colQty]}>Qty</Text>
+            <Text style={[s.th, s.colRate]}>Rate</Text>
+            <Text style={[s.th, s.colAmt]}>Amount</Text>
           </View>
           {data.items.map((item, i) => (
-            <View key={i} wrap={false} style={[styles.tableRow, ...(i % 2 === 1 ? [styles.tableRowAlt] : [])]}>
-              <Text style={styles.tdSl}>{i + 1}</Text>
-              <View style={styles.tdItemCell}>
-                <Text style={styles.tdItem}>{item.name}</Text>
+            <View key={i} wrap={false} style={[s.tr, ...(i % 2 === 1 ? [s.trAlt] : [])]}>
+              <Text style={[s.tdMuted, s.colSl]}>{i + 1}</Text>
+              <View style={s.colItem}>
+                <Text style={s.td}>{item.name}</Text>
               </View>
-              <Text style={styles.tdNum}>{qtyWithUnit(item.quantity, item.unit)}</Text>
-              <Text style={styles.tdPrice}>{fmt(item.price)}</Text>
-              <Text style={styles.tdPriceBold}>{fmt(item.price * item.quantity)}</Text>
+              <Text style={[s.td, s.colQty]}>{qtyWithUnit(item.quantity, item.unit)}</Text>
+              <Text style={[s.td, s.colRate]}>{fmt(item.price)}</Text>
+              <Text style={[s.tdBold, s.colAmt]}>{fmt(item.price * item.quantity)}</Text>
             </View>
           ))}
         </View>
 
         {/* ── Totals ── */}
-        <View style={styles.totalsContainer}>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Subtotal</Text>
-            <Text style={styles.totalValue}>{fmt(data.subtotal)}</Text>
+        <View style={s.totalsWrap} wrap={false}>
+          <View style={s.wordsBox}>
+            <Text style={s.label}>Amount in words</Text>
+            <Text style={s.body}>Rupees {rupeesInWords(data.total)}{Math.round((data.total % 1) * 100) ? ` and ${Math.round((data.total % 1) * 100)} paise` : ''} only</Text>
+            <Text style={s.thanks}>Thank you for shopping with us.</Text>
+            <Text style={s.thanksSub}>Questions about this order? Call or WhatsApp {SELLER.phone}.</Text>
           </View>
-          {discount > 0 && (
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>
-                Discount{data.couponCode ? ` (${data.couponCode})` : ''}
-              </Text>
-              <Text style={[styles.totalValue, { color: '#16a34a' }]}>−{fmt(discount)}</Text>
+          <View style={s.totals}>
+            <View style={s.tRow}><Text style={s.tLabel}>Subtotal</Text><Text style={s.tValue}>{fmt(data.subtotal)}</Text></View>
+            {discount > 0 && (
+              <View style={s.tRow}>
+                <Text style={s.tLabel}>Discount{data.couponCode ? ` (${data.couponCode})` : ''}</Text>
+                <Text style={[s.tValue, { color: '#1E7B4F' }]}>-{fmt(discount)}</Text>
+              </View>
+            )}
+            <View style={s.tRow}><Text style={s.tLabel}>Delivery</Text><Text style={s.tValue}>{data.deliveryFee === 0 ? 'Free' : fmt(data.deliveryFee)}</Text></View>
+            {Math.abs(roundOff) >= 0.01 && (
+              <View style={s.tRow}>
+                <Text style={s.tLabel}>Round off</Text>
+                <Text style={s.tValue}>{roundOff < 0 ? '-' : '+'}{fmt(Math.abs(roundOff))}</Text>
+              </View>
+            )}
+            <View style={s.grand}>
+              <Text style={s.grandLabel}>Total</Text>
+              <Text style={s.grandValue}>{fmt(data.total)}</Text>
             </View>
-          )}
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Delivery</Text>
-            <Text style={styles.totalValue}>{data.deliveryFee === 0 ? 'FREE' : fmt(data.deliveryFee)}</Text>
-          </View>
-          {Math.abs(roundOff) >= 0.01 && (
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Round Off</Text>
-              <Text style={styles.totalValue}>{roundOff < 0 ? '−' : '+'}{fmt(Math.abs(roundOff))}</Text>
-            </View>
-          )}
-          <View style={styles.grandRow}>
-            <Text style={styles.grandLabel}>Grand Total</Text>
-            <Text style={styles.grandValue}>{fmt(data.total)}</Text>
+            {pay.method !== 'online' && (
+              <View style={{ marginTop: 4 }}>
+                {pay.method === 'partial' && (
+                  <View style={s.payRow}><Text style={s.tLabel}>Paid online</Text><Text style={s.tValue}>{fmt(pay.paidOnline)}</Text></View>
+                )}
+                <View style={s.payRow}>
+                  <Text style={s.payDue}>{pay.delivered ? 'Collected on delivery' : 'Balance due on delivery'}</Text>
+                  <Text style={s.payDue}>{fmt(pay.rest)}</Text>
+                </View>
+              </View>
+            )}
           </View>
         </View>
 
-        {/* ── GST invoice: non-cancellable notice ──
-            A GST bill lets the buyer claim input tax credit, so once it's issued
-            the order can't be cancelled at all. The cancel API enforces this;
-            the notice states it on the document the buyer keeps. */}
-        {data.gstin && (
-          <View style={styles.gstNoticeBox}>
-            <Text style={styles.gstNoticeTitle}>GST Invoice — Non-Cancellable</Text>
-            <Text style={styles.gstNoticeText}>
-              This order has been billed with GST details for input tax credit. Once placed, it
-              cannot be cancelled under any circumstances, by the customer or on request.
+        {/* A GST bill lets the buyer claim input tax credit, so once it's issued the
+            order can't be cancelled. The cancel API enforces this; the notice
+            states it on the document the buyer keeps. */}
+        {data.gstin ? (
+          <View style={s.gstBox} wrap={false}>
+            <Text style={s.gstTitle}>GST invoice · non-cancellable</Text>
+            <Text style={s.gstText}>
+              This order has been billed with GST details for input tax credit. Once placed, it cannot be
+              cancelled under any circumstances, by the customer or on request.
             </Text>
           </View>
-        )}
+        ) : null}
 
-        {/* ── Footer ── */}
-        <View style={styles.footer}>
-          <Text style={styles.footerThanks}>Thank you for your business!</Text>
-          <Text style={styles.footerText}>
-            {SELLER.name} · {SELLER.address} · GSTIN: {SELLER.gstin}
-          </Text>
-          <Text style={styles.footerText}>
-            {SELLER.phone} · {SELLER.email}
-          </Text>
-          <Text style={styles.footerNote}>
-            This is a computer-generated invoice and does not require a physical signature.
-          </Text>
+        <View style={s.footer} fixed>
+          <Text style={s.footerText}>Computer-generated invoice. No signature required.</Text>
+          <Text style={s.footerText} render={({ pageNumber, totalPages }) => `${data.orderNumber} · Page ${pageNumber} of ${totalPages}`} />
         </View>
       </Page>
     </Document>

@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth/server'
 import { NextRequest, NextResponse, after } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { createDeliveryPaymentLink } from '@/lib/razorpay'
+import QRCode from 'qrcode'
 import { notifyOrderEvent } from '@/lib/resend/notify'
 import type { AuthMetadata } from '@/types'
 import { isDeliveryEnabled } from '@/lib/settings/delivery'
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
 
   let body: {
     order_id: string
-    action: 'create_payment_link' | 'confirm_delivery'
+    action: 'create_payment_link' | 'check_payment' | 'confirm_delivery'
     payment_type?: 'cash' | 'online'
     amount_received?: number
   }
@@ -77,11 +78,27 @@ export async function POST(req: NextRequest) {
   if (body.action === 'create_payment_link') {
     if (due <= 0) return NextResponse.json({ error: 'Nothing left to collect on this order.' }, { status: 400 })
     try {
-      const paymentUrl = await createDeliveryPaymentLink(body.order_id, due)
-      return NextResponse.json({ ok: true, payment_url: paymentUrl })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: profile } = await (supabase as any).from('profiles').select('email').eq('id', order.user_id ?? '').maybeSingle()
+      const link = await createDeliveryPaymentLink({
+        orderId: body.order_id,
+        orderNumber: order.order_number,
+        amount: due,
+        customer: { name: order.address?.name, phone: order.address?.phone, email: profile?.email ?? null },
+      })
+      // Remember the link so the payment_link.paid webhook can mark this order paid.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('orders').update({ payment_link_id: link.id }).eq('id', body.order_id)
+      const qr = await QRCode.toDataURL(link.url, { width: 480, margin: 1, color: { dark: '#292966', light: '#ffffff' } })
+      return NextResponse.json({ ok: true, payment_url: link.url, qr })
     } catch (e) {
       return NextResponse.json({ error: 'Failed to create payment link', detail: String(e) }, { status: 500 })
     }
+  }
+
+  // Has the customer paid the link yet? (The webhook flips payment_status.)
+  if (body.action === 'check_payment') {
+    return NextResponse.json({ ok: true, paid: alreadyPaid })
   }
 
   // Confirm delivery and record payment

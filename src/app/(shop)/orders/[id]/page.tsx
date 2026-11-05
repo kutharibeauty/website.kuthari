@@ -5,6 +5,7 @@ import { redirect, notFound } from 'next/navigation'
 import type { AuthMetadata } from '@/types'
 import type { Order } from '@/types/database.types'
 import OrderDetailClient from './OrderDetailClient'
+import type { OrderIssue } from '@/lib/orders/issues'
 
 // Private, per-customer page — noindex, but a clean title/description for tabs & shares.
 export const metadata: Metadata = {
@@ -42,6 +43,10 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
 
   if (error || !data) notFound()
 
+  // A damaged / wrong item request on this order, if the customer made one.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: issue } = await (supabase as any).from('order_issues').select('*').eq('order_id', id).maybeSingle()
+
   // Referral code to celebrate on a brand-new order (generated at checkout).
   const { getReferralConfig, referralBenefitText } = await import('@/lib/referral/config')
   const referralCfg = await getReferralConfig()
@@ -57,6 +62,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
     <OrderDetailClient
       order={data as unknown as Order}
       isNew={isNew === '1'}
+      issue={(issue ?? null) as OrderIssue | null}
       referralCode={referralCode}
       referralBenefit={referralCfg.enabled ? referralBenefitText(referralCfg) : null}
     />

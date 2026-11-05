@@ -5,6 +5,7 @@ import type { AuthMetadata } from '@/types'
 import type { OrderStatus } from '@/types/database.types'
 import { notifyOrderEvent } from '@/lib/resend/notify'
 import { restoreStockForOrder } from '@/lib/orders/stock'
+import { refundOrder } from '@/lib/orders/refund'
 import { requirePermission } from '@/lib/auth/guard'
 
 const VALID_STATUSES: OrderStatus[] = ['placed', 'confirmed', 'packed', 'shipping', 'delivered', 'cancelled', 'returned']
@@ -57,6 +58,9 @@ export async function PATCH(
   if (body.notes !== undefined) updateData.notes = body.notes
   if (body.estimated_delivery !== undefined) updateData.estimated_delivery = body.estimated_delivery
   if (body.custom_message !== undefined) updateData.custom_message = body.custom_message
+  // The damaged-item window (48 h) counts from delivery, so stamp it when staff
+  // mark an order delivered here rather than through the delivery app.
+  if (body.status === 'delivered' && prevStatus !== 'delivered') updateData.delivered_at = new Date().toISOString()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
@@ -92,7 +96,12 @@ export async function PATCH(
   // change (PRD #4). Best-effort — never blocks the status update.
   if (body.status && ['confirmed', 'packed', 'shipping', 'delivered', 'cancelled', 'returned'].includes(body.status)) {
     const status = body.status
-    after(() => notifyOrderEvent(id, status, { adminProfileId: meta?.admin_profile_id ?? null, customMessage: body.custom_message?.trim() || null }))
+    // A cancelled order gets its online payment refunded before the email goes out.
+    const refundFirst = status === 'cancelled' && prevStatus !== 'cancelled'
+    after(async () => {
+      if (refundFirst) await refundOrder(id, 'Cancelled by the shop')
+      await notifyOrderEvent(id, status, { adminProfileId: meta?.admin_profile_id ?? null, customMessage: body.custom_message?.trim() || null })
+    })
   }
 
   return NextResponse.json({ ok: true })

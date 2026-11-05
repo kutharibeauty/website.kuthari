@@ -71,6 +71,7 @@ export default function AdminSidebar({ role, onClose, className, badges, name, p
       label: 'Operations',
       items: [
         { href: '/admin/orders',     label: 'Orders',          icon: 'receipt_long',          show: can('view_orders'),          badge: badges?.orders },
+        { href: '/admin/returns',    label: 'Damaged items',   icon: 'assignment_return',     show: can('update_order_status'),  badge: badges?.returns },
         { href: '/admin/products',   label: 'Products',        icon: 'inventory_2',           show: can('manage_products') },
         { href: '/admin/categories', label: 'Categories',      icon: 'category',              show: can('manage_categories') },
         { href: '/admin/coupons',    label: 'Coupons',         icon: 'local_offer',           show: can('manage_coupons') },

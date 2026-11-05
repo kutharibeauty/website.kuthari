@@ -11,7 +11,7 @@ import { useFlyToCartStore } from '@/store/flyToCartStore'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
-import { getBuyOptions, pluralLabelOf } from '@/lib/products/packaging'
+import { getBuyOptions, pluralLabelOf, minQtyFor, bulkMinPieces } from '@/lib/products/packaging'
 import type { Product } from '@/types/database.types'
 
 interface Props {
@@ -76,7 +76,10 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
       ? tField('Boxes', 'ବାକ୍ସ')
       : (product.pack_type ? pluralize(product.pack_type) : tField('units', 'ୟୁନିଟ୍'))
   const maxQty = product.stock_qty > 0 ? product.stock_qty : 9999
-  const clampNum = (n: number) => Math.max(1, Math.min(Math.floor(n), maxQty))
+  // Bulk price needs a minimum number of pieces (admin-set per product).
+  const minQty = hasLevels ? minQtyFor(product, opt) : 1
+  const minPieces = bulkMinPieces(product)
+  const clampNum = (n: number) => Math.max(minQty, Math.min(Math.floor(n), maxQty))
 
   // Each level is its own cart line (a Hanger and a Pack are separate).
   const lineId = hasLevels ? `${product.id}::${opt.label}` : product.id
@@ -84,6 +87,12 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
 
   const [showSheet, setShowSheet] = useState(false)
   const [qtyStr, setQtyStr] = useState('1')
+  // Picking a bulk level in the sheet lifts the quantity to its minimum.
+  const [lastMin, setLastMin] = useState(minQty)
+  if (lastMin !== minQty) {
+    setLastMin(minQty)
+    if ((parseInt(qtyStr || '1', 10) || 1) < minQty) setQtyStr(String(minQty))
+  }
   const qtyNum = clampNum(parseInt(qtyStr || '1', 10) || 1)
 
   // Portal target only exists on the client.
@@ -129,7 +138,9 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
       image: product.images?.[0] ?? null,
       slug: product.slug,
       delivery_charge: product.delivery_charge_enabled ? (product.delivery_charge ?? 0) : 0,
+      min_qty: minQty > 1 ? minQty : undefined,
     })
+    quantity = Math.max(minQty, quantity)
     if (quantity > 1) updateQuantity(lineId, quantity)
     useFlyToCartStore.getState().launch(product.images?.[0] ?? null, anchorRef.current)
     setFlash(true)
@@ -143,7 +154,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
     if (!requireAuth()) return
     // Ask "how many?" before the first add for every product.
     if (!cartItem) {
-      setQtyStr('1')
+      setQtyStr(String(minQty))
       setShowSheet(true)
       return
     }
@@ -159,7 +170,10 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
     e.preventDefault()
     e.stopPropagation()
     if (!cartItem) return
-    updateQuantity(cartItem.id, cartItem.quantity + delta)
+    const next = cartItem.quantity + delta
+    // Below the bulk minimum the line comes out rather than sitting at a price
+    // the customer no longer qualifies for.
+    updateQuantity(cartItem.id, next < (cartItem.min_qty ?? 1) ? 0 : next)
   }
 
   const fmt = (n: number) => n.toLocaleString('en-IN')
@@ -235,13 +249,22 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
               </>
             )}
 
+            {minQty > 1 && (
+              <div className="mb-3 rounded-xl border-2 border-secondary/40 bg-secondary-container/60 px-3 py-2.5" role="status">
+                <p className="text-[14px] font-bold text-primary">Bulk price from {minPieces} pieces</p>
+                <p className="text-[13px] text-on-surface-variant">
+                  Order at least {minQty} {minQty === 1 ? unitWord : unitWordPlural} for this price.
+                </p>
+              </div>
+            )}
+
             <p className="text-[13px] font-semibold text-on-surface-variant/60 mb-2">
               {`Select quantity`}
             </p>
 
             {/* Quick options: 1 box / 10 boxes */}
             <div className="grid grid-cols-2 gap-3 mb-3">
-              {[1, 10].map((n) => {
+              {(minQty > 1 ? [minQty, minQty * 2] : [1, 10]).map((n) => {
                 const sel = qtyStr === String(n)
                 return (
                   <button

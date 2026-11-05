@@ -2,7 +2,7 @@ import { after } from 'next/server'
 import { auth } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cleanGstin } from '@/lib/validations/gst'
-import { findBuyOption } from '@/lib/products/packaging'
+import { findBuyOption, minQtyFor } from '@/lib/products/packaging'
 import { computeDeliveryFee, parseDeliveryConfig, availablePaymentModes, advanceFor } from '@/lib/cart/delivery'
 import { isOrderingOpen, formatMinute } from '@/lib/store-hours'
 import { createCheckoutOrder, verifyPaymentSignature, fetchPayment, isRazorpayConfigured } from '@/lib/razorpay'
@@ -115,6 +115,7 @@ export async function POST(request: Request) {
     pieces_per_secondary: number | null; secondary_price: number | null; secondary_mrp: number | null
     units_per_hanger: number | null; hangers_per_pack: number | null
     delivery_charge: number | null; delivery_charge_enabled: boolean | null
+    retail_price?: number | null; retail_mrp?: number | null; bulk_min_qty?: number | null
   }
 
   const productMap = new Map<string, DbProduct>(
@@ -129,6 +130,8 @@ export async function POST(request: Request) {
   // A bulk order is any order with a line bought above the single-piece retail
   // option (a box, pack, hanger...). Decided here from the DB, never by the client.
   let isBulkOrder = false
+  // Bulk lines below the product's bulk-price minimum (admin-set, in pieces).
+  const belowBulkMin: string[] = []
   for (const i of items) {
     const pid = i.product_id ?? i.id
     const product = productMap.get(pid)
@@ -142,6 +145,10 @@ export async function POST(request: Request) {
     // authoritatively from the DB — never trust the client's price.
     const buyOption = findBuyOption(product, i.variant)
     if (buyOption?.level !== 'retail') isBulkOrder = true
+    const minQty = minQtyFor(product, buyOption)
+    if (i.quantity < minQty) {
+      belowBulkMin.push(`${product.name}: at least ${minQty} ${minQty === 1 ? buyOption?.label ?? 'unit' : (buyOption?.pluralLabel ?? buyOption?.label ?? 'units')} for the bulk price`)
+    }
     if (buyOption) {
       price = buyOption.price
       mrp = buyOption.mrp
@@ -164,6 +171,13 @@ export async function POST(request: Request) {
       image: product.images?.[0] ?? null,
       stock_units: stockUnits,
     })
+  }
+
+  if (belowBulkMin.length > 0) {
+    return Response.json({
+      error: `Bulk price needs a minimum quantity. ${belowBulkMin.join('; ')}. Add more, or switch to the single-piece price.`,
+      error_code: 'bulk_minimum',
+    }, { status: 400 })
   }
 
   if (unavailableIds.length > 0) {
@@ -419,7 +433,11 @@ export async function POST(request: Request) {
     if (!rzp?.payment_id || !rzp.order_id || !rzp.signature) {
       // Phase 1 - start the payment. No order is created until it succeeds.
       try {
-        const rzOrder = await createCheckoutOrder(amountPaise, `kbs_${profileId.slice(0, 8)}_${Date.now()}`)
+        const rzOrder = await createCheckoutOrder(amountPaise, `kbs_${profileId.slice(0, 8)}_${Date.now()}`, {
+          customer: String(address?.name ?? '').slice(0, 60),
+          phone: String(address?.phone ?? ''),
+          mode,
+        })
         return Response.json({
           needs_payment: true,
           razorpay: {

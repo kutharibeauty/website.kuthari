@@ -41,6 +41,14 @@ export interface OrderEmailData {
   amountPaid?: number | null
 }
 
+export interface IssueEmailData {
+  orderId: string
+  orderNumber: string
+  deliveredAt?: string | null
+  issue: import('@/lib/orders/issues').OrderIssue
+  customer: { name: string; phone: string; email?: string | null; address?: Address | null }
+}
+
 export interface AdminRecipient {
   email: string
   name: string
@@ -109,7 +117,7 @@ export async function sendWelcomeCustomer(data: { email: string | null; name?: s
   await resend.emails.send({
     from: FROM,
     to: data.email,
-    subject: 'Welcome to Kuthari Beauty Store! 🎉',
+    subject: 'Welcome to Kuthari Beauty Store',
     html,
   })
 }
@@ -121,7 +129,7 @@ export async function sendOrderPlacedCustomer(data: OrderEmailData): Promise<voi
   await resend.emails.send({
     from: FROM,
     to: data.customerEmail,
-    subject: `Order Placed! #${data.orderNumber} — KUTHARI BEAUTY STORE`,
+    subject: `We've got your order #${data.orderNumber}`,
     html,
   })
 }
@@ -133,7 +141,7 @@ export async function sendOrderPlacedAdmin(data: OrderEmailData, admins: AdminRe
   await resend.emails.send({
     from: FROM,
     to: admins.map(a => a.email),
-    subject: `🛒 New Order #${data.orderNumber} | ₹${data.total.toLocaleString('en-IN')} | ${data.address.phone}`,
+    subject: `New order #${data.orderNumber} · ₹${data.total.toLocaleString('en-IN')} · ${data.address.name}`,
     html,
   })
 }
@@ -146,7 +154,7 @@ export async function sendOrderConfirmedCustomer(data: OrderEmailData): Promise<
   await resend.emails.send({
     from: FROM,
     to: data.customerEmail,
-    subject: data.customSubject?.trim() || `✅ Order Confirmed! #${data.orderNumber} — KUTHARI BEAUTY STORE`,
+    subject: data.customSubject?.trim() || `Order #${data.orderNumber} is confirmed`,
     html,
     attachments,
   })
@@ -160,7 +168,7 @@ export async function sendOrderStatusUpdate(data: OrderEmailData): Promise<void>
   const attachments = isDelivered ? await buildInvoiceAttachment(data) : []
   const statusTitle = STATUS_TITLES[data.status ?? ''] ?? data.status ?? 'Updated'
   // Admin-set subject wins; otherwise the auto-generated one.
-  const subject = data.customSubject?.trim() || `📦 Order Update: ${statusTitle} | #${data.orderNumber}`
+  const subject = data.customSubject?.trim() || `${statusTitle}: order #${data.orderNumber}`
   await resend.emails.send({
     from: FROM,
     to: data.customerEmail,
@@ -178,19 +186,12 @@ export async function sendOrderStatusUpdate(data: OrderEmailData): Promise<void>
 export async function sendOrderStatusAdmin(data: OrderEmailData, admins: AdminRecipient[]): Promise<void> {
   if (!admins.length) return
   const title = STATUS_TITLES[data.status ?? ''] ?? data.status ?? 'Updated'
-  const html = `<div style="font-family:Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;border:1px solid #e5e1d9;border-radius:12px;overflow:hidden">
-    <div style="background:#1b2c3d;color:#faf6ee;padding:16px 20px;font-weight:700;letter-spacing:1px">KUTHARI BEAUTY STORE — Order Update</div>
-    <div style="padding:20px;color:#1b2c3d">
-      <p style="margin:0 0 10px;font-size:15px">Order <strong>#${data.orderNumber}</strong> is now <strong>${title}</strong>.</p>
-      <p style="margin:0 0 4px;font-size:13px;color:#4f453f">Customer: ${data.customerName ?? '—'}${data.address?.phone ? ` · ${data.address.phone}` : ''}</p>
-      <p style="margin:0 0 4px;font-size:13px;color:#4f453f">Total: ₹${data.total.toLocaleString('en-IN')}</p>
-      ${data.estimatedDelivery ? `<p style="margin:0;font-size:13px;color:#4f453f">ETA: ${data.estimatedDelivery}</p>` : ''}
-    </div>
-  </div>`
+  const { default: Template } = await import('./templates/order-status-admin')
+  const html = await renderTemplate(Template as unknown as React.ComponentType<Record<string, unknown>>, { ...data, title, siteUrl: SITE_URL })
   await resend.emails.send({
     from: FROM,
     to: admins.map(a => a.email),
-    subject: `📦 Order ${title} — #${data.orderNumber}`,
+    subject: `Order #${data.orderNumber}: ${title}`,
     html,
   })
 }
@@ -203,7 +204,42 @@ export async function sendLowStockAlert(data: LowStockEmailData, admins: AdminRe
   await resend.emails.send({
     from: FROM,
     to: admins.map(a => a.email),
-    subject: `⚠️ Low Stock Alert: ${names.slice(0, 60)}${names.length > 60 ? '…' : ''}`,
+    subject: `Restock: ${names.slice(0, 60)}${names.length > 60 ? '…' : ''}`,
+    html,
+  })
+}
+
+// ── Damaged / wrong item requests ──────────────────────────────────────────────
+
+const ISSUE_SUBJECT: Record<string, (n: string) => string> = {
+  requested: (n) => `We've got your request for order #${n}`,
+  approved: (n) => `Approved: we'll replace your item from order #${n}`,
+  rejected: (n) => `About your request for order #${n}`,
+  resolved: (n) => `Your replacement for order #${n} is on its way`,
+}
+
+export async function sendIssueCustomer(data: IssueEmailData): Promise<void> {
+  if (!data.customer.email) return
+  const { default: Template } = await import('./templates/issue-customer')
+  const html = await renderTemplate(Template as unknown as React.ComponentType<Record<string, unknown>>, { ...data, siteUrl: SITE_URL })
+  await resend.emails.send({
+    from: FROM,
+    to: data.customer.email,
+    subject: (ISSUE_SUBJECT[data.issue.status] ?? ISSUE_SUBJECT.requested)(data.orderNumber),
+    html,
+  })
+}
+
+export async function sendIssueAdmin(data: IssueEmailData, admins: AdminRecipient[], variant: 'new' | 'approved'): Promise<void> {
+  if (!admins.length) return
+  const { default: Template } = await import('./templates/issue-admin')
+  const html = await renderTemplate(Template as unknown as React.ComponentType<Record<string, unknown>>, { ...data, variant, siteUrl: SITE_URL })
+  await resend.emails.send({
+    from: FROM,
+    to: admins.map((a) => a.email),
+    subject: variant === 'new'
+      ? `Damaged / wrong item: order #${data.orderNumber} · ${data.customer.name}`
+      : `Book ${data.issue.resolution}: order #${data.orderNumber} · ${data.customer.name} ${data.customer.phone}`,
     html,
   })
 }
@@ -229,4 +265,5 @@ const STATUS_TITLES: Record<string, string> = {
   out_for_delivery: 'Out for Delivery',
   delivered:        'Delivered',
   cancelled:        'Order Cancelled',
+  returned:         'Order Returned',
 }

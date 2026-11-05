@@ -30,12 +30,15 @@ export function isRazorpayConfigured(): boolean {
 export async function createCheckoutOrder(
   amountPaise: number,
   receipt: string,
+  notes?: Record<string, string>,
 ): Promise<{ id: string; amount: number; currency: string }> {
   const rz = getRazorpay()
   const order = await withTimeout(rz.orders.create({
     amount: amountPaise,
     currency: 'INR',
     receipt,
+    // Shown in the Razorpay dashboard, so a payment can be found by phone or mode.
+    ...(notes ? { notes } : {}),
     // Auto-capture so a successful payment is settled, not left authorized.
     payment_capture: true,
   }))
@@ -73,18 +76,57 @@ export async function fetchPayment(
   return { status: String(p.status), amount: Number(p.amount), orderId: p.order_id ? String(p.order_id) : null }
 }
 
-export async function createDeliveryPaymentLink(
-  orderId: string,
-  amount: number, // in ₹
-): Promise<string> {
+/**
+ * A payment link for the cash balance of an order, sent to the customer by SMS
+ * (and email when known). reference_id and payment_link_id tie it back to the
+ * order, so the payment_link.paid webhook can mark the balance paid. Expires in
+ * three days.
+ */
+export async function createDeliveryPaymentLink(opts: {
+  orderId: string
+  orderNumber?: string | null
+  amount: number // in ₹
+  customer?: { name?: string | null; phone?: string | null; email?: string | null }
+}): Promise<{ id: string; url: string }> {
   const rz = getRazorpay()
+  const label = opts.orderNumber || opts.orderId.slice(-8).toUpperCase()
+  const phone = (opts.customer?.phone ?? '').replace(/\D/g, '').slice(-10)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const link: { short_url?: string } = await withTimeout((rz.paymentLink as any).create({
-    amount: Math.round(amount * 100), // paise
+  const link: { id?: string; short_url?: string } = await withTimeout((rz.paymentLink as any).create({
+    amount: Math.round(opts.amount * 100), // paise
     currency: 'INR',
-    description: `Kuthari Beauty Store Order #${orderId.slice(-8).toUpperCase()}`,
-    reminder_enable: false,
-    upi_link: true,
+    description: `Kuthari Beauty Store order #${label}`,
+    // Razorpay rejects a reused reference_id, so add a short suffix per link.
+    reference_id: `${opts.orderId.slice(0, 30)}-${Date.now().toString(36)}`,
+    expire_by: Math.floor(Date.now() / 1000) + 3 * 24 * 3600,
+    customer: {
+      ...(opts.customer?.name ? { name: opts.customer.name } : {}),
+      ...(phone.length === 10 ? { contact: `+91${phone}` } : {}),
+      ...(opts.customer?.email ? { email: opts.customer.email } : {}),
+    },
+    notify: { sms: phone.length === 10, email: !!opts.customer?.email },
+    reminder_enable: true,
+    upi_link: false,
+    notes: { order_id: opts.orderId, order_number: String(label) },
   }))
-  return link.short_url as string
+  return { id: String(link.id), url: String(link.short_url) }
+}
+
+/**
+ * Refund a captured payment, fully or in part. speed 'optimum' makes it instant
+ * where the customer's bank supports it and falls back to a normal refund
+ * otherwise. Returns Razorpay's refund id and status ('pending' | 'processed' | 'failed').
+ */
+export async function refundPayment(
+  paymentId: string,
+  amountPaise: number,
+  notes?: Record<string, string>,
+): Promise<{ id: string; status: string; amount: number }> {
+  const rz = getRazorpay()
+  const r = (await withTimeout(rz.payments.refund(paymentId, {
+    amount: amountPaise,
+    speed: 'optimum',
+    ...(notes ? { notes } : {}),
+  }))) as { id: string; status: string; amount?: number | string }
+  return { id: String(r.id), status: String(r.status), amount: Number(r.amount) }
 }

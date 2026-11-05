@@ -12,6 +12,8 @@ import NotificationBell, { type AdminNotification } from '@/components/admin/Not
 
 export interface AdminBadges {
   orders: number
+  /** Damaged / wrong item requests waiting for review. */
+  returns?: number
 }
 
 interface Props {

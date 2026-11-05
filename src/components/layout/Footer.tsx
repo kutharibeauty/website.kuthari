@@ -19,7 +19,7 @@ const ACCOUNT_LINKS = [
 const HELP_LINKS = [
   { label: 'Contact us', href: '/contact' },
   { label: 'Shipping and delivery', href: '/shipping-policy' },
-  { label: 'Cancellations and refunds', href: '/refund-policy' },
+  { label: 'Cancellations & replacements', href: '/refund-policy' },
   { label: 'Privacy policy', href: '/privacy' },
   { label: 'Terms of use', href: '/terms' },
 ]

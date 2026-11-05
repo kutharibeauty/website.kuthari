@@ -46,6 +46,7 @@ type FormState = {
   secondary_price: string
   retail_price: string
   retail_mrp: string
+  bulk_min_qty: string
   secondary_mrp: string
   packs_per_box: string
   unit_type: string
@@ -150,6 +151,7 @@ export default function ProductForm({
     secondary_price: product?.secondary_price?.toString() ?? '',
     retail_price: product?.retail_price?.toString() ?? '',
     retail_mrp: product?.retail_mrp?.toString() ?? '',
+    bulk_min_qty: (product as { bulk_min_qty?: number | null } | null | undefined)?.bulk_min_qty?.toString() ?? '',
     secondary_mrp: product?.secondary_mrp?.toString() ?? '',
     packs_per_box: product?.packs_per_box?.toString() ?? '',
     unit_type: product?.unit_type ?? '',
@@ -348,6 +350,8 @@ export default function ProductForm({
       // retail whether or not it also has box/pack levels. Blank = bulk-only.
       retail_price: form.retail_price ? parseFloat(form.retail_price) : null,
       retail_mrp: form.retail_mrp ? parseFloat(form.retail_mrp) : null,
+      // Only meaningful alongside a retail price; 1 or blank = no minimum.
+      bulk_min_qty: form.retail_price && parseInt(form.bulk_min_qty, 10) > 1 ? parseInt(form.bulk_min_qty, 10) : null,
       secondary_price: !isHangerModel && form.secondary_price ? parseFloat(form.secondary_price) : null,
       secondary_mrp: !isHangerModel && form.secondary_mrp ? parseFloat(form.secondary_mrp) : null,
       packs_per_box: !isHangerModel && form.packs_per_box ? parseInt(form.packs_per_box, 10) : null,
@@ -897,6 +901,19 @@ export default function ProductForm({
                     className={inputCls}
                   />
                 </Field>
+                {form.retail_price && (
+                  <Field label="Bulk price from (pieces)" hint="Fewest pieces a customer must buy to get the bulk price. Blank = no minimum">
+                    <input
+                      type="number"
+                      value={form.bulk_min_qty}
+                      min={2}
+                      step={1}
+                      onChange={e => set('bulk_min_qty', e.target.value)}
+                      placeholder="e.g. 12"
+                      className={inputCls}
+                    />
+                  </Field>
+                )}
               </div>
             </div>
 

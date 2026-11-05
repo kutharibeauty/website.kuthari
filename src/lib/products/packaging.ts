@@ -34,6 +34,8 @@ export interface PackagingProduct {
   // Null when the product is sold in bulk only.
   retail_price?: number | null
   retail_mrp?: number | null
+  /** Pieces a customer must buy to get the bulk price (admin-set; null = no minimum). */
+  bulk_min_qty?: number | null
 }
 
 export type BuyLevel = 'box' | 'secondary' | 'retail'
@@ -215,4 +217,27 @@ export function describeSelection(qty: number, opt: BuyOption, pieceWord = 'Piec
   const unit = qty === 1 ? unitNounOf(opt) : unitNounPluralOf(opt)
   if (opt.pieces == null) return `${qty} ${unit}`
   return `${qty} ${unit} = ${(qty * opt.pieces).toLocaleString('en-IN')} ${pieceWord}`
+}
+
+/**
+ * The bulk-price minimum, in pieces. Only applies to products that have BOTH a
+ * retail and a bulk price (a bulk-only product has nothing cheaper to protect).
+ * Null when there is no minimum.
+ */
+export function bulkMinPieces(p: PackagingProduct): number | null {
+  const n = Math.floor(Number(p.bulk_min_qty))
+  return hasRetailPrice(p) && Number.isFinite(n) && n > 1 ? n : null
+}
+
+/**
+ * The fewest of `opt` a customer can buy. 1 for the retail option or when the
+ * product has no bulk minimum; otherwise enough units of `opt` to reach the
+ * minimum number of pieces (a Box of 24 already clears a 12-piece minimum).
+ * The cart, product page and order API all use this, so they agree.
+ */
+export function minQtyFor(p: PackagingProduct, opt: BuyOption | null | undefined): number {
+  if (!opt || opt.level === 'retail') return 1
+  const min = bulkMinPieces(p)
+  if (!min) return 1
+  return Math.max(1, Math.ceil(min / Math.max(1, opt.pieces ?? 1)))
 }

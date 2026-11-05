@@ -82,6 +82,9 @@ export async function notifyOrderEvent(
       gstin: order.gstin ?? null,
       gstBusinessName: order.gst_business_name ?? null,
       customSubject: opts.subjectOverride?.trim() || null,
+      transportDetails: order.transport_details ?? null,
+      paymentMethod: order.payment_method ?? null,
+      amountPaid: order.amount_paid ?? null,
     }
 
     const resend = await import('./index')

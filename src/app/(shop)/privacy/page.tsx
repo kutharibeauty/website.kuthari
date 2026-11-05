@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default async function PrivacyPage() {
   const { contact } = await getStoreContent()
-  const STORE = { name: 'Kuthari Beauty Store', address: contact.address, phones: contact.phones, email: contact.email, hours: contact.hours, updated: '4 November 2026' }
+  const STORE = { name: 'Kuthari Beauty Store', address: contact.address, phones: contact.phones, email: contact.email, hours: contact.hours, updated: '5 November 2026' }
   return (
     <LegalPage
       title="Privacy policy"
@@ -41,7 +41,7 @@ export default async function PrivacyPage() {
             <ul>
               <li>To sign you in with a one-time code sent to your phone.</li>
               <li>To take payment, pack and deliver your order, and send you its invoice and updates.</li>
-              <li>To answer your questions and sort out any problem with an order.</li>
+              <li>To answer your questions and sort out any problem with an order, including the photos you send when you report a damaged or wrong item.</li>
               <li>To keep accounts and meet our tax and legal duties.</li>
             </ul>
           ),
@@ -65,7 +65,7 @@ export default async function PrivacyPage() {
                 <li>Our delivery staff and partners, who need your name, phone and address to deliver.</li>
                 <li>Message Central, to send sign-in codes by SMS.</li>
                 <li>Resend, to send order emails.</li>
-                <li>Supabase and Vercel, which store and host the site.</li>
+                <li>Supabase and Vercel, which store and host the site, and Cloudflare, which stores and serves images (including photos you send with a damaged-item report).</li>
               </ul>
               <p>We may also share information when the law requires it.</p>
             </>

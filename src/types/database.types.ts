@@ -227,13 +227,21 @@ export interface Order {
   coupon_code?: string | null
   total: number
   status: OrderStatus
-  payment_method: 'cod'
+  payment_method: 'online' | 'cod' | 'partial'
+  payment_status?: string | null
+  /** What was paid online so far, and what is left to collect (migration 042). */
+  amount_paid?: number | null
+  amount_due?: number | null
+  /** Razorpay refund of the online payment after a cancellation (migration 046). */
+  refund_status?: 'pending' | 'processed' | 'failed' | null
+  refund_amount?: number | null
   notes: string | null
   /** Bus/transport chosen at checkout (migration 034). Text snapshot. */
   transport_details?: string | null
   is_bulk: boolean
   estimated_delivery?: string | null
   custom_message?: string | null
+  delivered_at?: string | null
   returned_at?: string | null
   gstin?: string | null
   gst_business_name?: string | null
@@ -271,6 +279,7 @@ export interface CartItem {
   quantity: number
   slug: string
   delivery_charge?: number  // per-product delivery charge (₹), 0 when none/disabled
+  min_qty?: number          // fewest of this line allowed (bulk-price minimum); absent = 1
 }
 
 // ── Supabase Database type ─────────────────────────────────────────────────

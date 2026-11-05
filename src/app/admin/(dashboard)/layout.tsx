@@ -24,10 +24,13 @@ const fetchBadges = unstable_cache(
       const supabase = createAdminClient()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any
-      const ordersRes = await db.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'placed')
-      return { orders: ordersRes.count ?? 0 }
+      const [ordersRes, issuesRes] = await Promise.all([
+        db.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'placed'),
+        db.from('order_issues').select('id', { count: 'exact', head: true }).eq('status', 'requested'),
+      ])
+      return { orders: ordersRes.count ?? 0, returns: issuesRes.count ?? 0 }
     } catch {
-      return { orders: 0 }
+      return { orders: 0, returns: 0 }
     }
   },
   ['admin-badges'],

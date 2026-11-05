@@ -1,125 +1,55 @@
-import {
-  Body, Container, Head, Heading, Hr, Html,
-  Preview, Section, Text, Row, Column, Button,
-} from '@react-email/components'
+import { Column, Row, Section, Text } from '@react-email/components'
 import type { LowStockEmailData } from '../index'
+import { C, CTA, EmailShell, Hero, SectionTitle } from './_kit'
 
 type Props = LowStockEmailData & { siteUrl: string }
 
-export default function LowStockAlert({ products, siteUrl }: Props) {
-  const critical = products.filter(p => p.stockQty === 0)
-  const low = products.filter(p => p.stockQty > 0)
+type P = LowStockEmailData['products'][number]
 
+function StockTable({ rows, tone }: { rows: P[]; tone: 'out' | 'low' }) {
+  const color = tone === 'out' ? C.red : C.amber
+  const head = { margin: 0, fontSize: '10px', letterSpacing: '1.5px', fontWeight: 700, color: C.muted, textTransform: 'uppercase' as const }
   return (
-    <Html lang="en">
-      <Head />
-      <Preview>{`⚠️ Low Stock Alert — ${products.length} product${products.length > 1 ? 's' : ''} need restocking`}</Preview>
-      <Body style={body}>
-        <Container style={container}>
-
-          {/* Header */}
-          <Section style={alertHeader}>
-            <Text style={alertIcon}>⚠️</Text>
-            <Heading style={alertTitle}>Low Stock Alert</Heading>
-            <Text style={alertSub}>{products.length} product{products.length > 1 ? 's' : ''} need restocking</Text>
-          </Section>
-
-          {/* Critical: out of stock */}
-          {critical.length > 0 && (
-            <Section style={section}>
-              <Heading style={{ ...sectionTitle, color: '#dc2626' }}>
-                🔴 Out of Stock ({critical.length})
-              </Heading>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#fee2e2' }}>
-                    <th style={th}>Product</th>
-                    <th style={{ ...th, textAlign: 'center' }}>SKU</th>
-                    <th style={{ ...th, textAlign: 'center' }}>Stock</th>
-                    <th style={{ ...th, textAlign: 'center' }}>Threshold</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {critical.map((p, i) => (
-                    <tr key={i} style={{ backgroundColor: '#fff1f2', borderBottom: '1px solid #fecaca' }}>
-                      <td style={td}><Text style={productName}>{p.name}</Text></td>
-                      <td style={{ ...td, textAlign: 'center' as const }}><Text style={skuText}>{p.sku ?? '—'}</Text></td>
-                      <td style={{ ...td, textAlign: 'center' as const }}><Text style={zeroStock}>0</Text></td>
-                      <td style={{ ...td, textAlign: 'center' as const }}><Text style={thresholdText}>{p.lowStockThreshold}</Text></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Section>
-          )}
-
-          {/* Low stock */}
-          {low.length > 0 && (
-            <Section style={section}>
-              <Heading style={{ ...sectionTitle, color: '#d97706' }}>
-                🟡 Low Stock ({low.length})
-              </Heading>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#fef3c7' }}>
-                    <th style={th}>Product</th>
-                    <th style={{ ...th, textAlign: 'center' }}>SKU</th>
-                    <th style={{ ...th, textAlign: 'center' }}>Stock</th>
-                    <th style={{ ...th, textAlign: 'center' }}>Threshold</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {low.map((p, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid #fde68a' }}>
-                      <td style={td}><Text style={productName}>{p.name}</Text></td>
-                      <td style={{ ...td, textAlign: 'center' as const }}><Text style={skuText}>{p.sku ?? '—'}</Text></td>
-                      <td style={{ ...td, textAlign: 'center' as const }}>
-                        <Text style={{ ...lowStockNum, color: p.stockQty <= Math.floor(p.lowStockThreshold / 2) ? '#dc2626' : '#d97706' }}>
-                          {p.stockQty}
-                        </Text>
-                      </td>
-                      <td style={{ ...td, textAlign: 'center' as const }}><Text style={thresholdText}>{p.lowStockThreshold}</Text></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Section>
-          )}
-
-          {/* CTA */}
-          <Section style={{ textAlign: 'center' as const, padding: '0 32px 24px' }}>
-            <Button href={`${siteUrl}/admin/products`} style={ctaBtn}>
-              Manage Inventory →
-            </Button>
-          </Section>
-
-          <Hr style={divider} />
-
-          <Section style={footer}>
-            <Text style={footerText}>Kuthari Beauty Store Admin · Low Stock Notification</Text>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
+    <Section style={{ margin: '0 0 24px' }}>
+      <Row style={{ borderBottom: `2px solid ${C.ink}` }}>
+        <Column style={{ padding: '0 0 6px' }}><Text style={head}>Product</Text></Column>
+        <Column style={{ width: '70px', padding: '0 0 6px', textAlign: 'right' as const }}><Text style={head}>In stock</Text></Column>
+        <Column style={{ width: '70px', padding: '0 0 6px', textAlign: 'right' as const }}><Text style={head}>Alert at</Text></Column>
+      </Row>
+      {rows.map((p) => (
+        <Row key={p.id} style={{ borderBottom: `1px solid ${C.line}` }}>
+          <Column style={{ padding: '10px 0' }}>
+            <Text style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: C.text }}>{p.name}</Text>
+            {p.sku && <Text style={{ margin: '2px 0 0', fontSize: '12px', color: C.muted }}>{p.sku}</Text>}
+          </Column>
+          <Column style={{ width: '70px', textAlign: 'right' as const }}>
+            <Text style={{ margin: 0, fontSize: '16px', fontWeight: 700, color }}>{p.stockQty}</Text>
+          </Column>
+          <Column style={{ width: '70px', textAlign: 'right' as const }}>
+            <Text style={{ margin: 0, fontSize: '14px', color: C.muted }}>{p.lowStockThreshold}</Text>
+          </Column>
+        </Row>
+      ))}
+    </Section>
   )
 }
 
-const body = { backgroundColor: '#eeeef8', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0', padding: '20px 0' }
-const container = { maxWidth: '600px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden' as const }
-const alertHeader = { backgroundColor: '#92400e', padding: '28px 32px', textAlign: 'center' as const }
-const alertIcon = { fontSize: '40px', margin: '0 0 4px' }
-const alertTitle = { color: '#ffffff', fontSize: '24px', fontWeight: '700', margin: '0 0 6px' }
-const alertSub = { color: '#fde68a', fontSize: '14px', margin: '0' }
-const section = { padding: '24px 32px' }
-const sectionTitle = { fontSize: '14px', fontWeight: '700', margin: '0 0 14px', textTransform: 'uppercase' as const, letterSpacing: '0.8px' }
-const th = { padding: '8px 10px', textAlign: 'left' as const, fontSize: '11px', fontWeight: '600', textTransform: 'uppercase' as const, color: '#4f453f' }
-const td = { padding: '10px', verticalAlign: 'top' as const }
-const productName = { color: '#1c1c17', fontSize: '14px', fontWeight: '600', margin: '0' }
-const skuText = { color: '#81756e', fontSize: '12px', fontFamily: 'monospace', margin: '0' }
-const zeroStock = { color: '#dc2626', fontSize: '15px', fontWeight: '700', margin: '0' }
-const lowStockNum = { fontSize: '15px', fontWeight: '700', margin: '0' }
-const thresholdText = { color: '#81756e', fontSize: '13px', margin: '0' }
-const ctaBtn = { backgroundColor: '#292966', color: '#f7f7fc', borderRadius: '24px', padding: '14px 28px', fontSize: '15px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }
-const divider = { borderColor: '#e5e1d9', margin: '0' }
-const footer = { backgroundColor: '#eeeef8', padding: '20px 32px', textAlign: 'center' as const }
-const footerText = { color: '#81756e', fontSize: '12px', margin: '0' }
+export default function LowStockAlert({ products, siteUrl }: Props) {
+  const out = products.filter((p) => p.stockQty <= 0)
+  const low = products.filter((p) => p.stockQty > 0)
+  const n = products.length
+
+  return (
+    <EmailShell siteUrl={siteUrl} audience="staff" preview={`${n} product${n === 1 ? '' : 's'} need restocking${out.length ? `, ${out.length} sold out` : ''}.`}>
+      <Hero eyebrow="Stock check" title={`${n} to restock`} tone={out.length ? 'bad' : 'warn'}
+        accent={out.length ? `${out.length} already sold out` : 'Running low'}>
+        These products are at or below their alert level.
+      </Hero>
+
+      {out.length > 0 && (<><SectionTitle>Sold out</SectionTitle><StockTable rows={out} tone="out" /></>)}
+      {low.length > 0 && (<><SectionTitle>Running low</SectionTitle><StockTable rows={low} tone="low" /></>)}
+
+      <CTA href={`${siteUrl}/admin/products`}>Update stock</CTA>
+    </EmailShell>
+  )
+}

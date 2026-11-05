@@ -51,11 +51,17 @@ export async function GET(req: NextRequest) {
   const rows = (captured ?? []) as PaymentRow[]
   if (rows.length === 0) return NextResponse.json({ success: true, orphaned: 0 })
 
-  const { data: matched } = await db
-    .from('orders')
-    .select('payment_reference')
-    .in('payment_reference', rows.map((r) => r.razorpay_payment_id))
-  const withOrder = new Set(((matched ?? []) as { payment_reference: string }[]).map((o) => o.payment_reference))
+  // A payment belongs to an order either as its checkout payment or as a cash
+  // balance paid later through a payment link.
+  const ids = rows.map((r) => r.razorpay_payment_id)
+  const [{ data: matched }, { data: matchedBalance }] = await Promise.all([
+    db.from('orders').select('payment_reference').in('payment_reference', ids),
+    db.from('orders').select('balance_payment_reference').in('balance_payment_reference', ids),
+  ])
+  const withOrder = new Set([
+    ...((matched ?? []) as { payment_reference: string }[]).map((o) => o.payment_reference),
+    ...((matchedBalance ?? []) as { balance_payment_reference: string }[]).map((o) => o.balance_payment_reference),
+  ])
   const orphans = rows.filter((r) => !withOrder.has(r.razorpay_payment_id))
 
   if (orphans.length > 0) {

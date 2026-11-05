@@ -9,7 +9,7 @@ import { useAuthPromptStore } from '@/store/authPromptStore'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
-import { retailOption, bulkBuyOptions, describeSelection, unitNounOf, unitNounPluralOf, type BuyOption } from '@/lib/products/packaging'
+import { retailOption, bulkBuyOptions, describeSelection, unitNounOf, unitNounPluralOf, minQtyFor, bulkMinPieces, type BuyOption } from '@/lib/products/packaging'
 import type { Product } from '@/types/database.types'
 
 /**
@@ -40,6 +40,9 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
   // plain single-price product with no packaging at all).
   const hasLevels = hasRetail || hasBulkChoice || !!product.pack_type
 
+  // Bulk price needs a minimum number of pieces (admin-set per product).
+  const minQty = minQtyFor(product, activeOption)
+  const minPieces = bulkMinPieces(product)
   const [qty, setQty] = useState(1)
   // Separate string state for the typed field so it can be cleared/empty while
   // editing (the numeric qty stays ≥1; we normalize the text on blur).
@@ -61,9 +64,16 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
   const innerUnitLabel = 'Pieces'
   // Clamp any typed quantity to available stock (never accept an invalid amount).
   const clampQty = (n: number) => {
-    if (!Number.isFinite(n) || n < 1) return 1
-    if (product.stock_qty <= 0) return 1
-    return Math.min(Math.floor(n), product.stock_qty)
+    if (!Number.isFinite(n) || n < minQty) return minQty
+    if (product.stock_qty <= 0) return minQty
+    return Math.max(minQty, Math.min(Math.floor(n), product.stock_qty))
+  }
+  // Switching to a bulk option lifts the quantity to its minimum (state adjusted
+  // during render, React's recommended alternative to an effect).
+  const [lastMin, setLastMin] = useState(minQty)
+  if (lastMin !== minQty) {
+    setLastMin(minQty)
+    if (qty < minQty) { setQty(minQty); setQtyInput(String(minQty)) }
   }
 
   const { tField } = useT()
@@ -91,6 +101,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
     image: product.images?.[0] ?? null,
     slug: product.slug,
     delivery_charge: product.delivery_charge_enabled ? (product.delivery_charge ?? 0) : 0,
+    min_qty: minQty > 1 ? minQty : undefined,
   })
 
   const requireAuth = () => {
@@ -126,7 +137,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
   const AddControl = ({ full }: { full?: boolean }) =>
     cartItem ? (
       <div className={cn('flex items-center justify-between bg-primary text-white rounded-full h-12 px-1', full && 'flex-1')}>
-        <button onClick={() => updateQuantity(cartItem.id, cartItem.quantity - 1)} className="w-11 h-full flex items-center justify-center rounded-full hover:bg-white/15 active:scale-95 transition" aria-label="Remove one">
+        <button onClick={() => updateQuantity(cartItem.id, cartItem.quantity - 1 < minQty ? 0 : cartItem.quantity - 1)} className="w-11 h-full flex items-center justify-center rounded-full hover:bg-white/15 active:scale-95 transition" aria-label="Remove one">
           <Minus size={16} strokeWidth={3} />
         </button>
         {/* Typed quantity — enter e.g. 100 boxes in one action instead of tapping +1 (PRD #1). */}
@@ -260,6 +271,19 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
         </div>
       )}
 
+      {/* The bulk-price minimum, shown as soon as a bulk option is chosen. */}
+      {activeOption.level !== 'retail' && minQty > 1 && (
+        <div className="mb-5 rounded-2xl border-2 border-secondary/40 bg-secondary-container/60 px-4 py-3 animate-drop-in" role="status">
+          <p className="text-[15px] font-bold text-primary">
+            Bulk price from {minPieces} pieces
+          </p>
+          <p className="mt-0.5 text-[14px] text-on-surface-variant">
+            Order at least {minQty} {minQty === 1 ? unitNoun : unitNounPlural} to get ₹{activeOption.price.toLocaleString('en-IN')} each.
+            {retail && <> Need fewer? Choose Single Piece at ₹{retail.price.toLocaleString('en-IN')}.</>}
+          </p>
+        </div>
+      )}
+
       {/* ── Step 2: which bulk unit ──
            Only when buying bulk AND the admin configured more than one bulk
            unit for this product (e.g. Box and Hanger). */}
@@ -330,7 +354,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
           <div className="flex items-center gap-4 flex-wrap">
             {/* +/- stepper */}
             <div className="inline-flex items-center h-12 rounded-full border-2 border-table-border overflow-hidden">
-              <button type="button" onClick={() => setQtyValue(Math.max(1, currentQty - 1))} className="w-12 h-full flex items-center justify-center text-primary hover:bg-surface-container active:scale-95 transition" aria-label="Decrease">
+              <button type="button" onClick={() => setQtyValue(currentQty - 1 < minQty && cartItem ? 0 : Math.max(minQty, currentQty - 1))} className="w-12 h-full flex items-center justify-center text-primary hover:bg-surface-container active:scale-95 transition" aria-label="Decrease">
                 <Minus size={16} strokeWidth={3} />
               </button>
               <span className="w-12 text-center font-black text-base text-primary tabular-nums">{currentQty}</span>

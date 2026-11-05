@@ -25,6 +25,8 @@ function orderToEmailData(order: Order): OrderEmailData {
     // omitting them here silently produced a GST invoice with no GST details.
     gstin: order.gstin ?? null,
     gstBusinessName: order.gst_business_name ?? null,
+    paymentMethod: order.payment_method ?? null,
+    amountPaid: order.amount_paid ?? null,
   }
 }
 

@@ -24,6 +24,8 @@ import {
   Copy,
 } from 'lucide-react'
 import OrderTimeline from '@/components/orders/OrderTimeline'
+import OrderIssuePanel from '@/components/orders/OrderIssuePanel'
+import type { OrderIssue } from '@/lib/orders/issues'
 import ReviewPopup from '@/components/product/ReviewPopup'
 import { useCartStore } from '@/store/cartStore'
 import type { Order, OrderItem } from '@/types/database.types'
@@ -312,9 +314,11 @@ export default function OrderDetailClient({
   isNew,
   referralCode = null,
   referralBenefit = null,
+  issue = null,
 }: {
   order: Order
   isNew: boolean
+  issue?: OrderIssue | null
   referralCode?: string | null
   referralBenefit?: string | null
 }) {
@@ -497,6 +501,28 @@ export default function OrderDetailClient({
         </div>
 
         <div className="max-w-4xl mx-auto px-4 pb-10">
+
+          {/* Damaged / wrong item: report it, or follow the request */}
+          <OrderIssuePanel order={order} initialIssue={issue} />
+
+          {/* Refund of an online payment after cancellation */}
+          {order.refund_status && (
+            <section role="status" className={`rounded-2xl border-2 p-4 mb-4 ${order.refund_status === 'failed' ? 'border-error/40 bg-error/5' : 'border-success/40 bg-success/5'}`}>
+              <p className="font-black text-primary text-[15px]">
+                {order.refund_status === 'processed' ? 'Refund sent'
+                  : order.refund_status === 'failed' ? 'Refund needs attention'
+                  : 'Refund on the way'}
+                {order.refund_amount ? ` · ₹${Number(order.refund_amount).toLocaleString('en-IN')}` : ''}
+              </p>
+              <p className="text-[13px] text-on-surface-variant mt-1">
+                {order.refund_status === 'processed'
+                  ? 'The money is back with your bank or UPI app. Banks can take up to 5 working days to show it.'
+                  : order.refund_status === 'failed'
+                    ? 'We could not refund automatically. The shop has been told and will sort it out.'
+                    : 'Your payment is being refunded to the same account you paid from, usually within 5 to 7 working days.'}
+              </p>
+            </section>
+          )}
 
           {/* Status tracker */}
           <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5 mb-4">
