@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth/server'
-import { aiJSON, isAIConfigured } from '@/lib/ai/openrouter'
+import { isAIConfigured } from '@/lib/ai/openrouter'
+import { writeDescription } from '@/lib/ai/product-copy'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { requirePermission } from '@/lib/auth/guard'
@@ -9,6 +10,9 @@ import { requirePermission } from '@/lib/auth/guard'
  * Body: { name, category?, price?, unit?, brand?, prompt? }
  * → { description: <html EN>, description_or: <html Odia> }
  */
+// Free AI models can be slow; allow up to five minutes.
+export const maxDuration = 300
+
 export async function POST(req: NextRequest) {
   const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
@@ -34,40 +38,9 @@ export async function POST(req: NextRequest) {
 
   if (!name) return NextResponse.json({ error: 'Product name required' }, { status: 400 })
 
-  const facts = [
-    `Product: ${name}`,
-    brand ? `Brand: ${brand}` : null,
-    category ? `Category: ${category}` : null,
-    price != null ? `Price: ₹${price}${unit ? ` per ${unit}` : ''}` : null,
-    unit ? `Unit / pack: ${unit}` : null,
-  ].filter(Boolean).join('\n')
-
-  const system = 'You are a product copywriter for KUTHARI BEAUTY STORE, a beauty shop in Brahmapur, Odisha that sells cosmetics, skincare, haircare, salon and grooming products online across India. Most shoppers buy a single piece at retail price; salons and shops can also buy by the box at a bulk price. You write clear, warm, trustworthy descriptions. You always reply with strict JSON only.'
-
-  const user = `Write a product description for this listing.
-
-${facts}
-${prompt ? `\nExtra instructions from the admin: ${prompt}` : ''}
-
-Requirements:
-- English version: 60-110 words. Lead with what the product does and who it suits, then how to use it. Mention the bulk price only if a box or pack is part of the listing. Do NOT invent specific certifications, weights or prices that were not provided.
-- Odia version: a faithful natural translation of the English version into Odia (ଓଡ଼ିଆ) script.
-- Format BOTH as simple, clean HTML using only these tags: <p>, <ul>, <li>, <strong>. No headings, no inline styles, no markdown.
-
-Return ONLY this JSON, no commentary:
-{"description":"<p>...English HTML...</p>","description_or":"<p>...Odia HTML...</p>"}`
-
   try {
-    const json = await aiJSON<{ description?: string; description_or?: string }>({
-      system, user, maxTokens: 1500, temperature: 0.7,
-    })
-    if (!json.description) {
-      return NextResponse.json({ error: 'AI did not return a description. Please try again.' }, { status: 502 })
-    }
-    return NextResponse.json({
-      description: json.description,
-      description_or: json.description_or ?? '',
-    })
+    const out = await writeDescription({ name, brand, category, price, unit }, prompt)
+    return NextResponse.json(out)
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Description generation failed' }, { status: 502 })
   }

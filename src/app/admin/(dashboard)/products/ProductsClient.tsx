@@ -2,14 +2,15 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams, useRouter } from 'next/navigation'
+import AiFillDialog from './AiFillDialog'
 import { cn } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
 import type { Product } from '@/types/database.types'
 import {
   Upload, Download, Plus, Search, Star, X, CheckSquare, Square,
   ArrowUp, ArrowDown, ChevronsUpDown, Edit3, MessageCircleQuestion, MessageSquare, Image as ImageIcon,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Sparkles,
 } from 'lucide-react'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
@@ -46,6 +47,8 @@ export default function ProductsClient({
   const [sortField, setSortField] = useState<SortField>(() => paramOr(searchParams.get('sort'), ['name', 'price', 'stock_qty', 'created_at'] as const, 'created_at'))
   const [sortDir, setSortDir] = useState<SortDir>(() => (searchParams.get('dir') === 'asc' ? 'asc' : 'desc'))
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [showAiFill, setShowAiFill] = useState(false)
+  const router = useRouter()
   const [editingStockId, setEditingStockId] = useState<string | null>(null)
   const [stockDraft, setStockDraft] = useState('')
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null)
@@ -286,6 +289,14 @@ export default function ProductsClient({
             <Download size={16} strokeWidth={2.5} />
             Export CSV
           </button>
+          <button
+            onClick={() => setShowAiFill(true)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-surface-card border-2 border-primary/40 text-primary rounded-xl font-bold text-[12px] hover:bg-primary/5 transition-colors active:scale-95"
+            title="Write descriptions and SEO for products with AI"
+          >
+            <Sparkles size={16} strokeWidth={2.5} />
+            Fill with AI
+          </button>
           <Link
             href="/admin/products/new"
             className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
@@ -295,6 +306,13 @@ export default function ProductsClient({
           </Link>
         </div>
       </div>
+
+      {showAiFill && (
+        <AiFillDialog
+          selectedIds={[...selectedIds]}
+          onClose={(changed) => { setShowAiFill(false); if (changed) router.refresh() }}
+        />
+      )}
 
       {/* ── Filters ── */}
       <div className="flex flex-wrap gap-3 items-center bg-surface-card border-2 border-table-border p-4 rounded-2xl">

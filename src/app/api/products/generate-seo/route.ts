@@ -1,8 +1,12 @@
 import { auth } from '@/lib/auth/server'
-import { aiJSON, isAIConfigured } from '@/lib/ai/openrouter'
+import { isAIConfigured } from '@/lib/ai/openrouter'
+import { writeSeo } from '@/lib/ai/product-copy'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { requirePermission } from '@/lib/auth/guard'
+
+// Free AI models can be slow; allow up to five minutes.
+export const maxDuration = 300
 
 export async function POST(req: NextRequest) {
   const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
@@ -28,35 +32,9 @@ export async function POST(req: NextRequest) {
 
   if (!name) return NextResponse.json({ error: 'Product name required' }, { status: 400 })
 
-  const priceStr = price != null && unit ? `₹${price} per ${unit}` : price != null ? `₹${price}` : 'Not specified'
-  const plainDesc = description ? description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 400) : 'N/A'
-
-  const system = 'You are an SEO expert for KUTHARI BEAUTY STORE, a beauty shop in Brahmapur, Odisha that sells cosmetics, skincare, haircare, salon and grooming products online across India, by the piece at retail price or by the box at bulk price. You always reply with strict JSON only.'
-
-  const user = `Generate SEO metadata for this product listing.
-- Product name: ${name}
-- Category: ${category ?? 'General'}
-- Price: ${priceStr}
-- Description: ${plainDesc}
-
-Rules:
-- Write for shoppers in India searching to buy this product online.
-- meta_title: <= 60 characters, must include the product name.
-- meta_description: <= 160 characters, says what the product is and ends with a call to action.
-- keywords: exactly 10 specific, high-intent buying keywords (no filler).
-
-Return ONLY this JSON, no markdown, no commentary:
-{"meta_title":"...","meta_description":"...","keywords":["...","..."]}`
-
   try {
-    const json = await aiJSON<{ meta_title?: string; meta_description?: string; keywords?: string[] }>({
-      system, user, maxTokens: 600, temperature: 0.5,
-    })
-    return NextResponse.json({
-      meta_title: (json.meta_title ?? '').slice(0, 60),
-      meta_description: (json.meta_description ?? '').slice(0, 160),
-      keywords: Array.isArray(json.keywords) ? json.keywords.map(String).slice(0, 10) : [],
-    })
+    const out = await writeSeo({ name, description, category, price, unit })
+    return NextResponse.json(out)
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'SEO generation failed' }, { status: 502 })
   }
