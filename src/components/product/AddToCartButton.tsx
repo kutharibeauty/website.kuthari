@@ -11,7 +11,7 @@ import { useFlyToCartStore } from '@/store/flyToCartStore'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
-import { getBuyOptions, pluralLabelOf, minQtyFor, bulkMinPieces } from '@/lib/products/packaging'
+import { getBuyOptions, pluralLabelOf, minQtyFor, bulkMinPieces, hasRetailPrice } from '@/lib/products/packaging'
 import type { Product } from '@/types/database.types'
 
 interface Props {
@@ -77,7 +77,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
       : (product.pack_type ? pluralize(product.pack_type) : tField('units', 'ୟୁନିଟ୍'))
   const maxQty = product.stock_qty > 0 ? product.stock_qty : 9999
   // Bulk price needs a minimum number of pieces (admin-set per product).
-  const minQty = hasLevels ? minQtyFor(product, opt) : 1
+  const minQty = minQtyFor(product, opt)
   const minPieces = bulkMinPieces(product)
   const clampNum = (n: number) => Math.max(minQty, Math.min(Math.floor(n), maxQty))
 
@@ -137,7 +137,6 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
       units_each: hasLevels ? (opt.pieces ?? undefined) : undefined,
       image: product.images?.[0] ?? null,
       slug: product.slug,
-      delivery_charge: product.delivery_charge_enabled ? (product.delivery_charge ?? 0) : 0,
       min_qty: minQty > 1 ? minQty : undefined,
     })
     quantity = Math.max(minQty, quantity)
@@ -251,7 +250,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
 
             {minQty > 1 && (
               <div className="mb-3 rounded-xl border-2 border-secondary/40 bg-secondary-container/60 px-3 py-2.5" role="status">
-                <p className="text-[14px] font-bold text-primary">Bulk price from {minPieces} pieces</p>
+                <p className="text-[14px] font-bold text-primary">{hasRetailPrice(product) ? `Bulk price from ${minPieces} pieces` : `Minimum order: ${minPieces} pieces`}</p>
                 <p className="text-[13px] text-on-surface-variant">
                   Order at least {minQty} {minQty === 1 ? unitWord : unitWordPlural} for this price.
                 </p>

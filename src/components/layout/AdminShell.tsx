@@ -14,6 +14,8 @@ export interface AdminBadges {
   orders: number
   /** Damaged / wrong item requests waiting for review. */
   returns?: number
+  /** Customer reviews waiting for approval. */
+  reviews?: number
 }
 
 interface Props {
@@ -60,7 +62,7 @@ export default function AdminShell({ role, children, badges, name, permissions, 
     href === '/admin/dashboard' ? pathname === href : pathname.startsWith(href)
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="admin-type flex min-h-screen bg-background">
       {/* ── Desktop sidebar ── */}
       <AdminSidebar
         role={role}

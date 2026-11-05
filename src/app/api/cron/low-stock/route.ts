@@ -47,8 +47,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, checked: (data ?? []).length, alerted: 0 })
   }
 
-  const { getLowStockAlertAdmins, sendLowStockAlert } = await import('@/lib/resend')
-  const admins = await getLowStockAlertAdmins()
+  const { getStaffEmailRecipients, sendLowStockAlert } = await import('@/lib/resend')
+  const admins = await getStaffEmailRecipients()
 
   if (admins.length > 0) {
     await sendLowStockAlert(

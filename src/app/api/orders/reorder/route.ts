@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { product_ids } = await req.json() as { product_ids: string[] }
-  if (!Array.isArray(product_ids) || product_ids.length === 0) {
+  if (!Array.isArray(product_ids) || product_ids.length === 0 || product_ids.length > 100) {
     return NextResponse.json({ error: 'product_ids required' }, { status: 400 })
   }
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('products')
-    .select('id, name, slug, price, mrp, unit, images, stock_qty, is_active, delivery_charge, delivery_charge_enabled')
+    .select('id, name, slug, price, mrp, unit, images, stock_qty, is_active')
     .in('id', product_ids)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

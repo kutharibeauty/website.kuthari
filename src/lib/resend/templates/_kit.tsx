@@ -11,6 +11,7 @@ import {
   Body, Button, Column, Container, Head, Hr, Html, Img, Link, Preview, Row, Section, Text,
 } from '@react-email/components'
 import type { Address, OrderItem } from '@/types/database.types'
+import { lineTerms } from '@/lib/orders/line-terms'
 
 export const C = {
   ink: '#292966',
@@ -212,7 +213,10 @@ export function ItemList({ items, showImages = true }: { items: OrderItem[]; sho
           <Column style={{ padding: '12px 0', verticalAlign: 'middle' as const }}>
             <Text style={{ margin: 0, fontSize: '14px', lineHeight: '20px', fontWeight: 600, color: C.text }}>{item.name}</Text>
             <Text style={{ margin: '2px 0 0', fontSize: '13px', color: C.muted }}>
-              {item.unit ? `${item.unit} · ` : ''}Qty {item.quantity} × {inr(item.price)}
+              {(() => {
+                const t = lineTerms(item.quantity, item.unit)
+                return [t.priceType, t.size, `${t.qty}${t.qtyNote ? ` (${t.qtyNote})` : ''} × ${inr(item.price)}/${t.per}`].filter(Boolean).join(' · ')
+              })()}
             </Text>
           </Column>
           <Column style={{ padding: '12px 0 12px 12px', textAlign: 'right' as const, verticalAlign: 'middle' as const, whiteSpace: 'nowrap' as const }}>

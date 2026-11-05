@@ -4,22 +4,12 @@ import {
 } from '@react-pdf/renderer'
 import type { OrderEmailData } from '@/lib/resend'
 import { LOGO_PNG } from './logo'
+import { lineTerms } from '@/lib/orders/line-terms'
 
 // react-pdf's built-in fonts have no ₹ glyph (it renders as a blank box), so the
 // PDF uses "Rs." for amounts — reliable across all viewers.
 const fmt = (n: number) =>
   `Rs. ${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-
-// Qty column shows the unit with the count — "10 Boxes" — instead of a bare "10".
-// Uses just the unit LABEL (the part before " · N pieces"), pluralised.
-function qtyWithUnit(quantity: number, unit: string | null | undefined): string {
-  const label = (unit ?? '').split('·')[0].trim()
-  if (!label) return String(quantity)
-  const plural = quantity === 1
-    ? label
-    : /(x|s|ch|sh)$/i.test(label) ? `${label}es` : `${label}s`
-  return `${quantity} ${plural}`
-}
 
 // ── Seller (issuer) details ─────────────────────────────────────────────────
 // Add the real GSTIN once the client provides one. Until then the document is a
@@ -103,6 +93,7 @@ const s = StyleSheet.create({
   td: { fontSize: 7.5, color: TEXT, lineHeight: 1.4 },
   tdMuted: { fontSize: 7.5, color: MUTED, lineHeight: 1.4 },
   tdBold: { fontSize: 7.5, color: INK, fontFamily: 'Helvetica-Bold', lineHeight: 1.4 },
+  tdSub: { fontSize: 6.5, color: MUTED, marginTop: 1.5, lineHeight: 1.3 },
 
   // Totals
   totalsWrap: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
@@ -223,7 +214,7 @@ function InvoiceDocument({ data }: { data: OrderEmailData }) {
           <View style={[s.party, { paddingRight: 0 }]}>
             <Text style={s.label}>Payment</Text>
             <Text style={s.bodyBold}>{pay.label}</Text>
-            {pay.method !== 'cod' && <Text style={s.body}>Paid online: {fmt(pay.paidOnline)}</Text>}
+            {pay.method !== 'cod' && <Text style={s.body}>{pay.method === 'online' ? 'Amount paid' : 'Paid online'}: {fmt(pay.paidOnline)}</Text>}
             {pay.rest > 0 && (
               <Text style={s.body}>{pay.delivered ? 'Collected in cash' : 'Due on delivery'}: {fmt(pay.rest)}</Text>
             )}
@@ -256,17 +247,27 @@ function InvoiceDocument({ data }: { data: OrderEmailData }) {
             <Text style={[s.th, s.colRate]}>Rate</Text>
             <Text style={[s.th, s.colAmt]}>Amount</Text>
           </View>
-          {data.items.map((item, i) => (
-            <View key={i} wrap={false} style={[s.tr, ...(i % 2 === 1 ? [s.trAlt] : [])]}>
-              <Text style={[s.tdMuted, s.colSl]}>{i + 1}</Text>
-              <View style={s.colItem}>
-                <Text style={s.td}>{item.name}</Text>
+          {data.items.map((item, i) => {
+            const t = lineTerms(item.quantity, item.unit)
+            return (
+              <View key={i} wrap={false} style={[s.tr, ...(i % 2 === 1 ? [s.trAlt] : [])]}>
+                <Text style={[s.tdMuted, s.colSl]}>{i + 1}</Text>
+                <View style={s.colItem}>
+                  <Text style={s.td}>{item.name}{t.size ? ` (${t.size})` : ''}</Text>
+                  {t.priceType ? <Text style={s.tdSub}>{t.priceType}</Text> : null}
+                </View>
+                <View style={s.colQty}>
+                  <Text style={[s.td, { textAlign: 'center' }]}>{t.qty}</Text>
+                  {t.qtyNote ? <Text style={[s.tdSub, { textAlign: 'center' }]}>{t.qtyNote}</Text> : null}
+                </View>
+                <View style={s.colRate}>
+                  <Text style={[s.td, { textAlign: 'right' }]}>{fmt(item.price)}</Text>
+                  <Text style={[s.tdSub, { textAlign: 'right' }]}>per {t.per}</Text>
+                </View>
+                <Text style={[s.tdBold, s.colAmt]}>{fmt(item.price * item.quantity)}</Text>
               </View>
-              <Text style={[s.td, s.colQty]}>{qtyWithUnit(item.quantity, item.unit)}</Text>
-              <Text style={[s.td, s.colRate]}>{fmt(item.price)}</Text>
-              <Text style={[s.tdBold, s.colAmt]}>{fmt(item.price * item.quantity)}</Text>
-            </View>
-          ))}
+            )
+          })}
         </View>
 
         {/* ── Totals ── */}

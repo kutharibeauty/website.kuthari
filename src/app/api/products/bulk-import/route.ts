@@ -20,11 +20,12 @@
  */
 import { auth } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { z } from 'zod'
 import type { AuthMetadata } from '@/types'
 import { withStorefrontRefresh } from '@/lib/revalidate'
 import { requirePermission } from '@/lib/auth/guard'
+import { notifySearchEngines } from '@/lib/seo/search-notify'
 
 const RowSchema = z.object({
   name:           z.string().min(1, 'name / Full Product Name required'),
@@ -149,6 +150,7 @@ function slugify(name: string): string {
 }
 
 async function POST_handler(req: NextRequest) {
+  const importStartedAt = new Date().toISOString()
   const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -291,6 +293,8 @@ async function POST_handler(req: NextRequest) {
   const errorCsvRows = errors.map((e) => ({ row: String(e.row), error: e.reason, ...e.data }))
   const errorCsvB64 = Buffer.from(toCSV(errorCsvRows)).toString('base64')
 
+  // Imported products: tell search engines about everything saved in this run.
+  after(() => notifySearchEngines({ since: importStartedAt }))
   return NextResponse.json({
     created,
     images_matched: imagesMatched,

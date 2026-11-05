@@ -57,9 +57,7 @@ export default function ProductCard({ product, className }: ProductCardProps) {
           )}
 
           {discount && !outOfStock && (
-            <span className="absolute top-3.5 left-3.5 rounded-full bg-periwinkle px-2.5 py-1 text-[12px] font-bold text-ink">
-              {discount}% off
-            </span>
+            <span className="off-band">{discount}% off</span>
           )}
 
           {outOfStock && (

@@ -1,11 +1,12 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { auth } from '@/lib/auth/server'
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { skuPrefix } from '@/lib/products/sku'
 import type { AuthMetadata } from '@/types'
 import { withStorefrontRefresh } from '@/lib/revalidate'
 import { requirePermission } from '@/lib/auth/guard'
+import { notifySearchEngines } from '@/lib/seo/search-notify'
 
 async function generateSku(categoryId: string, supabase: ReturnType<typeof createAdminClient>): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,6 +86,8 @@ async function POST_handler(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const newId = (data as { id?: string } | null)?.id
+  if (newId) after(() => notifySearchEngines({ productIds: [newId] }))
   return NextResponse.json(data, { status: 201 })
 }
 

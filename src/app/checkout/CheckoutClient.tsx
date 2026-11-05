@@ -555,6 +555,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                           <PincodeChecker
                             pincode={addr.pincode}
                             onResult={setPincodeResult}
+                            subtotal={subtotal}
                           />
                         </div>
                       )}

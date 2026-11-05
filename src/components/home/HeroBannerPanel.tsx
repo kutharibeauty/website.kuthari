@@ -28,11 +28,10 @@ const slide = {
 }
 
 /**
- * The admin's hero banners (Banners & CMS → placement "hero") in the hero's
- * right-hand panel: the original slide carousel with arrows, dots and swipe,
- * each banner held for its own display_seconds. Banners are wide 5:2 artwork
- * with text baked in, so each is shown whole over a soft blurred copy of
- * itself rather than cropped to the panel. Hovering or focusing pauses it.
+ * The admin's hero banners (Banners & CMS → placement "hero") as the homepage's
+ * full-width carousel, with arrows, dots and swipe, each banner held for its
+ * own display_seconds. Banners are 5:2 artwork with their text baked in, and
+ * the panel is 5:2 too, so each fills it edge to edge. Hover or focus pauses it.
  */
 export default function HeroBannerPanel({ banners }: { banners: Banner[] }) {
   const { tField } = useT()
@@ -61,14 +60,9 @@ export default function HeroBannerPanel({ banners }: { banners: Banner[] }) {
 
   const art = (
     <>
+      {/* The panel is the banners' own 5:2 shape, so the artwork fills it edge to edge. */}
       {b.image_url && (
-        <>
-          <Image src={b.image_url} alt="" aria-hidden="true" fill sizes="40vw" className="object-cover scale-125 blur-2xl opacity-60" />
-          <span className="absolute inset-0 bg-paper/35" aria-hidden="true" />
-          <span className="absolute inset-x-3 md:inset-x-5 top-1/2 -translate-y-1/2 aspect-[5/2] overflow-hidden rounded-2xl shadow-[var(--shadow-lift)]">
-            <Image src={b.image_url} alt={alt} fill priority={index === 0} sizes="(max-width: 1024px) 92vw, 680px" className="object-cover" />
-          </span>
-        </>
+        <Image src={b.image_url} alt={alt} fill priority={index === 0} sizes="(max-width: 1440px) 100vw, 1360px" className="object-cover" />
       )}
       {!b.image_url && title && (
         <span className="absolute inset-0 flex items-center p-8" style={{ backgroundColor: b.background_color || undefined }}>
@@ -82,7 +76,7 @@ export default function HeroBannerPanel({ banners }: { banners: Banner[] }) {
 
   return (
     <div
-      className="relative h-full min-h-[300px] select-none overflow-hidden rounded-[var(--radius-panel)] bg-periwinkle"
+      className="relative h-full select-none overflow-hidden rounded-[var(--radius-panel)] bg-periwinkle"
       aria-roledescription="carousel"
       aria-label="Offers"
       onMouseEnter={() => setHeld(true)}

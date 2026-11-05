@@ -11,9 +11,9 @@ import { parseOrderHours, DEFAULT_ORDER_HOURS, type OrderHoursConfig } from '@/l
 //      An explicit 0 means genuinely free delivery to that pincode.
 //   3. Otherwise DEFAULT_PINCODE_DELIVERY_FEE.
 //
-// Per-product delivery charges are deliberately NOT added on top: the charge is
-// about where it ships, not what is in the box. The product field is retained
-// in the schema but no longer feeds the total.
+// There is no per-product delivery charge: the fee is about where the order
+// ships, not what is in the box. (The old products.delivery_charge columns are
+// left in the database, unused.)
 
 // Defaults. These are Kuthari Beauty Store's ACTUAL trading terms, not neutral
 // placeholders — the admin can still override them in Settings, but with no
@@ -106,13 +106,6 @@ export function parseDeliveryConfig(settingsValue: unknown): DeliveryConfig {
       return Number.isFinite(p) ? Math.min(90, Math.max(10, Math.round(p))) : 25
     })(),
   }
-}
-
-/** Sum of enabled per-product delivery charges (each product once).
- *  No longer part of the charged total — see the rule at the top of this file.
- *  Kept because the admin product form still exposes the field. */
-export function perProductDelivery(items: Array<{ delivery_charge?: number | null }>): number {
-  return items.reduce((sum, i) => sum + (Number(i.delivery_charge) || 0), 0)
 }
 
 /**

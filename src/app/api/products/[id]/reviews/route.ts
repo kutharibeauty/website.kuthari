@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { ProductReview } from '@/types/database.types'
 import type { AuthMetadata } from '@/types'
+import { revalidateTag } from 'next/cache'
 
 export async function GET(
   req: NextRequest,
@@ -118,12 +119,13 @@ export async function POST(
       rating: Math.round(rating),
       body: text || null,
       is_verified_purchase: true,
-      // Every review waits for the shop to approve it (Products → Reviews).
+      // Every review waits for the shop to approve it (Admin → Reviews).
       is_approved: false,
     })
     .select('id')
     .single()
 
   if (error) return NextResponse.json({ error: 'Could not save your review' }, { status: 500 })
+  revalidateTag('admin-badges', { expire: 0 })
   return NextResponse.json({ id: (data as { id: string }).id }, { status: 201 })
 }

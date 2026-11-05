@@ -65,8 +65,8 @@ export async function GET(req: NextRequest) {
   const orphans = rows.filter((r) => !withOrder.has(r.razorpay_payment_id))
 
   if (orphans.length > 0) {
-    const { getOrderEmailAdmins } = await import('@/lib/resend')
-    const admins = await getOrderEmailAdmins()
+    const { getStaffEmailRecipients } = await import('@/lib/resend')
+    const admins = await getStaffEmailRecipients()
     if (admins.length > 0 && process.env.RESEND_API_KEY) {
       const { Resend } = await import('resend')
       const resend = new Resend(process.env.RESEND_API_KEY)

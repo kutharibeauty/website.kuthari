@@ -53,8 +53,6 @@ type FormState = {
   price_per_pack: string
   units_per_hanger: string
   hangers_per_pack: string
-  delivery_charge: string
-  delivery_charge_enabled: boolean
   description: string
   description_or: string
   meta_title: string
@@ -158,8 +156,6 @@ export default function ProductForm({
     price_per_pack: product?.price_per_pack?.toString() ?? '',
     units_per_hanger: product?.units_per_hanger?.toString() ?? '',
     hangers_per_pack: product?.hangers_per_pack?.toString() ?? '',
-    delivery_charge: product?.delivery_charge != null ? product.delivery_charge.toString() : '',
-    delivery_charge_enabled: product?.delivery_charge_enabled ?? false,
     description: product?.description ?? '',
     description_or: product?.description_or ?? '',
     meta_title: product?.meta_title ?? '',
@@ -350,8 +346,8 @@ export default function ProductForm({
       // retail whether or not it also has box/pack levels. Blank = bulk-only.
       retail_price: form.retail_price ? parseFloat(form.retail_price) : null,
       retail_mrp: form.retail_mrp ? parseFloat(form.retail_mrp) : null,
-      // Only meaningful alongside a retail price; 1 or blank = no minimum.
-      bulk_min_qty: form.retail_price && parseInt(form.bulk_min_qty, 10) > 1 ? parseInt(form.bulk_min_qty, 10) : null,
+      // Minimum pieces for the wholesale price (or minimum order when there's no retail price). 1 or blank = none.
+      bulk_min_qty: parseInt(form.bulk_min_qty, 10) > 1 ? parseInt(form.bulk_min_qty, 10) : null,
       secondary_price: !isHangerModel && form.secondary_price ? parseFloat(form.secondary_price) : null,
       secondary_mrp: !isHangerModel && form.secondary_mrp ? parseFloat(form.secondary_mrp) : null,
       packs_per_box: !isHangerModel && form.packs_per_box ? parseInt(form.packs_per_box, 10) : null,
@@ -361,8 +357,6 @@ export default function ProductForm({
       hangers_per_pack: isHangerModel && form.hangers_per_pack ? parseInt(form.hangers_per_pack, 10) : null,
       // Per-product delivery charge. The amount is kept even when the toggle is
       // off (so re-enabling doesn't lose it); the flag controls whether it applies.
-      delivery_charge: form.delivery_charge ? parseFloat(form.delivery_charge) : 0,
-      delivery_charge_enabled: form.delivery_charge_enabled,
       // Weight/size variants were removed — buying is Single piece vs a bulk pack.
       variants: [],
       images: images.map(i => i.url),
@@ -901,19 +895,33 @@ export default function ProductForm({
                     className={inputCls}
                   />
                 </Field>
-                {form.retail_price && (
-                  <Field label="Bulk price from (pieces)" hint="Fewest pieces a customer must buy to get the bulk price. Blank = no minimum">
-                    <input
-                      type="number"
-                      value={form.bulk_min_qty}
-                      min={2}
-                      step={1}
-                      onChange={e => set('bulk_min_qty', e.target.value)}
-                      placeholder="e.g. 12"
-                      className={inputCls}
-                    />
-                  </Field>
-                )}
+              </div>
+            </div>
+
+            {/* ── Minimum quantity for the wholesale price ── */}
+            <div className="card-lift animate-rise stagger-1 p-5 bg-amber-50/60 rounded-2xl border-2 border-amber-200 space-y-4">
+              <div>
+                <p className="font-bold text-[15px] text-primary">Minimum quantity for the wholesale price</p>
+                <p className="font-medium text-[14px] text-on-surface-variant mt-1">
+                  {form.retail_price
+                    ? <>Customers must buy at least this many pieces to get the wholesale price. Anyone buying fewer pays the retail price.</>
+                    : <>This product is sold at the wholesale price only, so this is the minimum order. Customers can&apos;t buy fewer pieces than this.</>}
+                  {' '}Leave blank for no minimum.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Field label="Minimum pieces" hint="e.g. 12 means the customer must order 12 or more pieces">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    value={form.bulk_min_qty}
+                    min={2}
+                    step={1}
+                    onChange={e => set('bulk_min_qty', e.target.value)}
+                    placeholder="No minimum"
+                    className={inputCls}
+                  />
+                </Field>
               </div>
             </div>
 
@@ -939,27 +947,6 @@ export default function ProductForm({
                   className={inputCls}
                 />
               </Field>
-            </div>
-
-            {/* Per-product delivery charge — toggle on/off, set the amount. */}
-            <div className="p-5 bg-surface-card rounded-2xl border-2 border-table-border space-y-4">
-              <ToggleField
-                label="Delivery Charge"
-                sub="Charge a delivery fee for this product. Off = no delivery charge."
-                checked={form.delivery_charge_enabled}
-                onChange={v => set('delivery_charge_enabled', v)}
-              />
-              {form.delivery_charge_enabled && (
-                <Field label="Delivery Charge (₹)" hint="Amount added for delivering this product">
-                  <input
-                    type="number" min={0} step="0.01"
-                    value={form.delivery_charge}
-                    onChange={e => set('delivery_charge', e.target.value)}
-                    placeholder="e.g. 40.00"
-                    className={inputCls}
-                  />
-                </Field>
-              )}
             </div>
 
             {/* Price preview */}

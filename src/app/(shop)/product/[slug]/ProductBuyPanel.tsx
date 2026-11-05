@@ -100,7 +100,6 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
     units_each: hasLevels ? (piecesEach ?? undefined) : undefined,
     image: product.images?.[0] ?? null,
     slug: product.slug,
-    delivery_charge: product.delivery_charge_enabled ? (product.delivery_charge ?? 0) : 0,
     min_qty: minQty > 1 ? minQty : undefined,
   })
 
@@ -275,11 +274,12 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
       {activeOption.level !== 'retail' && minQty > 1 && (
         <div className="mb-5 rounded-2xl border-2 border-secondary/40 bg-secondary-container/60 px-4 py-3 animate-drop-in" role="status">
           <p className="text-[15px] font-bold text-primary">
-            Bulk price from {minPieces} pieces
+            {retail ? `Bulk price from ${minPieces} pieces` : `Minimum order: ${minPieces} pieces`}
           </p>
           <p className="mt-0.5 text-[14px] text-on-surface-variant">
-            Order at least {minQty} {minQty === 1 ? unitNoun : unitNounPlural} to get ₹{activeOption.price.toLocaleString('en-IN')} each.
-            {retail && <> Need fewer? Choose Single Piece at ₹{retail.price.toLocaleString('en-IN')}.</>}
+            {retail
+              ? <>Order at least {minQty} {minQty === 1 ? unitNoun : unitNounPlural} to get ₹{activeOption.price.toLocaleString('en-IN')} each. Need fewer? Choose Single Piece at ₹{retail.price.toLocaleString('en-IN')}.</>
+              : <>This product is sold in quantities of {minQty} {minQty === 1 ? unitNoun : unitNounPlural} or more.</>}
           </p>
         </div>
       )}

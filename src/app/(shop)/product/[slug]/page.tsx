@@ -19,6 +19,7 @@ import ProductGrid from '@/components/product/ProductGrid'
 import ProductBuyPanel from './ProductBuyPanel'
 import { sanitizeRichText } from '@/lib/sanitize'
 import { safeJsonLd } from '@/lib/utils'
+import { SITE_URL } from '@/lib/site-url'
 
 export const revalidate = 60
 
@@ -34,12 +35,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!data) return { title: 'Product Not Found' }
 
   const { product, category } = data
-  const title = product.meta_title ?? `${product.name} | Kuthari Beauty Store`
+  // Names are often typed in lowercase; the shop shows them capitalised, so
+  // titles and share previews do too.
+  const cap = (s: string) => s.replace(/\s+/g, ' ').trim().replace(/(^|\s)(\p{L})/gu, (_m, sp, ch) => sp + ch.toUpperCase())
+  const displayName = cap(product.name)
+  const brand = product.brand ? cap(product.brand) : null
+  const title = product.meta_title ?? `${displayName} | Kuthari Beauty Store`
   const description =
     product.meta_description ??
-    `Buy ${product.name} (${product.unit}) from ₹${product.price}${product.brand ? ` — ${product.brand}` : ''}. Single piece or bulk, with secure online payment & fast delivery. ${product.description ? product.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) : ''}`.trim()
-  const keywords = getProductKeywords(product.tags ?? null, category?.slug)
-  const ogImage = product.images?.[0]
+    `Buy ${displayName} (${product.unit}) from ₹${product.price}${brand ? ` by ${brand}` : ''}. One piece at retail price or a box at bulk price, with secure payment and delivery across India. ${product.description ? product.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) : ''}`.trim()
+  const keywords = getProductKeywords(product.tags ?? null, category?.slug, {
+    name: product.name, brand: product.brand, unit: product.unit, categoryName: category?.name,
+  })
+  // Every product photo (a share preview uses the first; others are fallbacks).
+  const photos = (product.images ?? []).filter((u: string) => /^https?:\/\//.test(u)).slice(0, 4)
+  const shownPrice = product.retail_price && product.retail_price > 0 ? product.retail_price : product.price
 
   return {
     title,
@@ -51,15 +61,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url: `/product/${slug}`,
       type: 'website',
-      images: ogImage
-        ? [{ url: ogImage, width: 1200, height: 630, alt: product.name }]
-        : [{ url: '/images/og-default.jpg', width: 1200, height: 630 }],
+      siteName: 'Kuthari Beauty Store',
+      locale: 'en_IN',
+      images: photos.length
+        ? photos.map((url: string) => ({ url, alt: displayName }))
+        : [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Kuthari Beauty Store' }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ogImage ? [ogImage] : ['/images/og-default.jpg'],
+      images: photos.length ? [photos[0]] : ['/og-image.jpg'],
+    },
+    // Product details for link previews (Facebook, WhatsApp, Pinterest).
+    other: {
+      'product:price:amount': String(shownPrice),
+      'product:price:currency': 'INR',
+      'product:availability': product.stock_qty > 0 ? 'in stock' : 'out of stock',
+      'product:condition': 'new',
+      ...(brand ? { 'product:brand': brand } : {}),
     },
   }
 }
@@ -95,7 +115,7 @@ export default async function ProductPage({ params }: PageProps) {
     category ? getRelatedProducts(category.id, product.id, 4) : Promise.resolve([]),
   ])
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.kutharibeauty.com'
+  const appUrl = SITE_URL
 
   // Google needs a real person's name on a Review. Drop rows whose stored name
   // can't serve as one — blank, a generic placeholder, or a bare phone number.

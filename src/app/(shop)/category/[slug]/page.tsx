@@ -7,6 +7,7 @@ import ProductBreadcrumb from '@/components/product/ProductBreadcrumb'
 import CategoryProductsSection from './CategoryProductsSection'
 import CategoryStrip from '@/components/category/CategoryStrip'
 import { safeJsonLd } from '@/lib/utils'
+import { SITE_URL } from '@/lib/site-url'
 
 export const revalidate = 60
 
@@ -23,10 +24,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${category.name} — Buy Online | Kuthari Beauty Store`
   const description = `Shop ${category.name} at Kuthari Beauty Store — buy a single piece at retail price or order in bulk. Secure online payment and delivery across India.`
-  const keywords = getCategoryKeywords(slug)
+  const keywords = getCategoryKeywords(slug, category.name)
   const ogImage = category.image_url
     ? [{ url: category.image_url, width: 1200, height: 630, alt: category.name }]
-    : [{ url: '/images/og-default.jpg', width: 1200, height: 630 }]
+    : [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Kuthari Beauty Store' }]
 
   return {
     title,
@@ -43,7 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: 'summary_large_image',
       title,
       description,
-      images: category.image_url ? [category.image_url] : ['/images/og-default.jpg'],
+      images: category.image_url ? [category.image_url] : ['/og-image.jpg'],
     },
   }
 }
@@ -86,7 +87,7 @@ export default async function CategoryPage({ params }: PageProps) {
     .eq('is_active', true)
     .order('display_order')
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.kutharibeauty.com'
+  const appUrl = SITE_URL
 
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',

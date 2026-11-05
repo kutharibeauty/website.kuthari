@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/site-url'
 /**
  * Thin server-side OpenRouter client for admin content generation.
  *
@@ -8,12 +9,14 @@
 
 const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
 
-// Free models are frequently rate-limited/exhausted, so we try a chain: the
-// configured model(s) first, then these known-good free fallbacks. The request
-// succeeds as soon as any one of them returns text.
-// Instruct models first — they return clean JSON. Reasoning models (nemotron)
-// are last resort: they burn the token budget "thinking" and often truncate
-// structured output, so we only fall back to them if every instruct model is busy.
+// Free models are often rate-limited, so we try a chain and stop at the first
+// one that returns text: OPENROUTER_MODEL (comma-separated) if set, else the
+// shop's chosen NVIDIA Nemotron models, then a few other free fallbacks.
+const DEFAULT_MODELS = [
+  'nvidia/nemotron-3-ultra-550b-a55b:free',
+  'nvidia/nemotron-3.5-super-vl:free',
+  'nvidia/nemotron-3.5-lightning:free',
+]
 const FALLBACK_MODELS = [
   'google/gemma-4-31b-it:free',
   'google/gemma-4-26b-a4b-it:free',
@@ -25,7 +28,7 @@ const FALLBACK_MODELS = [
 function modelChain(): string[] {
   const configured = (process.env.OPENROUTER_MODEL ?? '')
     .split(',').map((s) => s.trim()).filter(Boolean)
-  return [...new Set([...configured, ...FALLBACK_MODELS])]
+  return [...new Set([...(configured.length ? configured : DEFAULT_MODELS), ...FALLBACK_MODELS])]
 }
 
 export function isAIConfigured(): boolean {
@@ -56,13 +59,17 @@ export async function aiChat({ system, user, maxTokens = 900, temperature = 0.6 
         headers: {
           Authorization: `Bearer ${key}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.kutharibeauty.com',
+          'HTTP-Referer': SITE_URL,
           'X-Title': 'Kuthari Beauty Store Admin',
         },
         body: JSON.stringify({
           model,
           temperature,
           max_tokens: maxTokens,
+          // Nemotron models reason before answering. Keep that short and out of
+          // the reply so the token budget goes to the copy itself. Models
+          // without reasoning ignore this.
+          reasoning: { effort: 'low', exclude: true },
           messages: [
             { role: 'system', content: system },
             { role: 'user', content: user },

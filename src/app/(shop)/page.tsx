@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
 import { HOMEPAGE_KEYWORDS } from '@/lib/seo/generator'
 import { getHomepageData } from '@/lib/data/homepage'
 import { getStoreContent } from '@/lib/data/store-content'
 import HeroStory from '@/components/home/HeroStory'
 import HeroBannerPanel from '@/components/home/HeroBannerPanel'
-import CategoryMarquee from '@/components/home/CategoryMarquee'
 import ShelfGrid from '@/components/home/ShelfGrid'
 import PromoCardsRow from '@/components/home/PromoCardsRow'
 import CouponCards from '@/components/home/CouponCards'
@@ -18,8 +15,9 @@ import CounterSection from '@/components/home/CounterSection'
 import ReviewsWall from '@/components/home/ReviewsWall'
 import { safeJsonLd } from '@/lib/utils'
 import { RETURN_POLICY_JSONLD } from '@/lib/seo/return-policy'
+import { SITE_URL } from '@/lib/site-url'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.kutharibeauty.com'
+const APP_URL = SITE_URL
 
 export const revalidate = 60
 
@@ -152,38 +150,21 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBizJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }} />
 
-      {/* 1. Hero: the head and the buy action left, the shelf story right. */}
-      <section className="mx-auto w-full max-w-[1440px] px-5 md:px-10 pt-6 md:pt-8 pb-10 md:pb-14">
-        <div className="grid gap-8 lg:gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:h-[min(640px,calc(100svh-150px))] lg:min-h-[540px]">
-          <div className="flex flex-col justify-center min-w-0 py-2 lg:py-6">
-            <h1 className="min-w-0">
-              <span className="display block text-[length:var(--text-hero)]">{content.hero.title}</span>
-              <span className="accent-line block mt-1 text-[calc(var(--text-hero)*0.8)]">{content.hero.accent}</span>
-            </h1>
-            <p className="mt-6 max-w-[34ch] text-[18px] md:text-[20px] leading-relaxed text-ink/80">
-              {content.hero.subtitle}
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <Link href="#shelf-head" className="btn-pill group/cta">
-                Shop the shelf
-                <ArrowRight size={18} strokeWidth={2.5} aria-hidden="true" className="transition-transform group-hover/cta:translate-x-1" />
-              </Link>
-              <p className="text-[15px] leading-snug text-muted">
-                One piece at retail price.
-                <br />
-                A box at bulk price.
-              </p>
-            </div>
+      {/* 1. Hero: the admin's banners as a full-width carousel. The banners carry
+          their own artwork and text, so the page heading is for screen readers
+          and search engines only. */}
+      <h1 className="sr-only">{content.hero.title} {content.hero.accent}</h1>
+      <section className="mx-auto w-full max-w-[1440px] px-4 md:px-10 pt-4 md:pt-6" aria-label="Offers">
+        {banners.length > 0 ? (
+          <div className="relative w-full aspect-[5/2]">
+            <HeroBannerPanel banners={banners} />
           </div>
-          {/* The admin's hero banners; the product story stands in when there are none. */}
-          <div className="relative min-w-0 h-[min(440px,82vw)] lg:h-full">
-            {banners.length > 0 ? <HeroBannerPanel banners={banners} /> : <HeroStory products={shelfProducts} />}
+        ) : (
+          <div className="relative w-full h-[min(440px,82vw)]">
+            <HeroStory products={shelfProducts} />
           </div>
-        </div>
+        )}
       </section>
-
-      {/* 2. Every aisle, rolling past. */}
-      <CategoryMarquee categories={categories} />
 
       <div className="flex flex-col gap-[var(--spacing-section)] pt-[var(--spacing-section)]">
         {/* 3. The shelf grid with aisle filters. */}

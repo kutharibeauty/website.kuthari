@@ -78,21 +78,31 @@ export async function PATCH(
 
   const { id } = await params
   const body = await request.json()
-  const { name, email, permissions, is_active } = body
+  const { name, email, permissions, is_active, email_notifications } = body
 
   const supabase = createAdminClient()
 
   const { data: existing } = await supabase
     .from('admin_profiles')
-    .select('role')
+    .select('*')
     .eq('id', id)
     .single()
 
   if (!existing) return Response.json({ error: 'Not found' }, { status: 404 })
 
+  // Staff email switch. Works for super admins too, but a locked person (the
+  // owner) can never be switched off.
+  if (email_notifications !== undefined) {
+    if (typeof email_notifications !== 'boolean') return Response.json({ error: 'email_notifications must be true or false' }, { status: 400 })
+    if (!email_notifications && (existing as { email_locked?: boolean }).email_locked) {
+      return Response.json({ error: 'Email notifications are always on for this person and cannot be turned off.' }, { status: 403 })
+    }
+  }
+
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (name !== undefined) update.name = name
   if (email !== undefined) update.email = email || null
+  if (email_notifications !== undefined) update.email_notifications = email_notifications
 
   // Protect super_admin from permission/status changes
   if (existing.role !== 'super_admin') {

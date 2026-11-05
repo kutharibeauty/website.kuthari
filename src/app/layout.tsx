@@ -5,8 +5,9 @@ import AuthTokenCatcher from '@/components/auth/AuthTokenCatcher'
 import AdminShortcut from '@/components/auth/AdminShortcut'
 import SessionKeepAlive from '@/components/auth/SessionKeepAlive'
 import './globals.css'
+import { SITE_URL } from '@/lib/site-url'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.kutharibeauty.com'
+const APP_URL = SITE_URL
 const OG_IMAGE = '/og-image.jpg'
 
 // Body and every functional heading.
@@ -44,9 +45,11 @@ export const metadata: Metadata = {
   keywords: [
     ...MASTER_KEYWORDS.brand,
     ...MASTER_KEYWORDS.retail,
+    ...MASTER_KEYWORDS.categories.slice(0, 8),
+    ...MASTER_KEYWORDS.brands,
     ...MASTER_KEYWORDS.cities.slice(0, 6),
-    ...MASTER_KEYWORDS.nearMe.slice(0, 4),
-    ...MASTER_KEYWORDS.longTail.slice(0, 6),
+    ...MASTER_KEYWORDS.nearMe,
+    ...MASTER_KEYWORDS.longTail,
   ],
   authors: [{ name: 'KUTHARI BEAUTY STORE', url: APP_URL }],
   creator: 'KUTHARI BEAUTY STORE',
@@ -56,6 +59,13 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'Kuthari Beauty Store', statusBarStyle: 'default' },
   formatDetection: { telephone: true, address: true, email: true },
+  // Where the shop is, for local search (Brahmapur, Ganjam, Odisha).
+  other: {
+    'geo.region': 'IN-OR',
+    'geo.placename': 'Brahmapur, Odisha',
+    'geo.position': '19.316888;84.7796813',
+    ICBM: '19.316888, 84.7796813',
+  },
   alternates: { canonical: APP_URL },
   robots: {
     index: true,
@@ -105,7 +115,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${familjen.variable} ${anton.variable} ${fraunces.variable}`}>
+    // suppressHydrationWarning: the preloader script marks <html> with
+    // data-kbs-seen before React hydrates (see layout/Preloader.tsx).
+    <html lang="en" className={`${familjen.variable} ${anton.variable} ${fraunces.variable}`} suppressHydrationWarning>
       <body>
         <AuthTokenCatcher />
         <AdminShortcut />

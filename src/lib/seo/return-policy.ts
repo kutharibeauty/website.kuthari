@@ -1,4 +1,5 @@
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.kutharibeauty.com'
+import { SITE_URL } from '@/lib/site-url'
+const APP_URL = SITE_URL
 
 /**
  * Kuthari Beauty Store's policy: no change-of-mind returns and no refunds on delivered orders.

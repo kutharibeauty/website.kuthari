@@ -53,6 +53,8 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
   // Phones: the location + search row folds away while scrolling down and
   // returns on the way up, so the sticky header stays one row tall.
   const [tucked, setTucked] = useState(false)
+  const rowRef = useRef<HTMLDivElement>(null)
+  const spacerRef = useRef<HTMLDivElement>(null)
   const { isSignedIn, isLoaded } = useSupabaseUser()
   const { t } = useT()
 
@@ -74,21 +76,45 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
 
   useEffect(() => {
     let last = window.scrollY
+    // Distance travelled in the current direction. Toggling only after a real
+    // run (not per-frame deltas) ignores finger wobble and the phone address
+    // bar showing/hiding, but still catches a slow, steady scroll.
+    let run = 0
     let ticking = false
     const onScroll = () => {
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
         const y = window.scrollY
-        if (y < 140) setTucked(false)
-        else if (y > last + 6) setTucked(true)
-        else if (y < last - 6) setTucked(false)
+        const d = y - last
         last = y
+        if (y < 140) {
+          run = 0
+          setTucked(false)
+        } else if (d !== 0) {
+          run = Math.sign(d) === Math.sign(run) ? run + d : d
+          if (run > 24) setTucked(true)
+          else if (run < -40) setTucked(false)
+        }
         ticking = false
       })
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Keep the spacer exactly as tall as the hanging row (it changes with the
+  // location label and font loading), written straight to the DOM so a resize
+  // never re-renders the header.
+  useEffect(() => {
+    const row = rowRef.current
+    const spacer = spacerRef.current
+    if (!row || !spacer) return
+    const sync = () => { spacer.style.height = `${row.offsetHeight}px` }
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(row)
+    return () => ro.disconnect()
   }, [])
 
   useEffect(() => {
@@ -152,7 +178,12 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
   )
 
   return (
-    <div className="sticky top-0 z-50 w-full bg-paper/90 backdrop-blur-xl border-b border-line">
+    <>
+    <div className={cn(
+      'sticky top-0 z-50 w-full bg-paper/90 backdrop-blur-xl border-b',
+      // On phones the hanging row draws the bottom line while it's showing.
+      tucked && !menuOpen ? 'border-line' : 'border-line max-lg:border-transparent',
+    )}>
       <header className="w-full">
         {/* ── Desktop ── */}
         <div className="hidden lg:grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 mx-auto max-w-[1440px] px-10 py-3.5">
@@ -225,7 +256,7 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
         </AnimatePresence>
 
         {/* ── Mobile and tablet ── */}
-        <div className="lg:hidden flex items-center gap-2 px-4 sm:px-6 py-2.5">
+        <div className="lg:hidden relative bg-paper flex items-center gap-2 px-4 sm:px-6 py-2.5">
           <Wordmark compact />
           <div className="ml-auto flex items-center gap-1.5">
             <Link
@@ -253,17 +284,24 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
           </div>
         </div>
 
+        {/* Location + search. It hangs below the bar and slides up behind it
+            while scrolling down. Only transform and opacity change, never its
+            height: a height change moves the page under the finger, the
+            browser re-anchors the scroll, and the row toggles back and forth
+            (the flicker this replaced). The spacer after the header keeps the
+            room it needs at the top of the page. */}
         <div
+          ref={rowRef}
           className={cn(
-            'lg:hidden grid transition-[grid-template-rows,opacity] duration-300 ease-[var(--ease-out-soft)]',
-            tucked && !menuOpen ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
+            'lg:hidden absolute inset-x-0 top-full -z-10 bg-paper border-b border-line',
+            'transition-[transform,opacity] duration-300 ease-[var(--ease-out-soft)] will-change-transform',
+            tucked && !menuOpen ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100',
           )}
+          inert={tucked && !menuOpen ? true : undefined}
         >
-          <div className={cn('min-h-0', tucked && !menuOpen ? 'overflow-hidden' : 'overflow-visible')} inert={tucked && !menuOpen ? true : undefined}>
-            <div className="px-4 sm:px-6 pb-3 flex flex-col gap-2.5">
-              <HeaderLocation />
-              {!isSearchPage && searchField('header-search-mobile')}
-            </div>
+          <div className="px-4 sm:px-6 pt-0.5 pb-3 flex flex-col gap-2.5">
+            <HeaderLocation />
+            {!isSearchPage && searchField('header-search-mobile')}
           </div>
         </div>
 
@@ -334,5 +372,8 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
         </AnimatePresence>
       </header>
     </div>
+    {/* Room for the hanging location + search row (phones only). */}
+    <div ref={spacerRef} aria-hidden="true" className="lg:hidden h-[108px]" />
+    </>
   )
 }

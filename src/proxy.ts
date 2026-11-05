@@ -11,6 +11,7 @@ const PUBLIC_PREFIXES = [
   // SEO / crawler files — must never redirect to login.
   '/robots.txt',
   '/sitemap.xml',
+  '/indexnow-key.txt',
   '/manifest.webmanifest',
   '/category/',
   '/product/',

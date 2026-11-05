@@ -58,7 +58,7 @@ Refunds and payment links need migrations 046 and 047.
 
 ## Applying database changes
 
-`supabase/RUN_039_TO_043.sql` applies migrations 039–043 in one transaction, after snapshotting `orders` and `cms_content` into backup tables. All migrations up to 048 are applied on the live database (as of 5 November 2026).
+`supabase/RUN_039_TO_043.sql` applies migrations 039–043 in one transaction, after snapshotting `orders` and `cms_content` into backup tables. All migrations up to 050 are applied on the live database (as of 5 November 2026).
 
 ## Cancellations and damaged items
 
@@ -69,11 +69,11 @@ Refunds and payment links need migrations 046 and 047.
 
 ## Images
 
-Product and banner images live in the R2 bucket `kuthari-media` on the Cloudflare account kuthari.dev@gmail.com. The `kuthari-media` Worker serves them at `https://kuthari-media.kuthari-dev.workers.dev/product-images/<file>` with a one-year cache, and accepts uploads only with `Authorization: Bearer <UPLOAD_SECRET>`.
+Product and banner images live in the R2 bucket `kuthari-media` on the Cloudflare account kuthari.dev@gmail.com. The `kuthari-media` Worker serves them at `https://media.kutharibeauty.com/product-images/<file>` (also reachable at kuthari-media.kuthari-dev.workers.dev) with a one-year cache, and accepts uploads only with `Authorization: Bearer <UPLOAD_SECRET>`.
 
 - The admin upload route (`/api/upload` → `src/lib/media.ts`) sends files there when `NEXT_PUBLIC_MEDIA_URL` and `MEDIA_UPLOAD_SECRET` are set. Without them it uses Supabase Storage.
 - To change the Worker: edit `cloudflare/media-worker/worker.js`, then run `npx wrangler deploy` in that folder.
-- Migration `045` moved the stored URLs from Supabase to the Worker. The Supabase copies were kept.
+- Migration `045` moved the stored URLs from Supabase to the Worker, and `050` moved them onto media.kutharibeauty.com. The Supabase copies were kept.
 
 ## Scheduled jobs
 

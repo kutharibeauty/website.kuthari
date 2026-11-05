@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { render } from '@react-email/components'
 import type { OrderItem, Address } from '@/types/database.types'
+import { SITE_URL } from '@/lib/site-url'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -9,7 +10,6 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? 'noreply@kutharibeauty.com'
 const FROM_NAME = process.env.RESEND_FROM_NAME ?? 'Kuthari Beauty Store'
 const FROM = FROM_EMAIL.includes('<') ? FROM_EMAIL : `${FROM_NAME} <${FROM_EMAIL}>`
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.kutharibeauty.com'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -65,43 +65,31 @@ async function renderTemplate(Component: React.ComponentType<Record<string, unkn
   return render(React.createElement(Component as React.ComponentType, props))
 }
 
-/** Fetch all admin emails where receive_order_emails = true AND role != delivery */
-export async function getOrderEmailAdmins(): Promise<AdminRecipient[]> {
+/**
+ * Everyone who gets staff emails: every active admin and super admin with an
+ * email address, unless they switched notifications off in Admin → Admin
+ * Profiles. A locked person (the owner) always gets them, whatever the switch
+ * says. Delivery staff never do. One rule for every staff email: new orders,
+ * status changes, damaged-item requests, low stock and payment checks.
+ */
+export async function getStaffEmailRecipients(): Promise<AdminRecipient[]> {
   const { createAdminClient } = await import('@/lib/supabase/server')
   const supabase = createAdminClient()
+  // '*' so this still works if migration 049 (email_notifications) is missing.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any)
     .from('admin_profiles')
-    .select('name, email, role, permissions')
+    .select('*')
     .eq('is_active', true)
+    .in('role', ['super_admin', 'admin'])
     .not('email', 'is', null)
 
   if (!data) return []
-  return (data as Array<{ name: string; email: string | null; role: string; permissions: Record<string, boolean> | null }>)
-    .filter(
-      (a) =>
-        a.email &&
-        a.role !== 'delivery' &&
-        (a.role === 'super_admin' || a.permissions?.receive_order_emails === true),
-    )
-    .map((a) => ({ name: a.name, email: a.email! }))
-}
-
-/** Fetch super-admin + manage_products admins for low stock alerts */
-export async function getLowStockAlertAdmins(): Promise<AdminRecipient[]> {
-  const { createAdminClient } = await import('@/lib/supabase/server')
-  const supabase = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
-    .from('admin_profiles')
-    .select('name, email, role, permissions')
-    .eq('is_active', true)
-    .not('email', 'is', null)
-
-  if (!data) return []
-  return (data as Array<{ name: string; email: string | null; role: string; permissions: Record<string, boolean> }>)
-    .filter(a => a.email && (a.role === 'super_admin' || a.permissions?.manage_products))
-    .map(a => ({ name: a.name, email: a.email! }))
+  const seen = new Set<string>()
+  return (data as Array<{ name: string; email: string | null; email_notifications?: boolean | null; email_locked?: boolean | null }>)
+    .filter((a) => a.email && (a.email_locked === true || a.email_notifications !== false))
+    .filter((a) => { const k = a.email!.trim().toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true })
+    .map((a) => ({ name: a.name, email: a.email!.trim() }))
 }
 
 // ── Email Senders ──────────────────────────────────────────────────────────────
@@ -179,9 +167,7 @@ export async function sendOrderStatusUpdate(data: OrderEmailData): Promise<void>
 }
 
 /**
- * Notify staff on EVERY order status change (PRD item #4). Recipients come from
- * getOrderEmailAdmins() which already includes super_admin unconditionally and
- * every admin with receive_order_emails, excluding delivery staff.
+ * Notify staff on EVERY order status change. Recipients: getStaffEmailRecipients().
  */
 export async function sendOrderStatusAdmin(data: OrderEmailData, admins: AdminRecipient[]): Promise<void> {
   if (!admins.length) return

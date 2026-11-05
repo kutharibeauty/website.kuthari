@@ -7,7 +7,7 @@ import type { OrderEmailData } from './index'
  *
  * Fires on EVERY order status transition and:
  *   • emails the customer a status-appropriate update, and
- *   • emails every eligible admin/super-admin (getOrderEmailAdmins already
+ *   • emails every eligible admin/super-admin (getStaffEmailRecipients already
  *     includes super_admin unconditionally and excludes delivery staff).
  *
  * All sends are best-effort (Promise.allSettled) and any failure is logged, never
@@ -88,7 +88,7 @@ export async function notifyOrderEvent(
     }
 
     const resend = await import('./index')
-    const admins = await resend.getOrderEmailAdmins()
+    const admins = await resend.getStaffEmailRecipients()
 
     const customerSend = opts.skipCustomer
       ? Promise.resolve()

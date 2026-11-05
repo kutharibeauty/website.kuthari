@@ -1,15 +1,18 @@
 import type { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/site-url'
 
-export const revalidate = 21600 // rebuild at most every 6 hours
+// Rebuilt at least every 6 hours, and straight away after any product,
+// category or banner change in the admin (lib/revalidate.ts).
+export const revalidate = 21600
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.kutharibeauty.com'
+  const siteUrl = SITE_URL
 
   const { createAdminClient } = await import('@/lib/supabase/server')
   const supabase = createAdminClient()
 
   const [{ data: products }, { data: categories }] = await Promise.all([
-    supabase.from('products').select('slug, updated_at').eq('is_active', true),
+    supabase.from('products').select('slug, updated_at, images').eq('is_active', true),
     supabase.from('categories').select('slug, updated_at').eq('is_active', true),
   ])
 
@@ -40,6 +43,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(p.updated_at ?? now),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
+    // Product photos, so they can show up in Google Images too.
+    images: ((p as { images?: string[] | null }).images ?? []).filter((u) => /^https?:\/\//.test(u)).slice(0, 5),
   }))
 
   return [...staticRoutes, ...categoryRoutes, ...productRoutes]

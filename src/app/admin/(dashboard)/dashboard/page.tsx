@@ -204,9 +204,11 @@ export default async function DashboardPage() {
             <div>
               <h3 className="text-[15px] font-semibold text-primary">Also waiting</h3>
               <ul className="mt-3 space-y-2 text-[14px]">
-                <li className="flex items-center justify-between rounded-xl border border-table-border px-3 py-2.5">
-                  <span className="text-primary">Reviews to approve</span>
-                  <span className="font-semibold tabular-nums text-primary">{pendingReviews}</span>
+                <li>
+                  <Link href="/admin/reviews" className="flex items-center justify-between rounded-xl border border-table-border px-3 py-2.5 hover:border-primary/40">
+                    <span className="text-primary">Reviews to approve</span>
+                    <span className="font-semibold tabular-nums text-primary">{pendingReviews}</span>
+                  </Link>
                 </li>
                 <li>
                   <Link href="/admin/abandoned-carts" className="flex items-center justify-between rounded-xl border border-table-border px-3 py-2.5 hover:border-primary/40">

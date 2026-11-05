@@ -44,7 +44,7 @@ export async function notifyIssue(issueId: string): Promise<void> {
     const resend = await import('@/lib/resend')
     const sends: Promise<void>[] = [resend.sendIssueCustomer(data)]
     if (issue.status === 'requested' || issue.status === 'approved') {
-      const admins = await resend.getOrderEmailAdmins()
+      const admins = await resend.getStaffEmailRecipients()
       sends.push(resend.sendIssueAdmin(data, admins, issue.status === 'requested' ? 'new' : 'approved'))
     }
     const results = await Promise.allSettled(sends)

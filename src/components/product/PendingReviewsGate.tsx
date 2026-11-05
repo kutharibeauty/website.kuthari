@@ -129,7 +129,8 @@ export default function PendingReviewsGate() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={(e) => { if (e.target === e.currentTarget) closeAll() }}
+        // Deliberately no tap-outside-to-close: a stray tap while picking stars
+        // used to throw the review away. Only the ✕ (or "Not now") closes it.
       >
         <motion.div
           role="dialog"

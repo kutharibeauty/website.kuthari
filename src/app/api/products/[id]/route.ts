@@ -1,9 +1,10 @@
 import { auth } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { withStorefrontRefresh } from '@/lib/revalidate'
 import { requirePermission } from '@/lib/auth/guard'
+import { notifySearchEngines } from '@/lib/seo/search-notify'
 
 const PATCHABLE = ['stock_qty', 'price', 'is_active', 'is_featured', 'display_order'] as const
 
@@ -44,6 +45,7 @@ async function PATCH_handler(
     .eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  after(() => notifySearchEngines({ productIds: [id] }))
   return NextResponse.json({ ok: true })
 }
 
@@ -77,6 +79,7 @@ async function PUT_handler(
     .eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  after(() => notifySearchEngines({ productIds: [id] }))
   return NextResponse.json({ ok: true })
 }
 

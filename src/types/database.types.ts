@@ -278,7 +278,6 @@ export interface CartItem {
   image: string | null
   quantity: number
   slug: string
-  delivery_charge?: number  // per-product delivery charge (₹), 0 when none/disabled
   min_qty?: number          // fewest of this line allowed (bulk-price minimum); absent = 1
 }
 

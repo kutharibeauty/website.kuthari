@@ -24,6 +24,10 @@ export interface AdminProfile {
   role: 'super_admin' | 'admin' | 'delivery'
   is_active: boolean
   permissions: AdminPermissions
+  /** Gets staff emails (migration 049). Defaults to on. */
+  email_notifications?: boolean
+  /** Always gets staff emails; can't be switched off (the owner). */
+  email_locked?: boolean
   created_by: string | null
   created_at: string
   updated_at: string

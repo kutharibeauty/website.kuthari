@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { Loader2, CheckCircle2 } from 'lucide-react'
-import { DEFAULT_PINCODE_DELIVERY_FEE } from '@/lib/cart/delivery'
+import { DEFAULT_PINCODE_DELIVERY_FEE, computeDeliveryFee } from '@/lib/cart/delivery'
+import { useDeliveryConfig } from '@/hooks/useDeliveryConfig'
 
 interface PincodeResult {
   serviceable: boolean
@@ -16,6 +17,10 @@ interface PincodeResult {
 interface Props {
   pincode: string
   onResult?: (result: PincodeResult | null) => void
+  /** The cart subtotal, at checkout. With it the line shows what this order
+   *  will actually pay (free above the threshold); without it, the pincode's
+   *  rate and the free-delivery threshold. */
+  subtotal?: number
 }
 
 /**
@@ -24,7 +29,8 @@ interface Props {
  * Delivery is all-India, so this never blocks checkout — it exists purely to
  * tell the customer what shipping to that pincode costs before they pay.
  */
-export default function PincodeChecker({ pincode, onResult }: Props) {
+export default function PincodeChecker({ pincode, onResult, subtotal }: Props) {
+  const config = useDeliveryConfig()
   const [status, setStatus] = useState<'idle' | 'checking' | 'done'>('idle')
   const [result, setResult] = useState<PincodeResult | null>(null)
   const lastPincode = useRef('')
@@ -68,7 +74,11 @@ export default function PincodeChecker({ pincode, onResult }: Props) {
 
   if (!result) return null
 
-  const charge = result.delivery_charge ?? DEFAULT_PINCODE_DELIVERY_FEE
+  // Same rule the order summary and the order API use.
+  const charge = subtotal != null
+    ? computeDeliveryFee(subtotal, result.delivery_charge ?? null, config)
+    : result.delivery_charge ?? DEFAULT_PINCODE_DELIVERY_FEE
+  const freeAbove = config.freeDeliveryMin.toLocaleString('en-IN')
 
   return (
     <div className="flex items-center gap-2 mt-2">
@@ -77,7 +87,11 @@ export default function PincodeChecker({ pincode, onResult }: Props) {
         Delivery available
         {result.city ? ` to ${result.city}${result.state ? `, ${result.state}` : ''}` : ''}
         {' — '}
-        {charge === 0 ? 'free' : `₹${charge.toLocaleString('en-IN')}`}
+        {charge === 0
+          ? (subtotal != null && subtotal >= config.freeDeliveryMin ? `free on this order (above ₹${freeAbove})` : 'free')
+          : subtotal != null
+            ? `₹${charge.toLocaleString('en-IN')} (free above ₹${freeAbove})`
+            : `₹${charge.toLocaleString('en-IN')}, free on orders above ₹${freeAbove}`}
         {result.delivery_days ? ` (${result.delivery_days} day${result.delivery_days > 1 ? 's' : ''})` : ''}
       </span>
     </div>

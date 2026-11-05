@@ -10,6 +10,9 @@ export function refreshStorefront() {
   try {
     revalidateTag('shop-chrome', { expire: 0 })
     revalidatePath('/', 'layout')
+    // Not under the page layout, so refreshed by name.
+    revalidatePath('/sitemap.xml')
+    revalidatePath('/api/merchant-feed')
   } catch (err) {
     // Never let a cache refresh turn a successful save into an error.
     console.error('[refreshStorefront]', err)

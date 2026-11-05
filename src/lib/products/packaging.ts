@@ -220,13 +220,13 @@ export function describeSelection(qty: number, opt: BuyOption, pieceWord = 'Piec
 }
 
 /**
- * The bulk-price minimum, in pieces. Only applies to products that have BOTH a
- * retail and a bulk price (a bulk-only product has nothing cheaper to protect).
- * Null when there is no minimum.
+ * The wholesale-price minimum, in pieces (admin-set). With a retail price,
+ * fewer pieces must be bought at retail; on a wholesale-only product it is
+ * simply the minimum order. Null when there is no minimum.
  */
 export function bulkMinPieces(p: PackagingProduct): number | null {
   const n = Math.floor(Number(p.bulk_min_qty))
-  return hasRetailPrice(p) && Number.isFinite(n) && n > 1 ? n : null
+  return Number.isFinite(n) && n > 1 ? n : null
 }
 
 /**

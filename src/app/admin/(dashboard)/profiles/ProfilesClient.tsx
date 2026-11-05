@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
 import type { AdminProfile, AdminPermissions } from '@/types/admin.types'
-import { Users, UserCog, Bike, Plus, Phone, Mail, CheckCircle, Clock, Edit3, Lock } from 'lucide-react'
+import { Users, UserCog, Bike, Plus, Phone, Mail, CheckCircle, Clock, Edit3, Lock, Bell, BellOff } from 'lucide-react'
 
 const ROLE_STYLES: Record<AdminProfile['role'], { chip: string; label: string }> = {
   super_admin: { chip: 'bg-primary text-white border-primary',                           label: 'Super Admin' },
@@ -44,6 +44,25 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
       showToast('Changes saved successfully', 'success')
     } else {
       showToast('Failed to save changes', 'error')
+    }
+    setToggling(null)
+  }
+
+  async function toggleEmails(p: AdminProfile) {
+    if (p.email_locked) return
+    const next = p.email_notifications === false
+    setToggling(p.id)
+    const res = await fetch(`/api/admin-profiles/${p.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email_notifications: next }),
+    })
+    if (res.ok) {
+      setProfiles(prev => prev.map(x => x.id === p.id ? { ...x, email_notifications: next } : x))
+      showToast(next ? `${p.name} will get email updates` : `Email updates off for ${p.name}`, 'success')
+    } else {
+      const d = await res.json().catch(() => ({}))
+      showToast(d.error ?? 'Failed to save changes', 'error')
     }
     setToggling(null)
   }
@@ -180,6 +199,49 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
                         Fixed permissions: view + update assigned orders only
                       </p>
                     )}
+
+                    {/* Staff email updates: new orders, status changes, damaged items, low stock, payments. */}
+                    {profile.role !== 'delivery' && (() => {
+                      const on = profile.email_locked || profile.email_notifications !== false
+                      return (
+                        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border-2 border-table-border bg-surface px-4 py-3 max-w-xl">
+                          {on ? <Bell size={18} className="text-primary shrink-0" /> : <BellOff size={18} className="text-on-surface-variant shrink-0" />}
+                          <div className="flex-1 min-w-[180px]">
+                            <p className="font-bold text-sm text-primary">Email notifications</p>
+                            <p className="text-[12px] text-on-surface-variant">
+                              {!profile.email
+                                ? 'Add an email address to this profile to receive updates.'
+                                : profile.email_locked
+                                  ? 'Always on for this person. It can’t be turned off.'
+                                  : on ? 'Gets every order, delivery, damaged-item and stock update.' : 'Off. No update emails are sent to this person.'}
+                            </p>
+                          </div>
+                          {profile.email_locked ? (
+                            <span className="flex items-center gap-1.5 rounded-lg border-2 border-primary/30 bg-primary/5 px-3 py-1.5 text-[12px] font-bold text-primary">
+                              <Lock size={13} /> Always on
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              role="switch"
+                              aria-checked={on}
+                              aria-label={`Email notifications for ${profile.name}`}
+                              disabled={toggling === profile.id}
+                              onClick={() => toggleEmails(profile)}
+                              className={cn(
+                                'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 transition-colors disabled:opacity-50 active:scale-95',
+                                on ? 'bg-primary border-primary' : 'bg-surface border-table-border',
+                              )}
+                            >
+                              <span className={cn(
+                                'inline-block h-4 w-4 rounded-full shadow transition-transform',
+                                on ? 'translate-x-6 bg-white' : 'translate-x-1.5 bg-on-surface-variant/50',
+                              )} />
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   {/* Right side actions */}

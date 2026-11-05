@@ -145,11 +145,27 @@ const CSS = `@property --kbs-n {
   .kbs-preloader__count {
     --kbs-n: 100;
   }
+}
+html[data-kbs-seen] .kbs-preloader {
+  display: none;
 }`
 
+// Runs during HTML parsing, before the curtain below is painted.
+const SEEN_SCRIPT =
+  "(function(){var d=document.documentElement;if(d.hasAttribute('data-kbs-seen'))return;" +
+  "try{if(sessionStorage.getItem('kbs-seen')){d.setAttribute('data-kbs-seen','');return}" +
+  "sessionStorage.setItem('kbs-seen','1')}catch(e){}" +
+  "setTimeout(function(){d.setAttribute('data-kbs-seen','')},2200)})()"
+
 /**
- * The opening curtain on every full page load (client-side navigation keeps
- * the layout mounted, so moving between pages doesn't replay it): a
+ * Once per visit (per browser tab): before the curtain paints, SEEN_SCRIPT
+ * checks sessionStorage. On a later load in the same tab (a reload, or coming
+ * back from checkout/login, which remounts this layout) it marks <html> with
+ * data-kbs-seen and the CSS hides the curtain. On the first load it records the
+ * visit and marks <html> once the curtain has lifted, so a remount later in the
+ * same page doesn't replay it either.
+ *
+ * The curtain itself: a
  * deep-indigo panel where the mirror logo rises, KUTHARI reveals letter by
  * letter and a counter runs 000 to 100, then the panel lifts away.
  *
@@ -161,6 +177,7 @@ export default function Preloader() {
   return (
     <>
     <style dangerouslySetInnerHTML={{ __html: CSS }} />
+    <script dangerouslySetInnerHTML={{ __html: SEEN_SCRIPT }} />
     <div className="kbs-preloader" aria-hidden="true">
       <div className="kbs-preloader__inner">
         <span className="kbs-preloader__mark">

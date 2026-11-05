@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { withStorefrontRefresh } from '@/lib/revalidate'
 import { requirePermission } from '@/lib/auth/guard'
+import { revalidateTag } from 'next/cache'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -29,6 +30,7 @@ async function PATCH_handler(req: NextRequest, { params }: Params) {
     .update({ is_approved })
     .eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  revalidateTag('admin-badges', { expire: 0 })
   return NextResponse.json({ ok: true })
 }
 
@@ -43,6 +45,7 @@ async function DELETE_handler(_req: NextRequest, { params }: Params) {
     .delete()
     .eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  revalidateTag('admin-badges', { expire: 0 })
   return NextResponse.json({ ok: true })
 }
 

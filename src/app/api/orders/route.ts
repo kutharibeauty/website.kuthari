@@ -114,7 +114,6 @@ export async function POST(request: Request) {
     pack_type: string | null; unit_type: string | null; units_per_pack: number | null
     pieces_per_secondary: number | null; secondary_price: number | null; secondary_mrp: number | null
     units_per_hanger: number | null; hangers_per_pack: number | null
-    delivery_charge: number | null; delivery_charge_enabled: boolean | null
     retail_price?: number | null; retail_mrp?: number | null; bulk_min_qty?: number | null
   }
 
@@ -189,18 +188,9 @@ export async function POST(request: Request) {
   }
 
   const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
-  // Per-product delivery charges (each product once), from authoritative DB data
-  // — never trust a client-sent charge. Products without a charge add nothing.
-  const deliveryByProduct = new Map<string, number>()
-  for (const oi of orderItems) {
-    const p = productMap.get(oi.product_id)
-    if (p?.delivery_charge_enabled && p.delivery_charge) {
-      deliveryByProduct.set(p.id, Number(p.delivery_charge))
-    }
-  }
   // Apply the SAME rule the cart and checkout show, so the charge matches what
-  // the customer saw: per-product charges win; otherwise free at/above the admin
-  // threshold, else the flat fee. Thresholds come from the `settings` CMS row.
+  // the customer saw: free at/above the admin threshold, else the pincode's
+  // rate (or the default). Thresholds come from the `settings` CMS row.
   const { data: settingsRow } = await adminDb
     .from('cms_content').select('value').eq('key', 'settings').maybeSingle()
   const deliveryConfig = parseDeliveryConfig((settingsRow as { value?: unknown } | null)?.value)
@@ -657,7 +647,7 @@ async function sendOrderEmails(
       amountPaid,
     }
 
-    const admins = await resend.getOrderEmailAdmins()
+    const admins = await resend.getStaffEmailRecipients()
 
     await Promise.allSettled([
       resend.sendOrderPlacedCustomer(emailData),
@@ -718,6 +708,6 @@ async function checkLowStock(
 
   if (!lowStock.length) return
 
-  const admins = await resend.getLowStockAlertAdmins()
+  const admins = await resend.getStaffEmailRecipients()
   await resend.sendLowStockAlert({ products: lowStock }, admins)
 }

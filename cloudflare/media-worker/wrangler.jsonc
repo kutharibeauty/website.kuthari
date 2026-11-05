@@ -11,5 +11,6 @@
   "main": "worker.js",
   "compatibility_date": "2026-10-01",
   "workers_dev": true,
+  "routes": [{ "pattern": "media.kutharibeauty.com", "custom_domain": true }],
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "kuthari-media" }]
 }
