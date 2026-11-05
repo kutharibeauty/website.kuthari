@@ -18,6 +18,18 @@ import { Plus, Image as ImageIcon, GripVertical, Edit3, Trash2, X, CloudUpload, 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type TrustBadge = { icon: string; text: string; text_or: string }
+/** A category card on the homepage's "What's on your list" grid. */
+export type AisleCategory = { id: string; name: string; slug: string; autoPhoto: string | null }
+
+/** Upload an image through the admin upload route; returns its URL, or '' on failure. */
+async function uploadToMedia(file: File, onToast: (msg: string, type?: 'success' | 'error' | 'info') => void): Promise<string> {
+  const fd = new FormData(); fd.append('file', file)
+  const res = await fetch('/api/upload', { method: 'POST', body: fd })
+  if (res.ok) return ((await res.json()) as { url: string }).url
+  const d = await res.json().catch(() => ({})) as { error?: string }
+  onToast(d.error ?? 'Image upload failed', 'error')
+  return ''
+}
 type FooterLink  = { label: string; href: string }
 
 const TABS = ['Banners', 'Homepage', 'Footer', 'Announcements']
@@ -53,9 +65,11 @@ const PLACEMENT_LABELS: Record<string, string> = {
 export default function BannersClient({
   initialBanners,
   cmsContent,
+  categories = [],
 }: {
   initialBanners: Banner[]
   cmsContent: CmsContent[]
+  categories?: AisleCategory[]
 }) {
   const [tab, setTab] = useState(0)
   const showToast = useToastStore((s) => s.show)
@@ -94,7 +108,7 @@ export default function BannersClient({
 
       {/* ── Tab Content ── */}
       {tab === 0 && <BannersTab initialBanners={initialBanners} onToast={showToast} />}
-      {tab === 1 && <HomepageTab cmsContent={cmsContent} onToast={showToast} />}
+      {tab === 1 && <HomepageTab cmsContent={cmsContent} categories={categories} onToast={showToast} />}
       {tab === 2 && <FooterTab cmsContent={cmsContent} onToast={showToast} />}
       {tab === 3 && <AnnouncementsTab cmsContent={cmsContent} onToast={showToast} />}
 
@@ -633,8 +647,32 @@ function BannerFormModal({
 
 // ── Tab 2: Homepage ────────────────────────────────────────────────────────────
 
-function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToast: Toast }) {
+function HomepageTab({ cmsContent, categories, onToast }: { cmsContent: CmsContent[]; categories: AisleCategory[]; onToast: Toast }) {
   const heroRaw = asObj(getCms(cmsContent, 'hero'))
+  // "What's on your list today?": heading and a picture per category card.
+  const aislesRaw = asObj(getCms(cmsContent, 'aisles_section'))
+  const coversRaw = asObj((aislesRaw.covers ?? null) as Json)
+  const [aisles, setAisles] = useState({
+    title: str(aislesRaw.title),
+    accent: str(aislesRaw.accent),
+    covers: Object.fromEntries(Object.entries(coversRaw).filter(([, v]) => typeof v === 'string' && v)) as Record<string, string>,
+  })
+  const [uploadingFor, setUploadingFor] = useState<string | null>(null)
+  async function pickCover(categoryId: string, file: File | undefined) {
+    if (!file) return
+    setUploadingFor(categoryId)
+    const url = await uploadToMedia(file, onToast)
+    setUploadingFor(null)
+    if (url) setAisles((a) => ({ ...a, covers: { ...a.covers, [categoryId]: url } }))
+  }
+  // The mid-page offer image (between the category shelves and the store band).
+  const offerRaw = asObj(getCms(cmsContent, 'offer_banner'))
+  const [offer, setOffer] = useState({
+    image_url: str(offerRaw.image_url),
+    link_url: str(offerRaw.link_url),
+    alt_text: str(offerRaw.alt_text),
+    is_active: offerRaw.is_active !== false,
+  })
   const trustRaw = asArr<TrustBadge>(getCms(cmsContent, 'trust_badges'))
   const statsRaw = asObj(getCms(cmsContent, 'store_stats'))
   const statItemsRaw = Array.isArray(statsRaw.items) ? (statsRaw.items as { value?: unknown; label?: unknown }[]) : []
@@ -672,6 +710,16 @@ function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToas
     setSaving(true)
     const results = await Promise.all([
       fetch('/api/cms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'hero', value: hero }) }),
+      fetch('/api/cms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'aisles_section', value: { title: aisles.title.trim(), accent: aisles.accent.trim(), covers: aisles.covers } }),
+      }),
+      fetch('/api/cms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'offer_banner', value: { ...offer, image_url: offer.image_url.trim(), link_url: offer.link_url.trim(), alt_text: offer.alt_text.trim() } }),
+      }),
       fetch('/api/cms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'trust_badges', value: badges }) }),
       fetch('/api/cms', {
         method: 'POST',
@@ -696,17 +744,125 @@ function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToas
 
   return (
     <div className="space-y-10 max-w-4xl">
-      <CmsSection title="Hero headline">
-        <p className="text-sm text-on-surface-variant -mt-2 mb-4">The big text at the top of the home page. Leave a field empty to keep the current wording.</p>
+      <CmsSection title="&quot;What's on your list today?&quot; cards">
+        <p className="text-sm text-on-surface-variant -mt-2 mb-4">
+          The grid of category cards on the home page. Pick a picture for any card, or leave it on automatic to show a product photo from that category.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <CmsField label="Heading" hint="Blank = What's on your list">
+            <input type="text" value={aisles.title} onChange={e => setAisles(a => ({ ...a, title: e.target.value }))} className={inputCls} placeholder="What's on your list" />
+          </CmsField>
+          <CmsField label="Second line (italic)" hint="Blank = today?">
+            <input type="text" value={aisles.accent} onChange={e => setAisles(a => ({ ...a, accent: e.target.value }))} className={inputCls} placeholder="today?" />
+          </CmsField>
+        </div>
+        {categories.length === 0 ? (
+          <p className="text-sm text-on-surface-variant">No active categories yet. Add them under Categories.</p>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {categories.map((c) => {
+              const chosen = aisles.covers[c.id]
+              const shown = chosen || c.autoPhoto
+              return (
+                <div key={c.id} className="rounded-2xl border-2 border-table-border bg-surface-card overflow-hidden">
+                  <div className="relative aspect-[4/3] bg-surface-container">
+                    {shown
+                      // eslint-disable-next-line @next/next/no-img-element
+                      ? <img src={shown} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      : <div className="absolute inset-0 flex items-center justify-center text-on-surface-variant/50"><ImageIcon size={28} /></div>}
+                    <span className={cn('absolute left-2 top-2 rounded-lg px-2 py-1 text-[11px] font-bold', chosen ? 'bg-primary text-white' : 'bg-white/90 text-on-surface-variant')}>
+                      {chosen ? 'Your picture' : shown ? 'Automatic' : 'No picture yet'}
+                    </span>
+                    {uploadingFor === c.id && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/70"><Loader2 size={22} className="animate-spin text-primary" /></div>
+                    )}
+                  </div>
+                  <div className="p-3 space-y-2">
+                    <p className="font-bold text-sm text-primary truncate">{c.name}</p>
+                    <div className="flex gap-2">
+                      <label className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border-2 border-table-border py-2 text-[13px] font-bold text-primary hover:border-primary/40">
+                        <CloudUpload size={15} /> {chosen ? 'Change' : 'Upload'}
+                        <input type="file" accept="image/*" className="sr-only" onChange={e => { pickCover(c.id, e.target.files?.[0]); e.target.value = '' }} />
+                      </label>
+                      {chosen && (
+                        <button
+                          type="button"
+                          onClick={() => setAisles(a => { const covers = { ...a.covers }; delete covers[c.id]; return { ...a, covers } })}
+                          className="rounded-xl border-2 border-table-border px-3 text-[13px] font-bold text-on-surface-variant hover:border-error/40 hover:text-error"
+                          title="Go back to the automatic product photo"
+                        >
+                          <X size={15} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </CmsSection>
+
+      <CmsSection title="Offer banner (middle of the home page)">
+        <p className="text-sm text-on-surface-variant -mt-2 mb-4">
+          A wide picture shown after the category shelves. Best at 1600 × 500 pixels or similar. Switch it off to hide it.
+        </p>
+        <div className="space-y-4">
+          <div className="relative overflow-hidden rounded-2xl border-2 border-table-border bg-surface-container aspect-[16/5]">
+            {offer.image_url
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={offer.image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              : <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-on-surface-variant/60">No offer picture</div>}
+            {uploadingFor === 'offer' && <div className="absolute inset-0 flex items-center justify-center bg-white/70"><Loader2 size={22} className="animate-spin text-primary" /></div>}
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex cursor-pointer items-center gap-1.5 rounded-xl border-2 border-table-border px-4 py-2.5 text-[13px] font-bold text-primary hover:border-primary/40">
+              <CloudUpload size={15} /> {offer.image_url ? 'Change picture' : 'Upload picture'}
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={async e => {
+                  const file = e.target.files?.[0]; e.target.value = ''
+                  if (!file) return
+                  setUploadingFor('offer')
+                  const url = await uploadToMedia(file, onToast)
+                  setUploadingFor(null)
+                  if (url) setOffer(o => ({ ...o, image_url: url }))
+                }}
+              />
+            </label>
+            {offer.image_url && (
+              <button type="button" onClick={() => setOffer(o => ({ ...o, image_url: '' }))} className="rounded-xl border-2 border-table-border px-4 py-2.5 text-[13px] font-bold text-on-surface-variant hover:border-error/40 hover:text-error">
+                Remove picture
+              </button>
+            )}
+            <label className="ml-auto flex cursor-pointer items-center gap-2 text-[13px] font-bold text-primary">
+              <input type="checkbox" checked={offer.is_active} onChange={e => setOffer(o => ({ ...o, is_active: e.target.checked }))} className="h-4 w-4 accent-[var(--color-primary)]" />
+              Show on the home page
+            </label>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CmsField label="Opens when tapped" hint="Optional, e.g. /category/skincare">
+              <input type="text" value={offer.link_url} onChange={e => setOffer(o => ({ ...o, link_url: e.target.value }))} className={inputCls} placeholder="/category/skincare" />
+            </CmsField>
+            <CmsField label="Describe the picture" hint="For screen readers and Google">
+              <input type="text" value={offer.alt_text} onChange={e => setOffer(o => ({ ...o, alt_text: e.target.value }))} className={inputCls} placeholder="Diwali offer: 20% off skincare" />
+            </CmsField>
+          </div>
+        </div>
+      </CmsSection>
+
+      <CmsSection title="Page heading for Google">
+        <p className="text-sm text-on-surface-variant -mt-2 mb-4">
+          Not shown on the page (your banners carry the visible text). Search engines and screen readers read it as the home page&apos;s main heading. Leave empty to keep the current wording.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <CmsField label="Headline (big capitals)" hint="Keep it short: 2 to 4 words.">
+          <CmsField label="Heading">
             <input type="text" value={hero.title_en} onChange={e => setHero(p => ({ ...p, title_en: e.target.value }))} className={inputCls} placeholder="The beauty counter," />
           </CmsField>
-          <CmsField label="Second line (italic)" hint="Shown under the headline in the italic font.">
+          <CmsField label="Rest of the heading">
             <input type="text" value={hero.accent_en} onChange={e => setHero(p => ({ ...p, accent_en: e.target.value }))} className={inputCls} placeholder="at your door." />
-          </CmsField>
-          <CmsField label="One sentence under it" extraClass="md:col-span-2">
-            <input type="text" value={hero.subtitle_en} onChange={e => setHero(p => ({ ...p, subtitle_en: e.target.value }))} className={inputCls} placeholder="Skincare, haircare and salon stock from our Brahmapur shop, sent across India." />
           </CmsField>
         </div>
       </CmsSection>
@@ -914,6 +1070,9 @@ function FooterTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToast:
       </CmsSection>
 
       <CmsSection title="Quick Links">
+        <p className="text-sm text-on-surface-variant -mt-2 mb-4">
+          Extra links in the footer&apos;s Help column, after the policy pages. Use a page on this site (starting with /, e.g. /category/skincare) or a full web address (https://…). Up to 8.
+        </p>
         <div className="space-y-4">
           {links.map((link, i) => (
             <div key={i} className="flex flex-col sm:flex-row items-center gap-4">

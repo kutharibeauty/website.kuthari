@@ -140,7 +140,7 @@ const websiteJsonLd = {
 export default async function HomePage() {
   const {
     banners, promoCards, categories, shelfProducts, shelfIsFeatured, categoryProducts, categoryCounts,
-    coupons, offerBanner, trustBadges, marqueeLines, reviews,
+    coupons, offerBanner, trustBadges, marqueeLines, reviews, aisles,
   } = await getHomepageData()
   const content = await getStoreContent()
 
@@ -185,8 +185,11 @@ export default async function HomePage() {
         <CategoryBento
           categories={categories}
           counts={categoryCounts}
+          title={aisles.title}
+          accent={aisles.accent}
+          // The admin's picture for a card (Banners & CMS → Homepage) wins; else a product photo from that aisle.
           covers={Object.fromEntries(
-            categories.map((c) => [c.id, (categoryProducts[c.id] ?? []).find((p) => p.images?.[0])?.images?.[0] ?? null]),
+            categories.map((c) => [c.id, aisles.covers[c.id] ?? (categoryProducts[c.id] ?? []).find((p) => p.images?.[0])?.images?.[0] ?? null]),
           )}
         />
 

@@ -65,9 +65,13 @@ export default function CategoryBento({
   categories,
   counts,
   covers = {},
+  title = "What's on your list",
+  accent = 'today?',
 }: {
   categories: Item[]
   counts: Record<string, number>
+  title?: string
+  accent?: string
   /** category id → a product photo from that aisle */
   covers?: Record<string, string | null>
 }) {
@@ -76,7 +80,7 @@ export default function CategoryBento({
 
   return (
     <section className="mx-auto w-full max-w-[1440px] px-5 md:px-10 reveal" aria-labelledby="aisles-head">
-      <SectionHead id="aisles-head" title="What's on your list" accent="today?" link={{ href: '/search', label: 'Every aisle' }} />
+      <SectionHead id="aisles-head" title={title} accent={accent} link={{ href: '/search', label: 'Every aisle' }} />
 
       <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 auto-rows-[200px] md:auto-rows-[240px] gap-4 md:gap-5">
         {ordered.map((c, i) => {

@@ -16,7 +16,7 @@ export const getStoreContent = unstable_cache(
       const { data } = await createAdminClient()
         .from('cms_content')
         .select('key, value')
-        .in('key', ['hero', 'store_stats', 'footer', 'social_links', 'settings'])
+        .in('key', ['hero', 'store_stats', 'footer', 'social_links', 'settings', 'footer_links'])
       const cms: Record<string, unknown> = {}
       for (const row of (data ?? []) as { key: string; value: unknown }[]) cms[row.key] = row.value
 
@@ -64,6 +64,12 @@ export const getStoreContent = unstable_cache(
           youtube: text(social.youtube, ''),
           whatsapp: text(social.whatsapp, ''),
         },
+        links: (Array.isArray(cms.footer_links) ? (cms.footer_links as unknown[]) : [])
+          .map((l) => obj(l))
+          .map((l) => ({ label: text(l.label, ''), href: text(l.href, '') }))
+          // Site paths or http(s) links only.
+          .filter((l) => l.label && (/^\/[^/]/.test(l.href) || /^https?:\/\//.test(l.href)))
+          .slice(0, 8),
         delivery: parseDeliveryConfig(cms.settings),
       }
     } catch {

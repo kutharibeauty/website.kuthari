@@ -36,6 +36,8 @@ export interface HomepageData {
   categoryCounts: Record<string, number>
   announcement: SiteAnnouncement | null
   offerBanner: OfferBannerConfig | null
+  /** "What's on your list today?": heading and per-category card pictures (Banners & CMS → Homepage). */
+  aisles: { title: string; accent: string; covers: Record<string, string> }
   trustBadges: TrustBadgeItem[]
   marqueeLines: MarqueeLineItem[]
   /** Real reviews for the home page wall (see components/home/ReviewsWall). */
@@ -136,8 +138,17 @@ export async function getHomepageData(): Promise<HomepageData> {
 
   const offerBanner = parseCmsValue<OfferBannerConfig>(
     cmsMap['offer_banner'],
-    (v) => typeof v['image_url'] === 'string'
+    // Shown only when switched on and an image is set.
+    (v) => typeof v['image_url'] === 'string' && v['image_url'].trim() !== '' && v['is_active'] !== false
   )
+
+  const aislesRaw = cmsMap['aisles_section'] && typeof cmsMap['aisles_section'] === 'object' ? (cmsMap['aisles_section'] as Record<string, unknown>) : {}
+  const coversRaw = aislesRaw['covers'] && typeof aislesRaw['covers'] === 'object' ? (aislesRaw['covers'] as Record<string, unknown>) : {}
+  const aisles = {
+    title: typeof aislesRaw['title'] === 'string' && aislesRaw['title'].trim() ? aislesRaw['title'].trim() : "What's on your list",
+    accent: typeof aislesRaw['accent'] === 'string' && aislesRaw['accent'].trim() ? aislesRaw['accent'].trim() : 'today?',
+    covers: Object.fromEntries(Object.entries(coversRaw).filter(([, u]) => typeof u === 'string' && /^https?:\/\//.test(u as string))) as Record<string, string>,
+  }
 
   // Trust badges are authored in Banners & CMS → Homepage as an array of
   // { icon, text, text_or }. Keep only entries that actually have label text.
@@ -210,6 +221,7 @@ export async function getHomepageData(): Promise<HomepageData> {
     categoryCounts,
     announcement,
     offerBanner,
+    aisles,
     trustBadges,
     marqueeLines,
   }

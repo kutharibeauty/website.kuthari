@@ -13,6 +13,8 @@ export interface StoreContent {
   stats: { headline: string; accent: string; blurb: string; items: { value: string; label: string }[] }
   contact: { phones: string[]; email: string; address: string; hours: string; tagline: string }
   social: { instagram: string; facebook: string; youtube: string; whatsapp: string }
+  /** Extra footer links added in Banners & CMS → Footer. */
+  links: { label: string; href: string }[]
   delivery: DeliveryConfig
 }
 
@@ -42,5 +44,6 @@ export const DEFAULT_CONTENT: StoreContent = {
     youtube: '',
     whatsapp: '',
   },
+  links: [],
   delivery: parseDeliveryConfig(null),
 }

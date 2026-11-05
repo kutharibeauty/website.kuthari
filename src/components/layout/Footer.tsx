@@ -50,7 +50,9 @@ const colLink = 'text-[17px] font-semibold text-paper-raised hover:text-periwink
 
 export default async function Footer() {
   const [categories, content] = await Promise.all([getFooterCategories(), getStoreContent()])
-  const { contact, social } = content
+  const { contact, social, links } = content
+  // The admin's extra links, after the fixed ones (skipping any duplicate).
+  const helpLinks = [...HELP_LINKS, ...links.filter((l) => !HELP_LINKS.some((h) => h.href === l.href))]
   const socials = [
     { label: 'Instagram', href: social.instagram },
     { label: 'Facebook', href: social.facebook },
@@ -107,11 +109,13 @@ export default async function Footer() {
           <div>
             <h2 className={colHead}>Help</h2>
             <ul className="flex flex-col gap-2.5">
-              {HELP_LINKS.map(({ label, href }) => (
+              {helpLinks.map(({ label, href }) => (
                 <li key={href}>
-                  <Link href={href} className={colLink}>
-                    {label}
-                  </Link>
+                  {/^https?:/.test(href) ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" className={colLink}>{label}</a>
+                  ) : (
+                    <Link href={href} className={colLink}>{label}</Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -119,7 +123,7 @@ export default async function Footer() {
             <ul className="flex flex-col gap-2.5">
               {contact.phones.map((p) => (
                 <li key={p}>
-                  <a href={`tel:${p.replace(/[^d+]/g, '')}`} className={colLink}>
+                  <a href={`tel:${p.replace(/[^\d+]/g, '')}`} className={colLink}>
                     {p}
                   </a>
                 </li>

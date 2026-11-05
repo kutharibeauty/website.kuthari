@@ -15,7 +15,14 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(key ? (data?.[0] ?? null) : data)
+  // This endpoint is public: drop staff-only fields from the settings row.
+  const rows = (data ?? []).map((row) => {
+    if (row.key !== 'settings' || !row.value || typeof row.value !== 'object' || Array.isArray(row.value)) return row
+    const { admin_notification_email: _hidden, ...rest } = row.value as Record<string, unknown>
+    void _hidden
+    return { ...row, value: rest }
+  })
+  return NextResponse.json(key ? (rows[0] ?? null) : rows)
 }
 
 async function POST_handler(req: NextRequest) {
