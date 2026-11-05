@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { Star, ChevronDown } from 'lucide-react'
 import type { Metadata } from 'next'
 import {
   getProductBySlug,
@@ -266,7 +267,7 @@ export default async function ProductPage({ params }: PageProps) {
             {category && (
               <Link
                 href={`/category/${category.slug}`}
-                className="inline-block self-start px-3 py-1.5 bg-primary text-white rounded-full font-black text-[10px] uppercase tracking-[0.15em] mb-4 hover:bg-primary/85 transition-colors active:scale-95"
+                className="inline-block self-start px-3 py-1.5 bg-primary text-white rounded-full font-black text-[12px] mb-4 hover:bg-primary/85 transition-colors active:scale-95"
               >
                 {category.name}
               </Link>
@@ -274,20 +275,20 @@ export default async function ProductPage({ params }: PageProps) {
 
             {/* Brand */}
             {product.brand && (
-              <p className="text-[11px] font-black uppercase tracking-[0.15em] text-on-surface-variant/60 mb-1">
+              <p className="text-[15px] font-semibold text-indigo capitalize mb-1">
                 {product.brand}
               </p>
             )}
 
             {/* Product name */}
-            <h1 className="text-2xl lg:text-3xl font-black text-primary leading-tight tracking-tight mb-2">
+            <h1 className="display text-[clamp(2.25rem,1.6rem+2.4vw,3.75rem)] mb-3">
               {product.name}
             </h1>
 
             {/* SKU */}
             {product.sku && (
-              <p className="text-[11px] font-black uppercase tracking-widest text-on-surface-variant/40 mb-3">
-                SKU: {product.sku}
+              <p className="text-[13px] text-muted mb-3">
+                SKU {product.sku}
               </p>
             )}
 
@@ -296,12 +297,12 @@ export default async function ProductPage({ params }: PageProps) {
               <div className="flex items-center gap-2 mb-4 pb-4 border-b border-table-border">
                 <div className="flex items-center gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span
+                    <Star
                       key={i}
-                      className={`text-sm ${i < Math.round(stats.avg) ? 'text-secondary' : 'text-on-surface-variant/20'}`}
-                    >
-                      ★
-                    </span>
+                      size={15}
+                      aria-hidden="true"
+                      className={i < Math.round(stats.avg) ? 'fill-indigo text-indigo' : 'text-lavender'}
+                    />
                   ))}
                 </div>
                 <span className="text-sm font-black text-primary">{stats.avg}</span>
@@ -318,11 +319,9 @@ export default async function ProductPage({ params }: PageProps) {
             <div className="mt-6 border-t border-table-border hidden lg:block">
               {product.description && (
                 <details className="group border-b border-table-border" open>
-                  <summary className="flex items-center justify-between cursor-pointer py-4 font-black text-sm uppercase tracking-widest text-primary hover:text-primary/70 transition-colors select-none">
+                  <summary className="flex items-center justify-between cursor-pointer py-4 font-black text-sm text-primary hover:text-primary/70 transition-colors select-none">
                     Product Description
-                    <span className="material-symbols-outlined text-on-surface-variant/50 transition-transform group-open:rotate-180 text-[20px]">
-                      expand_more
-                    </span>
+                    <ChevronDown size={20} aria-hidden="true" className="text-on-surface-variant/50 transition-transform group-open:rotate-180" />
                   </summary>
                   <div
                     className="pb-5 prose prose-sm max-w-none text-sm font-medium text-on-surface-variant/80 leading-relaxed break-words [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-black [&_strong]:text-primary"
@@ -333,17 +332,15 @@ export default async function ProductPage({ params }: PageProps) {
 
               {product.tags && product.tags.length > 0 && (
                 <details className="group border-b border-table-border">
-                  <summary className="flex items-center justify-between cursor-pointer py-4 font-black text-sm uppercase tracking-widest text-primary hover:text-primary/70 transition-colors select-none">
+                  <summary className="flex items-center justify-between cursor-pointer py-4 font-black text-sm text-primary hover:text-primary/70 transition-colors select-none">
                     Tags
-                    <span className="material-symbols-outlined text-on-surface-variant/50 transition-transform group-open:rotate-180 text-[20px]">
-                      expand_more
-                    </span>
+                    <ChevronDown size={20} aria-hidden="true" className="text-on-surface-variant/50 transition-transform group-open:rotate-180" />
                   </summary>
                   <div className="pb-4 flex flex-wrap gap-2">
                     {product.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-3 py-1.5 border border-table-border rounded-xl font-black text-[11px] uppercase tracking-wider text-on-surface-variant hover:border-primary hover:text-primary transition-colors duration-200 cursor-default"
+                        className="px-3 py-1.5 border border-table-border rounded-xl font-black text-[11px] text-on-surface-variant hover:border-primary hover:text-primary transition-colors duration-200 cursor-default"
                       >
                         {tag}
                       </span>
@@ -359,11 +356,9 @@ export default async function ProductPage({ params }: PageProps) {
         {product.description && (
           <div className="mt-6 lg:hidden">
             <details className="group border border-table-border rounded-2xl overflow-hidden" open>
-              <summary className="flex items-center justify-between cursor-pointer p-4 font-black text-sm uppercase tracking-widest text-primary bg-surface-container-low select-none">
+              <summary className="flex items-center justify-between cursor-pointer p-4 font-black text-sm text-primary bg-surface-container-low select-none">
                 Product Description
-                <span className="material-symbols-outlined text-on-surface-variant/50 transition-transform group-open:rotate-180 text-[20px]">
-                  expand_more
-                </span>
+                <ChevronDown size={20} aria-hidden="true" className="text-on-surface-variant/50 transition-transform group-open:rotate-180" />
               </summary>
               <div
                 className="p-4 prose prose-sm max-w-none text-sm font-medium text-on-surface-variant/80 leading-relaxed border-t border-table-border break-words [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-black [&_strong]:text-primary"
@@ -378,7 +373,7 @@ export default async function ProductPage({ params }: PageProps) {
           <div className="mt-10">
             <div className="flex items-center gap-3 mb-5">
               <div className="h-px flex-1 bg-table-border" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant/40">FAQs</span>
+              <span className="text-[12px] font-black text-on-surface-variant/40">FAQs</span>
               <div className="h-px flex-1 bg-table-border" />
             </div>
             <ProductFAQ faqs={faqs.map((f) => ({ ...f, answer: sanitizeRichText(f.answer), answer_or: f.answer_or ? sanitizeRichText(f.answer_or) : f.answer_or }))} />
@@ -389,7 +384,7 @@ export default async function ProductPage({ params }: PageProps) {
         <div className="mt-10">
           <div className="flex items-center gap-3 mb-5">
             <div className="h-px flex-1 bg-table-border" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant/40">Reviews</span>
+            <span className="text-[12px] font-black text-on-surface-variant/40">Reviews</span>
             <div className="h-px flex-1 bg-table-border" />
           </div>
           <ProductReviews
@@ -405,7 +400,7 @@ export default async function ProductPage({ params }: PageProps) {
           <section className="mt-10">
             <div className="flex items-center gap-3 mb-5">
               <div className="h-px flex-1 bg-table-border" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant/40">
+              <span className="text-[12px] font-black text-on-surface-variant/40">
                 You May Also Like
               </span>
               <div className="h-px flex-1 bg-table-border" />

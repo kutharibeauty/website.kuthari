@@ -139,7 +139,7 @@ export default function PaymentModal({ orderId, total, onDelivered, onClose }: P
           <button
             onClick={confirmDelivery}
             disabled={confirming}
-            className="w-full flex items-center justify-center gap-2 py-4 bg-green-600 text-white rounded-2xl font-body-lg text-body-lg font-semibold disabled:opacity-50 active:scale-[0.98] transition-all"
+            className="w-full flex items-center justify-center gap-2 py-4 bg-green-600 text-white rounded-2xl font-body-lg text-body-lg font-semibold disabled:opacity-50 active:scale-[0.98] transition"
           >
             {confirming ? (
               <>

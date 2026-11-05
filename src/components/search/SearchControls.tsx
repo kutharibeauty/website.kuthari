@@ -15,7 +15,7 @@ interface Props {
 }
 
 /** Fallback rotating terms when no category names are available. */
-const DEFAULT_TERMS = ['sugar', 'atta', 'edible oil', 'pulses', 'spices', 'water']
+const DEFAULT_TERMS = ['shampoo', 'face wash', 'hair colour', 'facial kit', 'shaving foam', 'scrub']
 
 export default function SearchControls({ categories, initialQ, initialCategory, hideCategoriesOnDesktop }: Props) {
   const router = useRouter()
@@ -87,7 +87,7 @@ export default function SearchControls({ categories, initialQ, initialCategory, 
           defaultValue={initialQ}
           onChange={handleInput}
           placeholder=""
-          className="w-full pl-11 pr-10 py-3.5 bg-surface-card border-2 border-table-border rounded-2xl text-sm font-medium text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-all duration-200 shadow-sm focus:shadow-[0_0_0_4px_rgba(0,0,0,0.06)]"
+          className="w-full pl-11 pr-10 py-3.5 bg-surface-card border-2 border-table-border rounded-2xl text-sm font-medium text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition duration-200 shadow-sm focus:shadow-[0_0_0_4px_rgba(0,0,0,0.06)]"
         />
         {/* Animated rotating placeholder — only while empty */}
         {!hasValue && <AnimatedSearchPlaceholder terms={terms} />}
@@ -95,7 +95,7 @@ export default function SearchControls({ categories, initialQ, initialCategory, 
         {initialQ && (
           <button
             onClick={clearQ}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-on-surface/8 hover:bg-on-surface/15 text-on-surface-variant hover:text-primary transition-all duration-150 active:scale-90"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-on-surface/8 hover:bg-on-surface/15 text-on-surface-variant hover:text-primary transition duration-150 active:scale-90"
             aria-label="Clear search"
           >
             <X size={13} strokeWidth={2.5} />
@@ -113,7 +113,7 @@ export default function SearchControls({ categories, initialQ, initialCategory, 
           {/* All chip */}
           <button
             onClick={() => selectCat('')}
-            className={`flex-shrink-0 text-[11px] font-black uppercase tracking-wider px-4 py-2 rounded-xl border-2 transition-all duration-200 active:scale-95 ${!initialCategory
+            className={`flex-shrink-0 text-[14px] font-semibold px-4 py-2 rounded-full border transition duration-200 active:scale-95 ${!initialCategory
                 ? 'bg-primary text-on-primary border-primary shadow-sm'
                 : 'bg-surface-card border-table-border text-on-surface-variant hover:border-primary/50 hover:text-primary'
               }`}
@@ -125,7 +125,7 @@ export default function SearchControls({ categories, initialQ, initialCategory, 
             <button
               key={cat.id}
               onClick={() => selectCat(cat.slug)}
-              className={`flex-shrink-0 text-[11px] font-black uppercase tracking-wider px-4 py-2 rounded-xl border-2 transition-all duration-200 active:scale-95 whitespace-nowrap ${initialCategory === cat.slug
+              className={`flex-shrink-0 text-[14px] font-semibold px-4 py-2 rounded-full border transition duration-200 active:scale-95 whitespace-nowrap ${initialCategory === cat.slug
                   ? 'bg-primary text-on-primary border-primary shadow-sm'
                   : 'bg-surface-card border-table-border text-on-surface-variant hover:border-primary/50 hover:text-primary'
                 }`}

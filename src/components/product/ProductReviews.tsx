@@ -7,6 +7,7 @@ import RatingBreakdown from './RatingBreakdown'
 import ReviewPopup from './ReviewPopup'
 import type { ProductReview } from '@/types/database.types'
 import type { RatingStats } from '@/lib/data/product'
+import { MessageSquarePlus } from 'lucide-react'
 
 interface Props {
   productId: string
@@ -49,9 +50,9 @@ export default function ProductReviews({ productId, productName, reviews, stats 
         <h2 className="font-headline-md text-headline-md text-on-surface">Customer Reviews</h2>
         <button
           onClick={() => setShowPopup(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full border-[1.5px] border-primary text-primary hover:bg-surface-container font-label-sm text-label-sm uppercase tracking-wider transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full border-[1.5px] border-primary text-primary hover:bg-surface-container font-label-sm text-label-sm transition-colors"
         >
-          <span className="material-symbols-outlined text-[16px]">rate_review</span>
+          <MessageSquarePlus size={16} aria-hidden="true" />
           Write a Review
         </button>
       </div>
@@ -70,12 +71,7 @@ export default function ProductReviews({ productId, productName, reviews, stats 
         </>
       ) : (
         <div className="text-center py-12 bg-surface-container-low rounded-xl">
-          <span
-            className="material-symbols-outlined text-[48px] text-outline mb-3 block"
-            style={{ fontVariationSettings: "'FILL' 0" }}
-          >
-            rate_review
-          </span>
+          <MessageSquarePlus size={44} strokeWidth={1.5} aria-hidden="true" className="text-outline mb-3 mx-auto block" />
           <p className="font-body-lg text-body-lg text-on-surface-variant">No reviews yet.</p>
           <p className="font-body-md text-body-md text-on-surface-variant/70 mt-1">
             Be the first to review {productName}

@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth/server'
 import { aiJSON, isAIConfigured } from '@/lib/ai/openrouter'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
+import { requirePermission } from '@/lib/auth/guard'
 
 /**
  * POST /api/products/generate-description
@@ -9,6 +10,7 @@ import type { AuthMetadata } from '@/types'
  * → { description: <html EN>, description_or: <html Odia> }
  */
 export async function POST(req: NextRequest) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -40,15 +42,15 @@ export async function POST(req: NextRequest) {
     unit ? `Unit / pack: ${unit}` : null,
   ].filter(Boolean).join('\n')
 
-  const system = 'You are a product copywriter for KUTHARI BEAUTY STORE, a B2B wholesale distributor of cosmetics, skincare, haircare, salon and grooming products in India. You write clear, trustworthy descriptions for retailers buying in bulk. You always reply with strict JSON only.'
+  const system = 'You are a product copywriter for KUTHARI BEAUTY STORE, a beauty shop in Brahmapur, Odisha that sells cosmetics, skincare, haircare, salon and grooming products online across India. Most shoppers buy a single piece at retail price; salons and shops can also buy by the box at a bulk price. You write clear, warm, trustworthy descriptions. You always reply with strict JSON only.'
 
-  const user = `Write a compelling product description for this wholesale listing.
+  const user = `Write a product description for this listing.
 
 ${facts}
 ${prompt ? `\nExtra instructions from the admin: ${prompt}` : ''}
 
 Requirements:
-- English version: 60-110 words. Focus on quality, bulk/wholesale value, use-cases for retailers, and reliability. Do NOT invent specific certifications, weights or prices that were not provided.
+- English version: 60-110 words. Lead with what the product does and who it suits, then how to use it. Mention the bulk price only if a box or pack is part of the listing. Do NOT invent specific certifications, weights or prices that were not provided.
 - Odia version: a faithful natural translation of the English version into Odia (ଓଡ଼ିଆ) script.
 - Format BOTH as simple, clean HTML using only these tags: <p>, <ul>, <li>, <strong>. No headings, no inline styles, no markdown.
 

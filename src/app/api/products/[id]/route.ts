@@ -2,6 +2,8 @@ import { auth } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
+import { withStorefrontRefresh } from '@/lib/revalidate'
+import { requirePermission } from '@/lib/auth/guard'
 
 const PATCHABLE = ['stock_qty', 'price', 'is_active', 'is_featured', 'display_order'] as const
 
@@ -9,10 +11,11 @@ export async function GET() {
   return NextResponse.json({})
 }
 
-export async function PATCH(
+async function PATCH_handler(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -44,10 +47,18 @@ export async function PATCH(
   return NextResponse.json({ ok: true })
 }
 
-export async function PUT(
+/** Columns the client must never set: identity and bookkeeping. */
+function stripProtected(body: unknown): Record<string, unknown> {
+  const b = body && typeof body === 'object' && !Array.isArray(body) ? { ...(body as Record<string, unknown>) } : {}
+  for (const k of ['id', 'created_at', 'updated_at', 'sku_seq']) delete b[k]
+  return b
+}
+
+async function PUT_handler(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -57,7 +68,7 @@ export async function PUT(
   }
 
   const { id } = await params
-  const body = await req.json()
+  const body = stripProtected(await req.json())
 
   const supabase = createAdminClient()
   const { error } = await supabase
@@ -68,3 +79,6 @@ export async function PUT(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
+
+export const PATCH = withStorefrontRefresh(PATCH_handler)
+export const PUT = withStorefrontRefresh(PUT_handler)

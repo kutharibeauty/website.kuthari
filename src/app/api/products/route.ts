@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { skuPrefix } from '@/lib/products/sku'
 import type { AuthMetadata } from '@/types'
+import { withStorefrontRefresh } from '@/lib/revalidate'
+import { requirePermission } from '@/lib/auth/guard'
 
 async function generateSku(categoryId: string, supabase: ReturnType<typeof createAdminClient>): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,8 +32,9 @@ export async function GET(request: NextRequest) {
   const categoryId = searchParams.get('category_id')
   const featured = searchParams.get('featured')
   const search = searchParams.get('q')
-  const limit = Number(searchParams.get('limit') ?? '24')
-  const page = Number(searchParams.get('page') ?? '1')
+  // Clamp paging so one request can't pull the whole catalogue.
+  const limit = Math.min(60, Math.max(1, Math.floor(Number(searchParams.get('limit') ?? '24')) || 24))
+  const page = Math.max(1, Math.floor(Number(searchParams.get('page') ?? '1')) || 1)
   const offset = (page - 1) * limit
 
   const supabase = await createClient()
@@ -53,7 +56,8 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ data, total: count ?? 0, page, limit })
 }
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -62,12 +66,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const body = await req.json()
+  const raw = await req.json()
+  // Never let the client choose identity or bookkeeping columns.
+  const body: Record<string, unknown> = raw && typeof raw === 'object' && !Array.isArray(raw) ? { ...raw } : {}
+  for (const k of ['id', 'created_at', 'updated_at']) delete body[k]
   const supabase = createAdminClient()
 
   // Auto-generate SKU if omitted and category_id is known
   if (!body.sku && body.category_id) {
-    body.sku = await generateSku(body.category_id, supabase)
+    body.sku = await generateSku(String(body.category_id), supabase)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,3 +87,5 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data, { status: 201 })
 }
+
+export const POST = withStorefrontRefresh(POST_handler)

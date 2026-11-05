@@ -234,7 +234,7 @@ export default function CategoryProductsSection({ categoryId, initialProducts, i
                 <button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
-                  className="flex items-center gap-2 px-8 py-3 rounded-full border-[1.5px] border-primary text-primary hover:bg-surface-container font-label-sm text-label-sm uppercase tracking-wider transition-colors disabled:opacity-60"
+                  className="flex items-center gap-2 px-8 py-3 rounded-full border-[1.5px] border-primary text-primary hover:bg-surface-container font-label-sm text-label-sm transition-colors disabled:opacity-60"
                 >
                   {isLoadingMore ? (
                     <>

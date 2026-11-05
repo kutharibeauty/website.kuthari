@@ -60,3 +60,8 @@ bcr_traders_new_features_prompt.md
 VYAPAR_NEEDS_ADMIN.txt
 KUTHARI_FANCY_STORE_INFO_FORM.txt
 ._wm.pdf
+
+# Local working files: design-tool output, reference PDFs, source artwork
+.hallmark/
+NeuroByte_10_Claude_Repos.pdf
+hor logo dark.png

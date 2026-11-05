@@ -5,7 +5,11 @@ import OrdersClient from './OrdersClient'
 export const metadata: Metadata = { title: 'Orders | Kuthari Admin' }
 export const revalidate = 0
 
-export default async function OrdersPage() {
+const STATUSES = ['placed', 'confirmed', 'packed', 'shipping', 'delivered', 'cancelled', 'returned'] as const
+
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  const { status } = await searchParams
+  const initialTab = (STATUSES as readonly string[]).includes(status ?? '') ? (status as (typeof STATUSES)[number]) : 'all'
   const supabase = createAdminClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,5 +28,5 @@ export default async function OrdersPage() {
     item_count: Array.isArray(items) ? items.length : 0,
   }))
 
-  return <OrdersClient initialOrders={orders} />
+  return <OrdersClient initialOrders={orders} initialTab={initialTab} />
 }

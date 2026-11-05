@@ -2,6 +2,7 @@ import { unstable_cache } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import AnnouncementBar from '@/components/home/AnnouncementBar'
 import Header from '@/components/layout/Header'
+import Preloader from '@/components/layout/Preloader'
 import Footer from '@/components/layout/Footer'
 import BottomNav from '@/components/layout/BottomNav'
 import SmoothScroll from '@/components/layout/SmoothScroll'
@@ -66,9 +67,10 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
 
   return (
     <SmoothScroll>
+      <Preloader />
+      <AnnouncementBar data={announcement} />
       <Header searchTerms={searchTerms} />
-      <main className="min-h-screen selection:bg-black selection:text-white">
-        {announcement && <AnnouncementBar data={announcement} />}
+      <main className="min-h-screen">
         {children}
       </main>
       <Footer />

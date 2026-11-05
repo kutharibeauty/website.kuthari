@@ -75,8 +75,8 @@ export default async function AbandonedCartsPage() {
 
       {lists.length > 0 && (
         <section className="px-4 md:px-8 max-w-7xl mx-auto w-full pb-12">
-          <h2 className="text-xl md:text-2xl font-black text-primary tracking-tight capitalize mb-1">Customer Shopping Lists</h2>
-          <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mb-5">
+          <h2 className="text-xl md:text-2xl font-bold text-primary tracking-tight capitalize mb-1">Customer Shopping Lists</h2>
+          <p className="font-bold text-[12px] text-on-surface-variant mb-5">
             Notes customers saved of what they plan to order
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -86,10 +86,10 @@ export default async function AbandonedCartsPage() {
                 <div key={l.user_id} className="rounded-2xl border-2 border-table-border bg-surface-card p-4">
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="min-w-0">
-                      <p className="font-black text-sm text-primary truncate">{prof?.name ?? 'Customer'}</p>
+                      <p className="font-bold text-sm text-primary truncate">{prof?.name ?? 'Customer'}</p>
                       {prof?.phone && <p className="text-xs font-medium text-on-surface-variant">{prof.phone}</p>}
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 flex-shrink-0">
+                    <span className="text-[12px] font-bold text-on-surface-variant/50 flex-shrink-0">
                       {new Date(l.updated_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                     </span>
                   </div>

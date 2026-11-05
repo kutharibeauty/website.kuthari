@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { buildFaqRow } from '@/lib/faq'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
+import { withStorefrontRefresh } from '@/lib/revalidate'
+import { requirePermission } from '@/lib/auth/guard'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -16,7 +18,8 @@ async function guard() {
   return null
 }
 
-export async function PUT(req: NextRequest, { params }: Params) {
+async function PUT_handler(req: NextRequest, { params }: Params) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const err = await guard(); if (err) return err
   const { id } = await params
   const body = await req.json()
@@ -29,7 +32,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
   return NextResponse.json({ ok: true })
 }
 
-export async function PATCH(req: NextRequest, { params }: Params) {
+async function PATCH_handler(req: NextRequest, { params }: Params) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const err = await guard(); if (err) return err
   const { id } = await params
   const body = await req.json()
@@ -45,7 +49,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   return NextResponse.json({ ok: true })
 }
 
-export async function DELETE(_req: NextRequest, { params }: Params) {
+async function DELETE_handler(_req: NextRequest, { params }: Params) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const err = await guard(); if (err) return err
   const { id } = await params
   const supabase = createAdminClient()
@@ -54,3 +59,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
+
+export const PUT = withStorefrontRefresh(PUT_handler)
+export const PATCH = withStorefrontRefresh(PATCH_handler)
+export const DELETE = withStorefrontRefresh(DELETE_handler)

@@ -132,38 +132,36 @@ export default async function CategoryPage({ params }: PageProps) {
         />
       )}
 
-      {/* ── Category Banner ── */}
-      <section className="relative w-full h-[200px] md:h-[280px] bg-primary overflow-hidden">
-        {/* Dot texture */}
-        <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none z-10" />
-
-        {/* Ambient orb */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-white/5 rounded-full blur-[70px] pointer-events-none z-10" />
-        <div className="absolute -bottom-24 -left-16 w-64 h-64 bg-white/4 rounded-full blur-[60px] pointer-events-none z-10" />
-
-        {/* Background image */}
-        {category.image_url ? (
-          <Image
-            src={category.image_url}
-            alt={category.name}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover opacity-20 mix-blend-luminosity"
-          />
-        ) : null}
-
-        {/* Rich gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/60 z-10" />
-
-        {/* Content */}
-        <div className="absolute inset-0 z-20 flex flex-col justify-end px-5 md:px-10 lg:px-16 pb-7 md:pb-10 max-w-7xl mx-auto">
-          <span className="inline-block text-[9px] font-black uppercase tracking-[0.22em] text-white/40 border border-white/15 px-3 py-1.5 rounded-full w-max mb-3">
-            Category
-          </span>
-          <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-[1.08]">
-            {category.name}
-          </h1>
+      {/* ── Category head: the aisle's name set huge on a periwinkle band ── */}
+      <section className="w-full bg-periwinkle">
+        <div className="mx-auto flex max-w-[1440px] items-end justify-between gap-6 px-5 md:px-10 py-12 md:py-16">
+          <div className="min-w-0">
+            <h1 className="display text-[length:var(--text-section)]">{category.name}</h1>
+            <p className="accent-line mt-1 text-[calc(var(--text-section)*0.6)] text-indigo">
+              {total} {total === 1 ? 'product' : 'products'} on the shelf.
+            </p>
+          </div>
+          {category.image_url?.startsWith('/images/categories/') ? (
+            <span
+              aria-hidden="true"
+              className="hidden sm:block h-28 w-28 md:h-40 md:w-40 shrink-0 bg-ink"
+              style={{
+                maskImage: `url(${category.image_url})`,
+                WebkitMaskImage: `url(${category.image_url})`,
+                maskSize: 'contain',
+                WebkitMaskSize: 'contain',
+                maskRepeat: 'no-repeat',
+                WebkitMaskRepeat: 'no-repeat',
+                maskPosition: 'center',
+                WebkitMaskPosition: 'center',
+              }}
+            />
+          ) : category.image_url ? (
+            // An image the admin uploaded for this category (Categories → image).
+            <span className="relative hidden sm:block h-32 w-32 md:h-44 md:w-44 shrink-0 overflow-hidden rounded-[var(--radius-card)] bg-paper-raised">
+              <Image src={category.image_url} alt="" fill sizes="176px" className="object-cover" />
+            </span>
+          ) : null}
         </div>
       </section>
 
@@ -193,14 +191,7 @@ export default async function CategoryPage({ params }: PageProps) {
       {/* ── SEO description ── */}
       <section className="mt-8 border-t border-table-border bg-surface-container-low">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-table-border" />
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-on-surface-variant/40">
-              About
-            </span>
-            <div className="h-px flex-1 bg-table-border" />
-          </div>
-          <h2 className="text-xl font-black text-primary tracking-tight uppercase mb-3">
+          <h2 className="text-xl font-black text-primary tracking-tight mb-3">
             {category.name}
           </h2>
           <p className="text-sm font-medium text-on-surface-variant/80 max-w-3xl leading-relaxed">

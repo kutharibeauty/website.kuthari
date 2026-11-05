@@ -104,7 +104,7 @@ export default function LowStockAlert({ products, siteUrl }: Props) {
   )
 }
 
-const body = { backgroundColor: '#f5f0e8', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0', padding: '20px 0' }
+const body = { backgroundColor: '#eeeef8', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0', padding: '20px 0' }
 const container = { maxWidth: '600px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden' as const }
 const alertHeader = { backgroundColor: '#92400e', padding: '28px 32px', textAlign: 'center' as const }
 const alertIcon = { fontSize: '40px', margin: '0 0 4px' }
@@ -119,7 +119,7 @@ const skuText = { color: '#81756e', fontSize: '12px', fontFamily: 'monospace', m
 const zeroStock = { color: '#dc2626', fontSize: '15px', fontWeight: '700', margin: '0' }
 const lowStockNum = { fontSize: '15px', fontWeight: '700', margin: '0' }
 const thresholdText = { color: '#81756e', fontSize: '13px', margin: '0' }
-const ctaBtn = { backgroundColor: '#1b2c3d', color: '#faf6ee', borderRadius: '24px', padding: '14px 28px', fontSize: '15px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }
+const ctaBtn = { backgroundColor: '#292966', color: '#f7f7fc', borderRadius: '24px', padding: '14px 28px', fontSize: '15px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }
 const divider = { borderColor: '#e5e1d9', margin: '0' }
-const footer = { backgroundColor: '#f5f0e8', padding: '20px 32px', textAlign: 'center' as const }
+const footer = { backgroundColor: '#eeeef8', padding: '20px 32px', textAlign: 'center' as const }
 const footerText = { color: '#81756e', fontSize: '12px', margin: '0' }

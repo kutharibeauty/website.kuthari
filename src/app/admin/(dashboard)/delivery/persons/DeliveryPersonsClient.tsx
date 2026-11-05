@@ -14,7 +14,7 @@ type DeliveryPerson = {
   created_at: string
 }
 
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200'
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })
@@ -82,24 +82,24 @@ export default function DeliveryPersonsClient({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b-2 border-table-border pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight capitalize">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight capitalize">
             Delivery Team.
           </h1>
-          <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">
+          <p className="font-bold text-[12px] text-on-surface-variant mt-2">
             {persons.length} delivery {persons.length === 1 ? 'person' : 'persons'} registered
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/admin/delivery/assignments"
-            className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-[10px] uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors active:scale-95 shadow-sm"
+            className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-bold text-[12px] hover:border-primary/40 hover:text-primary transition-colors active:scale-95 shadow-sm"
           >
             <FileText size={16} strokeWidth={2.5} />
             Assignments
           </Link>
           <button
             onClick={() => { setShowAdd(true); setError('') }}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
           >
             <UserPlus size={16} strokeWidth={2.5} />
             Add Person
@@ -121,14 +121,14 @@ export default function DeliveryPersonsClient({
       {showAdd && (
         <div className="bg-surface-card rounded-2xl border-2 border-table-border p-6 space-y-6">
           <div className="flex items-center justify-between border-b-2 border-table-border pb-4">
-            <h3 className="font-black text-xl text-primary">New Delivery Person.</h3>
+            <h3 className="font-bold text-xl text-primary">New Delivery Person.</h3>
             <button onClick={() => setShowAdd(false)} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:bg-surface-card transition-colors active:scale-95">
               <X size={16} strokeWidth={2.5} />
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="font-black text-[10px] text-primary uppercase tracking-widest flex items-center">
+              <label className="font-bold text-[12px] text-primary flex items-center">
                 Full Name <span className="text-error ml-1">*</span>
               </label>
               <input
@@ -140,7 +140,7 @@ export default function DeliveryPersonsClient({
               />
             </div>
             <div className="space-y-2">
-              <label className="font-black text-[10px] text-primary uppercase tracking-widest flex items-center">
+              <label className="font-bold text-[12px] text-primary flex items-center">
                 Phone <span className="text-error ml-1">*</span>
               </label>
               <input
@@ -159,13 +159,13 @@ export default function DeliveryPersonsClient({
             </div>
           )}
           <div className="flex gap-4 pt-4 border-t-2 border-table-border">
-            <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-xl border-2 border-table-border bg-surface font-black text-xs text-on-surface-variant uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors active:scale-95">
+            <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-xl border-2 border-table-border bg-surface font-bold text-xs text-on-surface-variant hover:border-primary/40 hover:text-primary transition-colors active:scale-95">
               Cancel
             </button>
             <button
               onClick={handleAdd}
               disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm"
+              className="flex-1 flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm"
             >
               {saving && <Loader2 size={16} className="animate-spin" />}
               {saving ? 'Adding…' : 'Add Person'}
@@ -180,8 +180,8 @@ export default function DeliveryPersonsClient({
           <div className="w-16 h-16 mx-auto bg-surface border-2 border-table-border rounded-2xl flex items-center justify-center mb-4">
             <Bike size={24} className="text-on-surface-variant/40" />
           </div>
-          <p className="font-black text-sm text-on-surface-variant uppercase tracking-widest">No delivery persons yet.</p>
-          <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">
+          <p className="font-bold text-sm text-on-surface-variant">No delivery persons yet.</p>
+          <p className="font-bold text-[12px] text-on-surface-variant mt-2">
             Add delivery persons to enable order assignments.
           </p>
         </div>
@@ -190,32 +190,32 @@ export default function DeliveryPersonsClient({
           {persons.map(p => (
             <div
               key={p.id}
-              className="flex flex-col p-6 bg-surface-card rounded-2xl border-2 border-table-border transition-all hover:border-primary/40 group"
+              className="flex flex-col p-6 bg-surface-card rounded-2xl border-2 border-table-border transition hover:border-primary/40 group"
             >
               <div className="flex items-start gap-4 mb-6">
                 {/* Avatar */}
                 <div className="w-14 h-14 rounded-xl border-2 border-table-border bg-surface flex items-center justify-center flex-shrink-0">
-                  <span className="font-black text-2xl text-primary">
+                  <span className="font-bold text-2xl text-primary">
                     {p.name[0]?.toUpperCase() ?? '?'}
                   </span>
                 </div>
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-black text-lg text-primary truncate leading-tight mb-1">{p.name}</p>
+                  <p className="font-bold text-lg text-primary truncate leading-tight mb-1">{p.name}</p>
                   <p className="font-bold text-sm text-on-surface-variant">{p.phone}</p>
                 </div>
               </div>
 
               <div className="mt-auto space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-table-border bg-surface font-black text-[10px] text-on-surface-variant uppercase tracking-widest">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-table-border bg-surface font-bold text-[12px] text-on-surface-variant">
                     <Bike size={12} strokeWidth={2.5} />
                     Delivery
                   </span>
                   
                   {/* Account link status */}
                   <div className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 font-black text-[10px] uppercase tracking-widest',
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 font-bold text-[12px]',
                     p.user_id
                       ? 'bg-green-50 text-green-700 border-green-200'
                       : 'bg-amber-50 text-amber-700 border-amber-200',
@@ -226,21 +226,21 @@ export default function DeliveryPersonsClient({
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t-2 border-table-border">
-                  <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest">
+                  <p className="font-bold text-[12px] text-on-surface-variant">
                     Joined {fmtDate(p.created_at)}
                   </p>
                   
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/admin/profiles/${p.id}`}
-                      className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                      className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95"
                       title="Edit profile"
                     >
                       <Edit3 size={16} strokeWidth={2.5} />
                     </Link>
                     <button
                       onClick={() => handleDelete(p.id, p.name)}
-                      className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition-all active:scale-95"
+                      className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition active:scale-95"
                       title="Remove"
                     >
                       <Trash2 size={16} strokeWidth={2.5} />
@@ -254,7 +254,7 @@ export default function DeliveryPersonsClient({
       )}
 
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-primary text-white border-2 border-primary rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_8px_30px_rgba(44,24,16,0.3)]">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-primary text-white border-2 border-primary rounded-xl font-bold text-xs shadow-[0_8px_30px_rgba(44,24,16,0.3)]">
           {toast}
         </div>
       )}

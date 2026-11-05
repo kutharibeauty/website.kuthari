@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { writeStrippingMissingColumns } from '@/lib/supabase/tolerant-write'
+import { withStorefrontRefresh } from '@/lib/revalidate'
+import { requirePermission } from '@/lib/auth/guard'
 
 export async function GET() {
   const supabase = await createClient()
@@ -16,7 +18,8 @@ export async function GET() {
   return NextResponse.json(data)
 }
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
+  const noPerm = await requirePermission('manage_categories'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const meta = sessionClaims?.publicMetadata as AuthMetadata | undefined
@@ -34,3 +37,5 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data, { status: 201 })
 }
+
+export const POST = withStorefrontRefresh(POST_handler)

@@ -50,6 +50,8 @@ export async function aiChat({ system, user, maxTokens = 900, temperature = 0.6 
     let res: Response
     try {
       res = await fetch(ENDPOINT, {
+        // Generation is slow but must not hang the admin request forever.
+        signal: AbortSignal.timeout(45000),
         method: 'POST',
         headers: {
           Authorization: `Bearer ${key}`,

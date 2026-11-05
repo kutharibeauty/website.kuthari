@@ -8,7 +8,7 @@ import { useToastStore } from '@/store/toastStore'
 import type { Coupon } from '@/types/database.types'
 import { ArrowLeft, Loader2, AlertCircle, X, Percent, IndianRupee, Info } from 'lucide-react'
 
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200'
 
 function toDateInput(iso: string | null) {
   if (!iso) return ''
@@ -145,11 +145,11 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
             <ArrowLeft size={20} strokeWidth={2.5} />
           </Link>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-primary tracking-tight capitalize">
+            <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight capitalize">
               {isEdit ? `Edit: ${coupon.code}` : 'New Coupon.'}
             </h1>
             {isEdit && (
-              <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">
+              <p className="font-bold text-[12px] text-on-surface-variant mt-1">
                 Used {coupon.uses_count} time{coupon.uses_count !== 1 ? 's' : ''}
               </p>
             )}
@@ -158,14 +158,14 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Link
             href="/admin/coupons"
-            className="flex-1 md:flex-none text-center px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-xs uppercase tracking-widest hover:border-primary/40 hover:text-primary hover:-translate-y-0.5 transition-all duration-200 active:scale-95"
+            className="flex-1 md:flex-none text-center px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-bold text-xs hover:border-primary/40 hover:text-primary hover:-translate-y-0.5 transition duration-200 active:scale-95"
           >
             Cancel
           </Link>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="gold-sheen relative overflow-hidden flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:hover:translate-y-0 active:scale-95 shadow-sm"
+            className="gold-sheen relative overflow-hidden flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md transition duration-200 disabled:opacity-60 disabled:hover:translate-y-0 active:scale-95 shadow-sm"
           >
             {saving && <Loader2 size={16} className="animate-spin" />}
             {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Coupon'}
@@ -197,7 +197,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
                   value={form.code}
                   onChange={e => set('code', e.target.value.toUpperCase())}
                   placeholder="SUMMER20"
-                  className={cn(inputCls, 'flex-1 font-mono tracking-[0.2em] text-lg uppercase')}
+                  className={cn(inputCls, 'flex-1 font-mono text-lg')}
                 />
                 <button
                   type="button"
@@ -206,7 +206,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
                     const code = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
                     set('code', code)
                   }}
-                  className="px-5 py-3 bg-surface-card border-2 border-table-border text-primary rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-primary/40 transition-colors whitespace-nowrap active:scale-95"
+                  className="px-5 py-3 bg-surface-card border-2 border-table-border text-primary rounded-xl font-bold text-[12px] hover:border-primary/40 transition-colors whitespace-nowrap active:scale-95"
                 >
                   Generate
                 </button>
@@ -250,7 +250,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
                     type="button"
                     onClick={() => set('discount_type', type)}
                     className={cn(
-                      'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 transition-all active:scale-95 font-black text-[10px] uppercase tracking-widest',
+                      'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 transition active:scale-95 font-bold text-[12px]',
                       form.discount_type === type
                         ? 'bg-primary border-primary text-white shadow-sm'
                         : 'bg-surface-card border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary',
@@ -269,7 +269,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
                 required
               >
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm text-primary">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-sm text-primary">
                     {form.discount_type === 'percentage' ? '%' : '₹'}
                   </span>
                   <input
@@ -288,7 +288,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
               {form.discount_type === 'percentage' && (
                 <Field label="Max Discount Cap (₹)" hint="Optional">
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm text-primary">₹</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-sm text-primary">₹</span>
                     <input
                       type="number"
                       value={form.max_discount}
@@ -304,7 +304,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
 
               <Field label="Min Order Amount (₹)" hint="Optional">
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm text-primary">₹</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-sm text-primary">₹</span>
                   <input
                     type="number"
                     value={form.min_order_value}
@@ -323,7 +323,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
               <div className="flex items-center gap-3 px-5 py-4 bg-primary/5 border-2 border-primary/20 rounded-xl">
                 <Info size={20} className="text-primary" />
                 <p className="font-bold text-sm text-primary">
-                  Preview: <strong className="font-black ml-1">{preview}</strong>
+                  Preview: <strong className="font-bold ml-1">{preview}</strong>
                 </p>
               </div>
             )}
@@ -376,8 +376,8 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
           <Section title="Status">
             <div className="flex items-center justify-between gap-6 p-5 bg-surface-card rounded-2xl border-2 border-table-border max-w-sm">
               <div>
-                <p className="font-black text-xs text-primary uppercase tracking-widest">Active</p>
-                <p className="font-bold text-[10px] text-on-surface-variant mt-1">
+                <p className="font-bold text-xs text-primary">Active</p>
+                <p className="font-bold text-[12px] text-on-surface-variant mt-1">
                   Coupon can be applied at checkout
                 </p>
               </div>
@@ -409,7 +409,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-6">
-      <h2 className="font-black text-xl text-primary tracking-tight border-b-2 border-table-border pb-3">
+      <h2 className="font-bold text-xl text-primary tracking-tight border-b-2 border-table-border pb-3">
         {title}
       </h2>
       {children}
@@ -422,10 +422,10 @@ function Field({ label, required, hint, children }: {
 }) {
   return (
     <div className="space-y-2">
-      <label className="font-black text-xs text-primary uppercase tracking-widest flex items-center">
+      <label className="font-bold text-xs text-primary flex items-center">
         {label}
         {required && <span className="text-error ml-1">*</span>}
-        {hint && <span className="font-bold text-[10px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
+        {hint && <span className="font-bold text-[12px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
       </label>
       {children}
     </div>

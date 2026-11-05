@@ -1,7 +1,7 @@
 'use client'
 
-import { Tag, Megaphone } from 'lucide-react'
 import { useT } from '@/hooks/useT'
+import Marquee from '@/components/ui/Marquee'
 import type { Coupon } from '@/types/database.types'
 
 type CouponItem = Pick<
@@ -22,66 +22,30 @@ interface Props {
   customLines?: MarqueeLine[]
 }
 
+/** The periwinkle ticker: live coupon codes and the admin's own lines. */
 export default function CouponMarquee({ coupons, customLines = [] }: Props) {
   const { tField } = useT()
   if (!coupons.length && !customLines.length) return null
 
-  const renderCoupon = (c: CouponItem, key: string) => {
-    const label =
-      c.discount_type === 'percentage'
-        ? `${c.discount_value}% OFF`
-        : `₹${c.discount_value} OFF`
+  const couponLine = (c: CouponItem) => {
+    const label = c.discount_type === 'percentage' ? `${c.discount_value}% off` : `₹${c.discount_value} off`
+    // An admin-written line for THIS coupon (migration 030) replaces the
+    // auto-composed half; the code still leads, since that's what gets copied.
+    const custom = c.marquee_message ? tField(c.marquee_message, c.marquee_message_or ?? null) : null
     const desc = c.description ? tField(c.description, c.description_or) : null
-    // An admin-written line for THIS coupon (migration 030). When present it
-    // replaces the auto-composed "20% OFF · description" half; the code still
-    // leads, since that's what the customer has to copy.
-    const custom = c.marquee_message
-      ? tField(c.marquee_message, c.marquee_message_or ?? null)
-      : null
-
-    return (
-      <span key={key} className="inline-flex items-center gap-2 px-6">
-        <Tag size={12} className="text-white flex-shrink-0 animate-pulse" />
-        <span className="tracking-wider uppercase text-white">{c.code}</span>
-        <span className="text-white/40">—</span>
-        {custom ? (
-          <span className="text-white font-medium">{custom}</span>
-        ) : (
-          <>
-            <span className="text-white">{label}</span>
-            {desc && (
-              <>
-                <span className="text-white/40">·</span>
-                <span className="text-white/80 font-medium">{desc}</span>
-              </>
-            )}
-          </>
-        )}
-      </span>
-    )
+    return `Code ${c.code}: ${custom ?? [label, desc].filter(Boolean).join(', ')}`
   }
 
-  const renderLine = (line: MarqueeLine, key: string) => (
-    <span key={key} className="inline-flex items-center gap-2 px-6">
-      <Megaphone size={12} className="text-white flex-shrink-0" />
-      <span className="text-white font-medium">{tField(line.text, line.text_or)}</span>
-    </span>
-  )
-
-  // One full pass = every coupon, then every custom line. Rendered twice with
-  // distinct key prefixes so the animation loops seamlessly without React
-  // complaining about duplicate keys.
-  const buildPass = (prefix: string) => [
-    ...coupons.map((c, i) => renderCoupon(c, `${prefix}-c-${c.id}-${i}`)),
-    ...customLines.map((l, i) => renderLine(l, `${prefix}-l-${i}`)),
-  ]
+  const lines = [...coupons.map(couponLine), ...customLines.map((l) => tField(l.text, l.text_or))]
 
   return (
-    <div className="bg-gradient-to-r from-primary via-primary-container to-primary text-on-primary text-[11px] font-bold py-2.5 overflow-hidden shadow-3xs">
-      <div className="flex whitespace-nowrap animate-marquee">
-        {buildPass('a')}
-        {buildPass('b')}
-      </div>
-    </div>
+    <Marquee
+      label={lines.join('. ')}
+      items={lines}
+      duration={40}
+      className="bg-periwinkle py-3 text-ink"
+      itemClassName="text-[15px] font-semibold"
+      starClassName="h-3.5 w-3.5 text-ink"
+    />
   )
 }

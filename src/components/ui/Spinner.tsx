@@ -9,7 +9,8 @@ export default function Spinner({ size = 'md', className }: SpinnerProps) {
   const sizes = { sm: 'w-4 h-4', md: 'w-6 h-6', lg: 'w-10 h-10' }
   return (
     <svg
-      className={cn('animate-spin text-green-600', sizes[size], className)}
+      className={cn('animate-spin text-indigo', sizes[size], className)}
+      aria-hidden="true"
       viewBox="0 0 24 24"
       fill="none"
     >

@@ -65,7 +65,7 @@ export default function ShoppingListClient() {
           <ClipboardList size={22} className="text-primary" />
           <h1 className="text-2xl md:text-3xl font-black text-primary tracking-tight capitalize">My Shopping List</h1>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50">
+        <span className="text-[12px] font-bold text-on-surface-variant/50">
           {saving ? 'Saving…' : loaded ? 'Saved' : ''}
         </span>
       </div>
@@ -84,7 +84,7 @@ export default function ShoppingListClient() {
         />
         <button
           onClick={add}
-          className="h-12 px-5 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-primary/90 active:scale-95 transition-all"
+          className="h-12 px-5 rounded-xl bg-primary text-white font-black text-xs flex items-center gap-2 hover:bg-primary/90 active:scale-95 transition"
         >
           <Plus size={16} strokeWidth={3} /> Add
         </button>

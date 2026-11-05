@@ -45,7 +45,7 @@ export default function DataTable<T>({
               <th
                 key={col.key}
                 className={cn(
-                  'px-4 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider whitespace-nowrap',
+                  'px-4 py-3 font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap',
                   col.className,
                 )}
               >

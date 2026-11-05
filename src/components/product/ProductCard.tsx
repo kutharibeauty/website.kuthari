@@ -15,6 +15,11 @@ interface ProductCardProps {
   className?: string
 }
 
+/**
+ * A shelf card: the photo on its own rounded panel, the name and the price on
+ * one line under it, then the buy button. The panel lifts on hover; the photo
+ * itself stays still.
+ */
 export default function ProductCard({ product, className }: ProductCardProps) {
   const { tField } = useT()
   const name = tField(product.name, product.name_or)
@@ -34,88 +39,69 @@ export default function ProductCard({ product, className }: ProductCardProps) {
   const outOfStock = product.stock_qty === 0
 
   return (
-    <div
-      className={cn(
-        'w-44 md:w-52 flex-shrink-0 card-soft card-soft-hover flex flex-col group relative overflow-hidden',
-        className,
-      )}
-    >
-      <Link href={`/product/${product.slug}`} className="block flex-1 relative z-10">
-        {/* ── Image ── */}
-        <div className="relative aspect-[4/5] w-full bg-surface-container-low/60 overflow-hidden">
+    <article className={cn('w-48 md:w-60 flex-shrink-0 flex flex-col group relative', className)}>
+      <Link href={`/product/${product.slug}`} className="block flex-1 rounded-[var(--radius-card)]">
+        <div className="relative aspect-square w-full rounded-[var(--radius-card)] bg-paper-sunk overflow-hidden transition-[transform,box-shadow] duration-500 ease-[var(--ease-out-soft)] group-hover:-translate-y-1 group-hover:shadow-[var(--shadow-lift)]">
           {product.images?.[0] ? (
             <Image
               src={product.images[0]}
               alt={name}
               fill
-              sizes="(max-width: 768px) 176px, 208px"
-              className="object-contain p-6 mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-105"
+              sizes="(max-width: 768px) 192px, 240px"
+              className="object-cover"
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Package className="text-on-surface-variant/20" size={32} strokeWidth={1.25} />
+              <Package className="text-muted/40" size={32} strokeWidth={1.25} />
             </div>
           )}
 
-          {/* Discount — a quiet gold rule-tag, not a shouty pill */}
           {discount && !outOfStock && (
-            <span className="absolute top-3 left-3 bg-secondary/95 text-on-secondary text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full">
+            <span className="absolute top-3.5 left-3.5 rounded-full bg-periwinkle px-2.5 py-1 text-[12px] font-bold text-ink">
               {discount}% off
             </span>
           )}
 
-          <div className="absolute top-3 right-3 z-20">
-            <WishlistButton productId={product.id} />
-          </div>
-
           {outOfStock && (
-            <div className="absolute inset-0 bg-surface/70 backdrop-blur-[2px] flex items-center justify-center">
-              <span className="eyebrow bg-surface-card px-3.5 py-2 rounded-full shadow-sm">
-                Sold out
-              </span>
-            </div>
+            <span className="absolute top-3.5 left-3.5 rounded-full bg-ink px-2.5 py-1 text-[12px] font-bold text-paper-raised">
+              Sold out
+            </span>
           )}
         </div>
 
-        {/* ── Info ── */}
-        <div className="px-4 pt-4 pb-2 flex flex-col gap-1">
-          {product.brand && (
-            <p className="eyebrow truncate">{product.brand}</p>
-          )}
-
-          {/* Name in the serif — the single biggest shift away from the old
-              all-caps slab treatment. */}
-          <h4 className="font-heading text-[15px] md:text-base font-semibold text-primary leading-snug line-clamp-2 min-h-[42px]">
-            {name}
-          </h4>
-
-          <p className="text-[11px] font-medium text-on-surface-variant/70">{unit}</p>
-
-          {/* Price */}
-          <div className="flex items-baseline gap-2 flex-wrap mt-2">
-            <span className="text-lg font-semibold text-primary tracking-tight">
+        <div className="pt-3.5 pb-3 flex flex-col gap-1">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-[16px] md:text-[17px] font-semibold leading-snug text-ink capitalize line-clamp-2 min-w-0">
+              {name}
+            </h3>
+            <span className="text-[19px] md:text-[22px] font-bold leading-none text-ink tabular-nums shrink-0">
               ₹{shownPrice.toLocaleString('en-IN')}
             </span>
-            {shownMrp && shownMrp > shownPrice && (
-              <span className="text-[11px] text-on-surface-variant/50 line-through">
-                ₹{shownMrp.toLocaleString('en-IN')}
-              </span>
-            )}
           </div>
-
-          {/* Bulk hint — tells a shop owner there is a better rate inside,
-              without cluttering the retail-facing price above. */}
+          <p className="text-[13px] text-muted flex flex-wrap items-baseline gap-x-2">
+            {product.brand && <span className="capitalize">{product.brand}</span>}
+            {unit && <span>{unit}</span>}
+            {shownMrp && shownMrp > shownPrice && (
+              <s className="tabular-nums">₹{shownMrp.toLocaleString('en-IN')}</s>
+            )}
+          </p>
+          {/* Bulk hint: a shop owner sees there is a better rate inside. */}
           {retail && (
-            <p className="text-[10px] font-medium text-secondary tracking-wide">
+            <p className="text-[13px] font-semibold text-indigo">
               Bulk from ₹{product.price.toLocaleString('en-IN')}
             </p>
           )}
         </div>
       </Link>
 
-      <div className="px-4 pb-4 pt-2 mt-auto">
+      {/* Outside the link so the heart is its own control, not nested in an <a>. */}
+      <div className="absolute top-3 right-3 z-20">
+        <WishlistButton productId={product.id} />
+      </div>
+
+      <div className="mt-auto">
         <AddToCartButton product={product} variant="full" disabled={outOfStock} />
       </div>
-    </div>
+    </article>
   )
 }

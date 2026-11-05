@@ -77,12 +77,12 @@ export default function ProfileForm({ initialName, initialEmail, phone }: Props)
       </Link>
 
       <form onSubmit={handleSave} className="flex flex-col gap-4 p-5 rounded-2xl border-2 border-table-border bg-surface-card">
-        <h2 className="font-black text-primary text-base border-b border-table-border pb-2 mb-1 uppercase tracking-wide">
+        <h2 className="font-black text-primary text-base border-b border-table-border pb-2 mb-1">
           Account Details
         </h2>
 
         <div>
-          <label className="font-black text-xs uppercase tracking-wider text-primary mb-1.5 block">Mobile Number</label>
+          <label className="font-black text-xs text-primary mb-1.5 block">Mobile Number</label>
           <input
             type="text"
             value={phone}
@@ -92,7 +92,7 @@ export default function ProfileForm({ initialName, initialEmail, phone }: Props)
         </div>
 
         <div>
-          <label className="font-black text-xs uppercase tracking-wider text-primary mb-1.5 block">Name</label>
+          <label className="font-black text-xs text-primary mb-1.5 block">Name</label>
           <input
             type="text"
             value={name}
@@ -102,7 +102,7 @@ export default function ProfileForm({ initialName, initialEmail, phone }: Props)
         </div>
 
         <div>
-          <label className="font-black text-xs uppercase tracking-wider text-primary mb-1.5 block">Email (optional)</label>
+          <label className="font-black text-xs text-primary mb-1.5 block">Email (optional)</label>
           <input
             type="email"
             value={email}
@@ -118,7 +118,7 @@ export default function ProfileForm({ initialName, initialEmail, phone }: Props)
         <button
           type="submit"
           disabled={saving}
-          className="self-start flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all duration-200 shadow-sm active:scale-95 px-6 py-3 disabled:opacity-50"
+          className="self-start flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-black text-xs rounded-xl transition duration-200 shadow-sm active:scale-95 px-6 py-3 disabled:opacity-50"
         >
           {saving && <Loader2 size={14} className="animate-spin" />}
           Save Changes
@@ -128,7 +128,7 @@ export default function ProfileForm({ initialName, initialEmail, phone }: Props)
       <button
         onClick={handleSignOut}
         disabled={signingOut}
-        className="flex items-center justify-center gap-2 border-2 border-table-border text-on-surface font-black text-xs uppercase tracking-widest rounded-xl hover:border-error/40 hover:text-error transition-all duration-200 px-6 py-3 disabled:opacity-50"
+        className="flex items-center justify-center gap-2 border-2 border-table-border text-on-surface font-black text-xs rounded-xl hover:border-error/40 hover:text-error transition duration-200 px-6 py-3 disabled:opacity-50"
       >
         {signingOut ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
         Sign Out

@@ -63,16 +63,16 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b-2 border-table-border pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight capitalize">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight capitalize">
             Coupons.
           </h1>
-          <p className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mt-1">
+          <p className="text-sm font-bold text-on-surface-variant mt-1">
             {coupons.length} coupon{coupons.length !== 1 ? 's' : ''} active
           </p>
         </div>
         <Link
           href="/admin/coupons/new"
-          className="flex items-center gap-1.5 px-5 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+          className="flex items-center gap-1.5 px-5 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
         >
           <Plus size={16} strokeWidth={2.5} />
           Add Coupon
@@ -86,10 +86,10 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
             <div className="w-16 h-16 bg-surface border-2 border-table-border rounded-2xl flex items-center justify-center mb-4">
               <Tag size={24} className="text-on-surface-variant/40" />
             </div>
-            <p className="font-black text-sm uppercase tracking-widest text-on-surface-variant mb-6">No coupons yet.</p>
+            <p className="font-bold text-sm text-on-surface-variant mb-6">No coupons yet.</p>
             <Link
               href="/admin/coupons/new"
-              className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+              className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
             >
               <Plus size={16} strokeWidth={2.5} />
               Create first coupon
@@ -101,7 +101,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
               <thead>
                 <tr className="bg-primary text-white">
                   {['Code', 'Type', 'Value', 'Min Order', 'Cap', 'Usage', 'Valid Until', 'Active', 'Actions'].map((h, i) => (
-                    <th key={h} className={cn("py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70", i < 8 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
+                    <th key={h} className={cn("py-4 px-5 font-bold text-[12px] text-white/70", i < 8 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -121,17 +121,17 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
                       {/* Code */}
                       <td className="py-4 px-5 border-r border-table-border">
                         <div className="flex items-center gap-2">
-                          <span className="px-3 py-1.5 bg-primary/5 text-primary border-2 border-primary/20 rounded-lg font-mono font-black text-xs tracking-widest">
+                          <span className="px-3 py-1.5 bg-primary/5 text-primary border-2 border-primary/20 rounded-lg font-mono font-bold text-xs tracking-widest">
                             {coupon.code}
                           </span>
                           {expired && (
-                            <span className="px-2.5 py-1 border-2 border-error text-error rounded-lg font-black text-[10px] uppercase tracking-widest">
+                            <span className="px-2.5 py-1 border-2 border-error text-error rounded-lg font-bold text-[12px]">
                               Expired
                             </span>
                           )}
                         </div>
                         {coupon.description && (
-                          <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-1 max-w-[200px] truncate">
+                          <p className="font-bold text-[12px] text-on-surface-variant mt-1 max-w-[200px] truncate">
                             {coupon.description}
                           </p>
                         )}
@@ -140,7 +140,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
                       {/* Type */}
                       <td className="py-4 px-5 border-r border-table-border">
                         <span className={cn(
-                          'px-2.5 py-1 rounded-lg border-2 font-black text-[10px] uppercase tracking-widest',
+                          'px-2.5 py-1 rounded-lg border-2 font-bold text-[12px]',
                           coupon.discount_type === 'percentage'
                             ? 'bg-blue-50 text-blue-600 border-blue-200'
                             : 'bg-green-50 text-green-600 border-green-200',
@@ -150,7 +150,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
                       </td>
 
                       {/* Value */}
-                      <td className="py-4 px-5 border-r border-table-border font-black text-sm text-primary">
+                      <td className="py-4 px-5 border-r border-table-border font-bold text-sm text-primary">
                         {coupon.discount_type === 'percentage'
                           ? `${coupon.discount_value}%`
                           : `₹${coupon.discount_value}`}
@@ -169,7 +169,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
                       {/* Usage */}
                       <td className="py-4 px-5 border-r border-table-border">
                         <div className="space-y-2">
-                          <p className="font-black text-xs text-primary">
+                          <p className="font-bold text-xs text-primary">
                             {coupon.uses_count}
                             {coupon.max_uses ? ` / ${coupon.max_uses}` : ''}
                           </p>
@@ -215,7 +215,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
                           <Link
                             href={`/admin/coupons/${coupon.id}`}
                             title="Edit"
-                            className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                            className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95"
                           >
                             <Edit3 size={16} strokeWidth={2.5} />
                           </Link>
@@ -223,7 +223,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
                             onClick={() => deleteCoupon(coupon.id, coupon.code)}
                             disabled={deleting === coupon.id}
                             title="Delete"
-                            className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition-all disabled:opacity-40 active:scale-95"
+                            className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition disabled:opacity-40 active:scale-95"
                           >
                             {deleting === coupon.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} strokeWidth={2.5} />}
                           </button>

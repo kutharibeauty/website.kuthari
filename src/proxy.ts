@@ -15,6 +15,12 @@ const PUBLIC_PREFIXES = [
   '/category/',
   '/product/',
   '/search',
+  // Policy and contact pages: Razorpay and shoppers must reach them signed out.
+  '/privacy',
+  '/terms',
+  '/refund-policy',
+  '/shipping-policy',
+  '/contact',
   '/api/products',
   '/api/categories',
   '/api/coupons',
@@ -24,8 +30,9 @@ const PUBLIC_PREFIXES = [
   '/api/pincodes/check',
   '/api/merchant-feed',
   '/api/webhooks/',
+  // Vercel Cron calls carry no session; each cron route checks CRON_SECRET itself.
+  '/api/cron/',
   '/api/errors',
-  '/api/translations',
   '/api/auth/',
 ]
 

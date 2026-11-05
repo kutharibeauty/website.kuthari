@@ -21,7 +21,7 @@ export default function StatsCard({ title, value, icon, trend, accent = 'primary
     <div className={cn('bg-surface-container-lowest rounded-xl border border-outline-variant/50 p-5 shadow-sm', className)}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">
+          <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">
             {title}
           </p>
           <p className="font-headline-md text-headline-md text-on-surface">{value}</p>

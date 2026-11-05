@@ -19,7 +19,7 @@ import { useToastStore } from '@/store/toastStore'
 import { DEFAULT_PINCODE_DELIVERY_FEE } from '@/lib/cart/delivery'
 import type { PincodeRow } from './page'
 
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200'
 
 interface Props { initialRows: PincodeRow[] }
 
@@ -225,35 +225,35 @@ export default function PincodesClient({ initialRows }: Props) {
       {/* Header */}
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 border-b-2 border-table-border pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight capitalize">Serviceable Pincodes.</h1>
-          <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">{rows.length} pincodes configured</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight capitalize">Serviceable Pincodes.</h1>
+          <p className="font-bold text-[12px] text-on-surface-variant mt-2">{rows.length} pincodes configured</p>
         </div>
         <div className="flex gap-3 flex-wrap">
           {/* View toggle */}
           <div className="flex rounded-xl border-2 border-table-border overflow-hidden">
             <button
               onClick={() => setView('list')}
-              className={cn('flex items-center gap-1.5 px-4 py-2 font-black text-[10px] uppercase tracking-widest transition-colors', view === 'list' ? 'bg-primary text-white' : 'bg-surface text-on-surface-variant hover:bg-surface-card')}
+              className={cn('flex items-center gap-1.5 px-4 py-2 font-bold text-[12px] transition-colors', view === 'list' ? 'bg-primary text-white' : 'bg-surface text-on-surface-variant hover:bg-surface-card')}
             >
               <List size={14} strokeWidth={2.5} /> List
             </button>
             <button
               onClick={() => setView('map')}
-              className={cn('flex items-center gap-1.5 px-4 py-2 font-black text-[10px] uppercase tracking-widest transition-colors border-l-2 border-table-border', view === 'map' ? 'bg-primary text-white' : 'bg-surface text-on-surface-variant hover:bg-surface-card')}
+              className={cn('flex items-center gap-1.5 px-4 py-2 font-bold text-[12px] transition-colors border-l-2 border-table-border', view === 'map' ? 'bg-primary text-white' : 'bg-surface text-on-surface-variant hover:bg-surface-card')}
             >
               <Map size={14} strokeWidth={2.5} /> By City
             </button>
           </div>
-          <button onClick={() => csvRef.current?.click()} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-[10px] uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors active:scale-95">
+          <button onClick={() => csvRef.current?.click()} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-bold text-[12px] hover:border-primary/40 hover:text-primary transition-colors active:scale-95">
             <Upload size={14} strokeWidth={2.5} /> Import CSV
           </button>
           <input ref={csvRef} type="file" accept=".csv" className="hidden" onChange={handleBulkCSV} />
-          <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-[10px] uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors active:scale-95">
+          <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-bold text-[12px] hover:border-primary/40 hover:text-primary transition-colors active:scale-95">
             <Download size={14} strokeWidth={2.5} /> Export CSV
           </button>
           <button
             onClick={() => setIsAdding(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-opacity active:scale-95 shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-opacity active:scale-95 shadow-sm"
           >
             <Plus size={15} strokeWidth={2.5} /> Add Pincode
           </button>
@@ -263,10 +263,10 @@ export default function PincodesClient({ initialRows }: Props) {
       {/* Add form */}
       {isAdding && (
         <form onSubmit={handleAdd} className="bg-surface-card rounded-2xl border-2 border-table-border p-6 space-y-6">
-          <h2 className="font-black text-xl text-primary">Add Pincode.</h2>
+          <h2 className="font-bold text-xl text-primary">Add Pincode.</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             <div className="space-y-2">
-              <label className="font-black text-[10px] text-primary uppercase tracking-widest">
+              <label className="font-bold text-[12px] text-primary">
                 Pincode <span className="text-error">*</span>
                 {detecting && <span className="ml-2 font-bold text-on-surface-variant/60 normal-case tracking-normal">detecting…</span>}
               </label>
@@ -283,10 +283,10 @@ export default function PincodesClient({ initialRows }: Props) {
                 maxLength={6}
                 className={inputCls}
               />
-              {pinNotice && <p className="text-[10px] font-bold text-error">{pinNotice}</p>}
+              {pinNotice && <p className="text-[12px] font-bold text-error">{pinNotice}</p>}
             </div>
             <div className="space-y-2 relative">
-              <label className="font-black text-[10px] text-primary uppercase tracking-widest">
+              <label className="font-bold text-[12px] text-primary">
                 Area Name
                 <span className="ml-2 font-bold text-on-surface-variant/50 normal-case tracking-normal">type to find its pincode</span>
               </label>
@@ -309,31 +309,31 @@ export default function PincodesClient({ initialRows }: Props) {
                       <span className="min-w-0 flex-1">
                         <span className="block font-bold text-sm text-primary truncate">{o.area}</span>
                         {o.office_type && (
-                          <span className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/80 truncate">
+                          <span className="block text-[12px] font-bold text-on-surface-variant/80 truncate">
                             {o.office_type}
                           </span>
                         )}
                       </span>
-                      <span className="font-mono font-black text-xs text-on-surface-variant tracking-widest flex-shrink-0">{o.pincode}</span>
+                      <span className="font-mono font-bold text-xs text-on-surface-variant tracking-widest flex-shrink-0">{o.pincode}</span>
                     </button>
                   ))}
                 </div>
               )}
             </div>
             <div className="space-y-2">
-              <label className="font-black text-[10px] text-primary uppercase tracking-widest">City <span className="text-error">*</span></label>
+              <label className="font-bold text-[12px] text-primary">City <span className="text-error">*</span></label>
               <input value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} placeholder="Bhubaneswar" className={inputCls} />
             </div>
             <div className="space-y-2">
-              <label className="font-black text-[10px] text-primary uppercase tracking-widest">State</label>
+              <label className="font-bold text-[12px] text-primary">State</label>
               <input value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))} placeholder="Odisha" className={inputCls} />
             </div>
             <div className="space-y-2">
-              <label className="font-black text-[10px] text-primary uppercase tracking-widest">Delivery Days</label>
+              <label className="font-bold text-[12px] text-primary">Delivery Days</label>
               <input type="number" min={1} max={7} value={form.delivery_days} onChange={(e) => setForm((f) => ({ ...f, delivery_days: e.target.value }))} className={inputCls} />
             </div>
             <div className="space-y-2">
-              <label className="font-black text-[10px] text-primary uppercase tracking-widest">Delivery Charge (₹)</label>
+              <label className="font-bold text-[12px] text-primary">Delivery Charge (₹)</label>
               <input
                 type="number"
                 min={0}
@@ -343,15 +343,15 @@ export default function PincodesClient({ initialRows }: Props) {
                 placeholder={`Blank = ₹${DEFAULT_PINCODE_DELIVERY_FEE}`}
                 className={inputCls}
               />
-              <p className="font-medium text-[10px] text-on-surface-variant/70 leading-relaxed">
+              <p className="font-medium text-[12px] text-on-surface-variant/70 leading-relaxed">
                 Leave blank to charge the ₹{DEFAULT_PINCODE_DELIVERY_FEE} default. Enter <b>0</b> for free delivery here.
               </p>
             </div>
           </div>
           {error && <p className="font-bold text-sm text-error">{error}</p>}
           <div className="flex gap-4 pt-4 border-t-2 border-table-border">
-            <button type="button" onClick={() => { setIsAdding(false); setError('') }} className="px-6 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-xs uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors active:scale-95">Cancel</button>
-            <button type="submit" disabled={isSaving} className="flex items-center gap-2 px-8 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm">
+            <button type="button" onClick={() => { setIsAdding(false); setError('') }} className="px-6 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-bold text-xs hover:border-primary/40 hover:text-primary transition-colors active:scale-95">Cancel</button>
+            <button type="submit" disabled={isSaving} className="flex items-center gap-2 px-8 py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm">
               {isSaving && <Loader2 size={16} className="animate-spin" />} Save Pincode
             </button>
           </div>
@@ -366,7 +366,7 @@ export default function PincodesClient({ initialRows }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search pincode, city, or area…"
-            className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-table-border bg-surface font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40"
+            className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-table-border bg-surface font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200 placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40"
           />
         </div>
         {view === 'list' && <PageSizeSelect pageSize={pageSize} onChange={setPageSize} />}
@@ -380,13 +380,13 @@ export default function PincodesClient({ initialRows }: Props) {
               <thead>
                 <tr className="bg-primary text-white">
                   {['Pincode', 'Area', 'City', 'State', 'Days', 'Delivery ₹', 'Active', 'Actions'].map((h, i) => (
-                    <th key={h} className={cn("py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70", i < 7 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
+                    <th key={h} className={cn("py-4 px-5 font-bold text-[12px] text-white/70", i < 7 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={7} className="px-5 py-24 text-center font-black text-sm text-on-surface-variant uppercase tracking-widest">No pincodes found.</td></tr>
+                  <tr><td colSpan={7} className="px-5 py-24 text-center font-bold text-sm text-on-surface-variant">No pincodes found.</td></tr>
                 ) : (
                   paged.map((row, idx) => (
                     <PincodeTableRow key={row.id} row={row} isLast={idx === paged.length - 1} onToggle={handleToggle} onDelete={handleDelete} />
@@ -404,13 +404,13 @@ export default function PincodesClient({ initialRows }: Props) {
         <div className="space-y-4">
           {cityEntries.length === 0 ? (
             <div className="bg-surface-card rounded-2xl border-2 border-table-border py-24 text-center">
-              <p className="font-black text-sm text-on-surface-variant uppercase tracking-widest">No pincodes found.</p>
+              <p className="font-bold text-sm text-on-surface-variant">No pincodes found.</p>
             </div>
           ) : (
             <>
               <div className="flex gap-4 justify-end">
-                <button onClick={expandAll} className="font-black text-[10px] uppercase tracking-widest text-primary hover:underline">Expand all</button>
-                <button onClick={collapseAll} className="font-black text-[10px] uppercase tracking-widest text-on-surface-variant hover:underline">Collapse all</button>
+                <button onClick={expandAll} className="font-bold text-[12px] text-primary hover:underline">Expand all</button>
+                <button onClick={collapseAll} className="font-bold text-[12px] text-on-surface-variant hover:underline">Collapse all</button>
               </div>
               {cityEntries.map(([city, cityRows]) => {
                 const active = cityRows.filter((r) => r.is_active).length
@@ -423,12 +423,12 @@ export default function PincodesClient({ initialRows }: Props) {
                     >
                       <div className="flex items-center gap-4 flex-wrap">
                         <Map size={20} className="text-primary shrink-0" strokeWidth={2.5} />
-                        <span className="font-black text-lg text-primary">{city}</span>
-                        <span className="font-black text-[10px] uppercase tracking-widest text-primary bg-primary/10 border-2 border-primary/20 px-3 py-1 rounded-lg">
+                        <span className="font-bold text-lg text-primary">{city}</span>
+                        <span className="font-bold text-[12px] text-primary bg-primary/10 border-2 border-primary/20 px-3 py-1 rounded-lg">
                           {cityRows.length} pincode{cityRows.length !== 1 ? 's' : ''}
                         </span>
                         {active < cityRows.length && (
-                          <span className="font-black text-[10px] uppercase tracking-widest text-error bg-error/10 border-2 border-error/20 px-3 py-1 rounded-lg">
+                          <span className="font-bold text-[12px] text-error bg-error/10 border-2 border-error/20 px-3 py-1 rounded-lg">
                             {cityRows.length - active} inactive
                           </span>
                         )}
@@ -443,14 +443,14 @@ export default function PincodesClient({ initialRows }: Props) {
                           <thead>
                             <tr className="bg-primary text-white">
                               {['Pincode', 'Area', 'Days', 'Delivery ₹', 'Active', 'Actions'].map((h, i) => (
-                                <th key={h} className={cn("px-5 py-3 font-black text-[10px] uppercase tracking-[0.2em] text-white/70", i < 5 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
+                                <th key={h} className={cn("px-5 py-3 font-bold text-[12px] text-white/70", i < 5 ? "border-r border-white/10" : "", h === "Actions" || h === "Active" ? "text-center" : "")}>{h}</th>
                               ))}
                             </tr>
                           </thead>
                           <tbody>
                             {cityRows.map((row, idx) => (
                               <tr key={row.id} className={cn("hover:bg-surface-container-low transition-colors", idx !== cityRows.length - 1 ? 'border-b-2 border-table-border' : '')}>
-                                <td className="px-5 py-4 border-r border-table-border font-mono font-black text-xs text-primary tracking-widest">{row.pincode}</td>
+                                <td className="px-5 py-4 border-r border-table-border font-mono font-bold text-xs text-primary tracking-widest">{row.pincode}</td>
                                 <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface">{row.area_name ?? '—'}</td>
                                 <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface-variant">{row.delivery_days}d</td>
       <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface-variant">{row.delivery_charge == null ? <span className="text-on-surface-variant/50">₹{DEFAULT_PINCODE_DELIVERY_FEE}</span> : row.delivery_charge === 0 ? <span className="text-success">Free</span> : `₹${row.delivery_charge}`}</td>
@@ -463,7 +463,7 @@ export default function PincodesClient({ initialRows }: Props) {
                                   </button>
                                 </td>
                                 <td className="px-5 py-4 text-center">
-                                  <button onClick={() => handleDelete(row)} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition-all active:scale-95">
+                                  <button onClick={() => handleDelete(row)} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition active:scale-95">
                                     <Trash2 size={16} strokeWidth={2.5} />
                                   </button>
                                 </td>
@@ -482,7 +482,7 @@ export default function PincodesClient({ initialRows }: Props) {
       )}
 
       {/* CSV format hint */}
-      <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest">
+      <p className="font-bold text-[12px] text-on-surface-variant">
         CSV import format: <code className="bg-surface border-2 border-table-border px-2 py-1 rounded-lg text-primary mx-1 normal-case font-mono tracking-normal">pincode,area_name,city,state,delivery_days,delivery_charge</code>
       </p>
     </div>
@@ -502,7 +502,7 @@ function PincodeTableRow({
 }) {
   return (
     <tr className={cn("hover:bg-surface-container-low transition-colors group", !isLast ? "border-b-2 border-table-border" : "")}>
-      <td className="px-5 py-4 border-r border-table-border font-mono font-black text-xs text-primary tracking-widest">{row.pincode}</td>
+      <td className="px-5 py-4 border-r border-table-border font-mono font-bold text-xs text-primary tracking-widest">{row.pincode}</td>
       <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface">{row.area_name ?? '—'}</td>
       <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface">{row.city}</td>
       <td className="px-5 py-4 border-r border-table-border font-bold text-sm text-on-surface-variant">{row.state}</td>
@@ -517,7 +517,7 @@ function PincodeTableRow({
         </button>
       </td>
       <td className="px-5 py-4 text-center">
-        <button onClick={() => onDelete(row)} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition-all active:scale-95">
+        <button onClick={() => onDelete(row)} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition active:scale-95">
           <Trash2 size={16} strokeWidth={2.5} />
         </button>
       </td>

@@ -1,95 +1,114 @@
+/* Hallmark · v2.0.0 · redesign: full · theme: the client's palette (#CCCCFF, #A3A3CC, #5C5C99, #292966) with layout and motion after plumo.framer.website, by request · idea: "the Sano Bazar beauty counter, set loud: a shop shelf you can scroll" · vibe: "playful, glossy, loud type, indigo on cool paper" · genre: playful · job: buy · paper: cool white #F7F7FC · ink: deep indigo #292966 · accent: indigo #5C5C99, periwinkle #CCCCFF · faces: Anton display, Fraunces (wordmark roman, accent line italic), Familjen Grotesk body · posture: light/grotesk-heavy/cool · hero: Stage, the head left and a product story right · nav: three links, the mark centred, the bag right · footer: deep indigo band with link columns · signature: the product story in the hero, cycling real shelf photos */
+/* Hallmark · pre-emit critique: P4 H4 E4 S3 R4 V4 · weakest: S, the frame is borrowed from the user's reference; made specific with the store's own shelf photos, its Sano Bazar address and its retail-or-bulk price rule */
+/* Hallmark · user direction · the italic accent sits on its own line under each Anton head (38i), never inside it; Anton is kept although the Manifesto theme uses it, because the user named the reference */
+/* Hallmark · dismissed 67 · components/layout/Logo.tsx BrandLockup is the wordmark, which 67 names as legal tracked caps */
 @import "tailwindcss";
 
 @theme {
-  /* Mirror & Gold Palette — matches the Kuthari Beauty Store crest (deep navy
-     ink + antique gold foil on a warm ivory ground). Same token names as
-     before, so every component using bg-primary/text-secondary/etc.
-     re-themes automatically. */
-  --color-background: #FAF6EE;
-  --color-surface: #FAF6EE;
-  --color-surface-bright: #FFFFFF;
-  --color-surface-dim: #EBE1CC;
-  --color-surface-variant: #DDD0B4;
-  --color-surface-container-lowest: #FFFFFF;
-  --color-surface-container-low: #F7F1E4;
-  --color-surface-container: #F2EADA;
-  --color-surface-container-high: #ECE2CC;
-  --color-surface-container-highest: #E5D9BF;
-  --color-surface-tint: #1B2C3D;
+  /* The client's palette: periwinkle #CCCCFF, lavender #A3A3CC, indigo
+     #5C5C99, deep indigo #292966. Neutrals are tinted toward the same hue so
+     the paper sits with them. Token names below are unchanged from before, so
+     every page that reads bg-primary / text-secondary re-themes at once.
+     primary = deep indigo ink, secondary = indigo, tertiary = lavender. */
+  --color-ink: #292966;
+  --color-ink-soft: #383880;
+  --color-ink-deep: #1D1D4A;
+  --color-indigo: #5C5C99;
+  --color-lavender: #A3A3CC;
+  --color-periwinkle: #CCCCFF;
+  --color-lilac: #E6E6FF;
+  --color-haze: #DCDCF0;
+  --color-paper: #F7F7FC;
+  --color-paper-raised: #FDFDFF;
+  --color-paper-sunk: #EEEEF8;
+  --color-line: #DCDCEC;
+  --color-muted: #55557A;
+  --color-whatsapp: #25D366;
+  --color-justdial: #0076D7;
 
-  /* Primary — the deep navy ink from the mirror's silhouette & wordmark */
-  --color-primary: #1B2C3D;
-  --color-on-primary: #FAF6EE;
-  --color-primary-container: #24384C;
-  --color-on-primary-container: #FAF6EE;
-  --color-primary-fixed: #24384C;
-  --color-primary-fixed-dim: #16232F;
-  --color-on-primary-fixed: #FAF6EE;
-  --color-on-primary-fixed-variant: #ECE2CC;
-  --color-inverse-primary: #D9AF5C;
+  --color-background: var(--color-paper);
+  --color-surface: var(--color-paper);
+  --color-surface-bright: var(--color-paper-raised);
+  --color-surface-dim: #E4E4F2;
+  --color-surface-variant: var(--color-line);
+  --color-surface-container-lowest: var(--color-paper-raised);
+  --color-surface-container-low: var(--color-paper-sunk);
+  --color-surface-container: #E9E9F5;
+  --color-surface-container-high: #E2E2F1;
+  --color-surface-container-highest: #D8D8EB;
+  --color-surface-tint: var(--color-ink);
 
-  /* Secondary — antique gold foil accent (the mirror frame) */
-  --color-secondary: #B9862F;
-  --color-on-secondary: #FAF6EE;
-  --color-secondary-container: #F0DBA8;
-  --color-on-secondary-container: #1B2C3D;
-  --color-secondary-fixed: #D9AF5C;
-  --color-secondary-fixed-dim: #B9862F;
-  --color-on-secondary-fixed: #1B2C3D;
-  --color-on-secondary-fixed-variant: #2E2213;
+  --color-primary: var(--color-ink);
+  --color-on-primary: var(--color-paper-raised);
+  --color-primary-container: var(--color-ink-soft);
+  --color-on-primary-container: var(--color-paper-raised);
+  --color-primary-fixed: var(--color-ink-soft);
+  --color-primary-fixed-dim: var(--color-ink-deep);
+  --color-on-primary-fixed: var(--color-paper-raised);
+  --color-on-primary-fixed-variant: var(--color-line);
+  --color-inverse-primary: var(--color-periwinkle);
 
-  /* Tertiary — dusty rose, a cosmetics-appropriate accent alongside navy/gold */
-  --color-tertiary: #B76E79;
-  --color-on-tertiary: #FFFFFF;
-  --color-tertiary-container: #F3DEE0;
-  --color-on-tertiary-container: #4A2328;
-  --color-tertiary-fixed: #B76E79;
-  --color-tertiary-fixed-dim: #96525C;
-  --color-on-tertiary-fixed: #FFFFFF;
-  --color-on-tertiary-fixed-variant: #ECE2CC;
+  --color-secondary: var(--color-indigo);
+  --color-on-secondary: var(--color-paper-raised);
+  --color-secondary-container: var(--color-periwinkle);
+  --color-on-secondary-container: var(--color-ink);
+  --color-secondary-fixed: var(--color-lavender);
+  --color-secondary-fixed-dim: var(--color-ink-soft);
+  --color-on-secondary-fixed: var(--color-paper-raised);
+  --color-on-secondary-fixed-variant: var(--color-ink-soft);
+
+  --color-tertiary: var(--color-lavender);
+  --color-on-tertiary: var(--color-ink);
+  --color-tertiary-container: var(--color-lilac);
+  --color-on-tertiary-container: var(--color-ink);
+  --color-tertiary-fixed: var(--color-lavender);
+  --color-tertiary-fixed-dim: var(--color-indigo);
+  --color-on-tertiary-fixed: var(--color-ink);
+  --color-on-tertiary-fixed-variant: var(--color-line);
 
   --color-error: #B3261E;
-  --color-on-error: #FFFFFF;
-  --color-error-container: #FBE9E7;
-  --color-on-error-container: #7A1912;
+  --color-on-error: var(--color-paper-raised);
+  --color-error-container: #FBE4E5;
+  --color-on-error-container: #6A0D12;
 
-  --color-outline: #362C1D;
-  --color-outline-variant: #DDD0B4;
+  --color-outline: #3A3A66;
+  --color-outline-variant: var(--color-line);
 
-  --color-on-background: #1B2C3D;
-  --color-on-surface: #1B2C3D;
-  --color-on-surface-variant: #5B5240;
+  --color-on-background: var(--color-ink);
+  --color-on-surface: var(--color-ink);
+  --color-on-surface-variant: var(--color-muted);
 
-  --color-inverse-surface: #1B2C3D;
-  --color-inverse-on-surface: #FAF6EE;
+  --color-inverse-surface: var(--color-ink);
+  --color-inverse-on-surface: var(--color-paper);
 
-  /* Extra surface / border tokens */
-  --color-surface-card: #FFFFFF;
-  --color-table-border: #E5D9BF;
+  --color-surface-card: var(--color-paper-raised);
+  --color-table-border: var(--color-line);
 
-  /* Status colours */
-  --color-status-placed: #6B7280;
-  --color-status-confirmed: #3B82F6;
-  --color-status-packed: #F59E0B;
-  --color-status-shipping: #8B5CF6;
-  --color-status-delivered: #0C831F;
+  /* Order status — mixed for this palette, not framework swatches. */
+  --color-status-placed: #6E6862;
+  --color-status-confirmed: #2F5E8C;
+  --color-status-packed: #B7791F;
+  --color-status-shipping: var(--color-indigo);
+  --color-status-delivered: #2E7D4F;
 
-  /* Font families */
-  /* Main site font — Poppins */
-  --font-sans: var(--font-poppins), 'Poppins', ui-sans-serif, sans-serif;
-  --font-body-lg: var(--font-poppins), 'Poppins', sans-serif;
-  --font-body-md: var(--font-poppins), 'Poppins', sans-serif;
-  /* Heading / sub-heading font — Playfair Display */
-  --font-heading: var(--font-playfair), 'Playfair Display', ui-serif, Georgia, serif;
-  --font-headline-lg: var(--font-heading);
-  --font-headline-md: var(--font-heading);
-  --font-headline-sm: var(--font-heading);
-  --font-headline-lg-mobile: var(--font-heading);
-  /* Labels use the main Poppins font too — keeps the site visually consistent
-     (Playfair headings are the only secondary accent). */
-  --font-label-sm: var(--font-poppins), 'Poppins', ui-sans-serif, sans-serif;
+  --color-success: #2E7D4F;
+  --color-success-subtle: #DDF0E3;
+  --color-on-success: var(--color-paper-raised);
 
-  /* Font sizes */
+  /* Faces. Body and every functional heading: Familjen Grotesk. Display:
+     Anton, always uppercase. Accent line: Fraunces italic. */
+  --font-sans: var(--font-familjen), 'Familjen Grotesk', ui-sans-serif, sans-serif;
+  --font-display: var(--font-anton), 'Anton', 'Impact', sans-serif;
+  --font-serif: var(--font-fraunces), 'Fraunces', ui-serif, Georgia, serif;
+  --font-heading: var(--font-sans);
+  --font-body-lg: var(--font-sans);
+  --font-body-md: var(--font-sans);
+  --font-headline-lg: var(--font-sans);
+  --font-headline-md: var(--font-sans);
+  --font-headline-sm: var(--font-sans);
+  --font-headline-lg-mobile: var(--font-sans);
+  --font-label-sm: var(--font-sans);
+
   --text-body-lg: 18px;
   --text-body-lg--line-height: 28px;
   --text-body-md: 16px;
@@ -103,30 +122,46 @@
   --text-label-sm: 12px;
   --text-label-sm--line-height: 16px;
 
-  /* Spacing */
+  /* Display scale (Anton). Fluid between a 360px phone and a 1440px desk. */
+  --text-hero: clamp(3.25rem, 2rem + 6.2vw, 7.5rem);
+  --text-section: clamp(2.5rem, 1.6rem + 4.2vw, 5.5rem);
+  --text-title: clamp(1.75rem, 1.3rem + 1.8vw, 2.75rem);
+
   --spacing-margin-mobile: 16px;
-  --spacing-margin-desktop: 64px;
+  --spacing-margin-desktop: 40px;
   --spacing-gutter: 24px;
   --spacing-base: 8px;
-  --spacing-max-width: 1280px;
+  --spacing-max-width: 1440px;
+  --spacing-section: clamp(4.5rem, 3rem + 6vw, 8.5rem);
 
-  /* Border radius */
-  --radius-DEFAULT: 0.125rem;
-  --radius-lg: 0.25rem;
-  --radius-xl: 0.5rem;
-  --radius-full: 0.75rem;
-  --radius-card: 0.75rem;
-  --radius-btn: 0.5rem;
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+  --radius-full: 9999px;
+  --radius-card: 1.5rem;
+  --radius-panel: 2rem;
+  --radius-btn: 9999px;
   --radius-pill: 9999px;
 
-  /* Shadows */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 1px 2px rgb(41 41 102 / 0.06);
+  --shadow-lift: 0 18px 40px -18px rgb(41 41 102 / 0.32);
+  --shadow-modal: 0 24px 60px rgb(41 41 102 / 0.2);
 
-  /* Success / Add-to-cart green */
-  --color-success: #16a34a;
-  --color-success-subtle: #dcfce7;
-  --color-on-success: #ffffff;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-squish: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-indigo);
+  outline-offset: 3px;
+  transition: none;
 }
 
 /* Remove default disclosure triangle from <details> */
@@ -151,6 +186,9 @@ details>summary::-webkit-details-marker {
   animation: chart-draw 2.4s ease-in-out forwards;
 }
 
+/* ── Marquee ───────────────────────────────────────────────────────────────
+   A track holding the same pass twice, slid by half its width so the seam never
+   shows. Pauses while hovered or focused; stands still under reduced motion. */
 @keyframes marquee {
   from {
     transform: translateX(0);
@@ -162,36 +200,171 @@ details>summary::-webkit-details-marker {
 }
 
 @utility animate-marquee {
-  animation: marquee 28s linear infinite;
+  animation: marquee var(--marquee-duration, 32s) linear infinite;
+
+  &:hover,
+  &:focus-within {
+    animation-play-state: paused;
+  }
 }
 
-/* Gold sheen hover-sweep — a diagonal light band that crosses a primary CTA on
-   hover. Add `.gold-sheen` to a `relative overflow-hidden` element; the sweep
-   sits on a pseudo-element so it never affects layout or interferes with the
-   element's own content/border-radius. */
+/* ── Type ─────────────────────────────────────────────────────────────────── */
+
+/* The display voice: Anton, uppercase, tight. Every head that is a statement. */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  line-height: 1.02;
+  color: var(--color-ink);
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+
+/* The accent line under a display head: Fraunces italic, indigo, lower case. */
+@utility accent-line {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  color: var(--color-indigo);
+  text-transform: none;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+/* Small quiet text that names a thing (a brand, a size). Body face, sentence
+   case, never tracked capitals. */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-muted);
+}
+
+/* ── Surfaces ─────────────────────────────────────────────────────────────── */
+
+@utility card-soft {
+  background-color: var(--color-paper-raised);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.35s var(--ease-out-soft), transform 0.35s var(--ease-out-soft), border-color 0.35s var(--ease-out-soft);
+}
+
+@utility card-soft-hover {
+  &:hover {
+    border-color: color-mix(in oklab, var(--color-ink) 18%, transparent);
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-4px);
+  }
+}
+
+@utility rule-gold {
+  height: 1px;
+  background: var(--color-line);
+}
+
+/* Kept as a name so older markup still compiles; it no longer paints a glow. */
+@utility radial-glow-gold {
+  background: transparent;
+}
+
+/* Kept as a name; the sweep is gone, a pill now answers hover with a lift. */
 @utility gold-sheen {
+  transition: transform 0.3s var(--ease-out-soft);
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────────
+   One primary style site-wide: a deep-indigo pill that lifts to indigo on
+   hover. The periwinkle pill is the quiet buy action inside a card. Both squish a little on press. */
+@utility btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border-radius: var(--radius-pill);
+  padding: 0.95rem 1.75rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  background-color: var(--color-ink);
+  color: var(--color-paper-raised);
+  transition: transform 0.25s var(--ease-squish), background-color 0.2s ease-out, color 0.2s ease-out;
+
+  &:hover {
+    background-color: var(--color-indigo);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@utility btn-pill-accent {
+  background-color: var(--color-periwinkle);
+  color: var(--color-ink);
+
+  &:hover {
+    background-color: var(--color-ink);
+    color: var(--color-paper-raised);
+  }
+}
+
+/* A round arrow chip that sits beside a label (never glued to its text). */
+@utility arrow-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-indigo);
+  color: var(--color-paper-raised);
+  transition: transform 0.3s var(--ease-squish);
+}
+
+/* Underline that grows from the left on hover. */
+@utility link-underline {
+  position: relative;
+
   &::after {
     content: '';
     position: absolute;
-    inset: 0;
-    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.35) 48%, rgba(255, 255, 255, 0.35) 52%, transparent 70%);
-    transform: translateX(-120%);
-    pointer-events: none;
+    left: 0;
+    bottom: -3px;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s var(--ease-out-soft);
   }
 
   &:hover::after {
-    transform: translateX(120%);
-    transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: scaleX(1);
   }
-
-  &::after {
-    transition: transform 0.01s;
-  }
-}
-
-/* Soft radial gold glow — a decorative accent behind hero/empty-state sections. */
-@utility radial-glow-gold {
-  background: radial-gradient(circle, rgba(185, 134, 47, 0.16) 0%, transparent 70%);
 }
 
 @keyframes heart-burst {
@@ -215,88 +388,15 @@ details>summary::-webkit-details-marker {
   animation: heart-burst 0.55s ease-out forwards;
 }
 
-/* ── Editorial type & surface system ────────────────────────────────────────
-   The inherited look was built for a wholesale commodity trader: everything
-   set in `font-black uppercase tracking-widest` inside 2px boxes, which reads
-   as loud and industrial. A beauty store wants the opposite — quiet, airy,
-   editorial. These are the replacements; the palette is untouched. */
-
-/* Small label above a heading. Replaces `font-black uppercase tracking-widest`:
-   same role, but light weight and wide tracking instead of shouting. */
-@utility eyebrow {
-  font-size: 10px;
-  line-height: 1;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-on-surface-variant) 70%, transparent);
-}
-
-/* Section heading — the serif, in sentence case, with generous leading.
-   Replaces the uppercase black slab headings. */
-@utility display {
-  font-family: var(--font-heading);
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.12;
-  color: var(--color-primary);
-}
-
-/* A soft card: hairline border, generous radius, barely-there shadow that
-   deepens on hover. Replaces `border-2 border-table-border rounded-2xl`. */
-@utility card-soft {
-  background-color: var(--color-surface-card);
-  border: 1px solid color-mix(in srgb, var(--color-table-border) 75%, transparent);
-  border-radius: 1.25rem;
-  box-shadow: 0 1px 2px rgba(27, 44, 61, 0.04);
-  transition: box-shadow 0.3s ease-out, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease-out;
-}
-
-@utility card-soft-hover {
-  &:hover {
-    border-color: color-mix(in srgb, var(--color-primary) 18%, transparent);
-    box-shadow: 0 16px 40px rgba(27, 44, 61, 0.10);
-    transform: translateY(-4px);
-  }
-}
-
-/* Thin gold rule used to separate editorial sections. */
-@utility rule-gold {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-secondary) 55%, transparent), transparent);
-}
-
-/* Underline that grows from the left on hover — for quiet text links that
-   replace the old boxed uppercase buttons. */
-@utility link-underline {
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -3px;
-    height: 1px;
-    width: 100%;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  &:hover::after {
-    transform: scaleX(1);
-  }
-}
-
-/* ── Shared entrance + interaction utilities ────────────────────────────────
-   Defined here rather than pulled from tailwindcss-animate (not a dependency),
-   so `animate-*` classes below are real and not silently inert. */
-
+/* ── Motion ─────────────────────────────────────────────────────────────────
+   One reveal for the whole storefront: a section rises into place as it enters
+   the viewport. CSS scroll timelines only, so it costs no script, the content
+   is visible where the browser lacks support or scripting is off, and it does
+   nothing under reduced motion. */
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(28px);
   }
 
   to {
@@ -305,9 +405,18 @@ details>summary::-webkit-details-marker {
   }
 }
 
-/* Section/card entrance. Pair with `stagger-N` for a cascade down a column. */
+@utility reveal {
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: rise-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+
 @utility animate-rise {
-  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rise-in 0.5s var(--ease-out-soft) both;
 }
 
 @keyframes drop-in {
@@ -322,31 +431,88 @@ details>summary::-webkit-details-marker {
   }
 }
 
-/* For content revealed BELOW its trigger (e.g. a second-step picker), so it
-   reads as unfolding downward from the control that opened it. */
 @utility animate-drop-in {
-  animation: drop-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: drop-in 0.24s var(--ease-out-soft) both;
 }
 
-/* Cascade helpers — cheap alternative to per-item motion components. */
 @utility stagger-1 { animation-delay: 40ms; }
 @utility stagger-2 { animation-delay: 80ms; }
 @utility stagger-3 { animation-delay: 120ms; }
 @utility stagger-4 { animation-delay: 160ms; }
 @utility stagger-5 { animation-delay: 200ms; }
 
-/* Admin surface card: subtle lift + shadow on hover, so panels feel handled
-   rather than static. Deliberately small — these are dense work surfaces. */
-@utility card-lift {
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+/* The 3D pieces drift gently in place. Transform only; still under reduced motion. */
+@keyframes float-y {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(var(--float-rot, 0deg));
+  }
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(27, 44, 61, 0.08);
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(calc(var(--float-rot, 0deg) + 3deg));
   }
 }
 
-/* Press feedback for icon-only / small controls that have no other affordance. */
+@utility animate-float {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: float-y var(--float-dur, 6s) ease-in-out infinite;
+  }
+}
+
+/* The Crayora credit: a soft indigo halo that breathes behind the logo.
+   Opacity-only animation; still under reduced motion. */
+@keyframes crayora-pulse {
+  0%, 100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.crayora-glow {
+  position: relative;
+  display: inline-flex;
+  filter: drop-shadow(0 0 6px rgb(204 204 255 / 0.55));
+}
+
+.crayora-glow::before {
+  content: '';
+  position: absolute;
+  inset: -10px -16px;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgb(124 124 255 / 0.65), transparent);
+  filter: blur(8px);
+  animation: crayora-pulse 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Story progress bar: fills over --story-ms, paused with the story. */
+@keyframes story-fill {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@utility story-fill {
+  transform-origin: left;
+  animation: story-fill var(--story-ms, 5000ms) linear forwards;
+}
+
+/* Admin surface card: a small lift on hover for dense work surfaces. */
+@utility card-lift {
+  transition: transform 0.2s var(--ease-out-soft), box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+}
+
 @utility press {
   transition: transform 0.12s ease-out;
 
@@ -355,7 +521,6 @@ details>summary::-webkit-details-marker {
   }
 }
 
-/* Everything above is decoration. Respect a reduced-motion preference. */
 @media (prefers-reduced-motion: reduce) {
 
   *,
@@ -377,12 +542,9 @@ details>summary::-webkit-details-marker {
   }
 }
 
-/* Slim light scrollbar for scrollable areas on a DARK background (the search
-   sidebar's category list). scrollbar-hide leaves no hint that there's more to
-   see, which on a short/zoomed viewport reads as "the list is cut off". */
 @utility scrollbar-thin-light {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  scrollbar-color: color-mix(in oklab, var(--color-paper-raised) 28%, transparent) transparent;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -393,20 +555,15 @@ details>summary::-webkit-details-marker {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.28);
-    border-radius: 9999px;
+    background-color: color-mix(in oklab, var(--color-paper-raised) 28%, transparent);
+    border-radius: var(--radius-pill);
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.45);
+    background-color: color-mix(in oklab, var(--color-paper-raised) 45%, transparent);
   }
 }
 
-/* The footer carries mt-8/md:mt-24 as breathing room after ordinary page
-   content. The search page is a full-bleed two-column layout whose dark sidebar
-   runs to the bottom of the section, so that margin renders as a stray cream
-   band between the sidebar and the footer. Opt that one layout out — both are
-   bg-primary, so they now meet seamlessly. */
 body:has([data-flush-footer]) footer {
   margin-top: 0;
 }
@@ -414,14 +571,11 @@ body:has([data-flush-footer]) footer {
 body {
   background-color: var(--color-background);
   color: var(--color-on-background);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-/* iOS Safari zooms the whole page in when a focused control's font-size is under
-   16px (ours are 14px), then leaves the page zoomed. Bumping to 16px stops it.
-   Scoped to iOS only — `-webkit-touch-callout` is an iOS-Safari-only feature —
-   so desktop and Android inputs are byte-for-byte unchanged. Field HEIGHT is
-   padding-driven, so this only nudges the text size on iPhone, nothing else. */
+/* iOS Safari zooms in on focused controls under 16px; keep them at 16px there. */
 @supports (-webkit-touch-callout: none) {
   input,
   select,
@@ -430,17 +584,23 @@ body {
   }
 }
 
-/* Headings / sub-headings use the Playfair Display serif by default.
-   Product names (h4) intentionally stay on the main Poppins font. */
-h1,
-h2,
-h3 {
-  font-family: var(--font-heading);
+/* Functional headings (cart, checkout, account, admin) use the body face, bold.
+   Statement heads opt into Anton with the `display` utility. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+  }
+}
+
+::selection {
+  background-color: var(--color-periwinkle);
+  color: var(--color-ink);
 }
 
 @media print {
 
-  /* Hide all site chrome — only the order detail content prints */
   header,
   nav,
   footer,
@@ -450,12 +610,11 @@ h3 {
   }
 
   body {
-    background: #fff !important;
-    color: #000 !important;
+    background: var(--color-paper-raised) !important;
+    color: var(--color-ink) !important;
     font-size: 12pt;
   }
 
-  /* Expand the order detail to fill the page */
   main,
   .max-w-4xl {
     max-width: 100% !important;
@@ -463,10 +622,9 @@ h3 {
     margin: 0 !important;
   }
 
-  /* Ensure cards print with visible borders */
   .border,
   [class*="border-"] {
-    border-color: #ccc !important;
+    border-color: var(--color-line) !important;
   }
 
   a[href]::after {

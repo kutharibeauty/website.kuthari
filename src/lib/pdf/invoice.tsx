@@ -29,9 +29,9 @@ function qtyWithUnit(quantity: number, unit: string | null | undefined): string 
 const SELLER = {
   name: 'KUTHARI BEAUTY STORE',
   tagline: 'Cosmetics, Skincare & Salon Products',
-  address: 'Marthapeta St, Sano Bazar, Back side of Ganesh Market, Brahmapur, Odisha - 760009',
+  address: 'Marthapeta St, near Sano Bazar, Triveni Nagar, Brahmapur, Odisha 760009',
   gstin: '',
-  phone: '+91 98612 35276 · +91 78490 76520',
+  phone: '+91 98612 35276',
   email: 'smortika@gmail.com',
 }
 

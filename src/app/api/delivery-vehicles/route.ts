@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin } from '@/lib/auth/guard'
+import { requireAdmin, requirePermission } from '@/lib/auth/guard'
 import { NextRequest } from 'next/server'
 
 /**
@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(request: Request) {
+  const noPerm = await requirePermission('manage_delivery_persons'); if (noPerm) return noPerm
   const denied = await requireAdmin(); if (denied) return denied
 
   const body = await request.json().catch(() => ({}))

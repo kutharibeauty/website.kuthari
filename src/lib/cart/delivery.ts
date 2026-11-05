@@ -37,8 +37,38 @@ export interface DeliveryConfig {
   minOrderValue: number
   /** Admin-set window during which orders may be placed. */
   orderHours: OrderHoursConfig
-  /** Whether online (Razorpay) payment is enabled — required at checkout, no COD. */
+  /** Whether online (Razorpay) payment is enabled. */
   razorpayEnabled: boolean
+  /** Admin switch: offer cash on delivery for the full amount. */
+  codEnabled: boolean
+  /** Admin switch: when COD is off, bulk orders may pay part online, the rest in cash. */
+  bulkPartialEnabled: boolean
+  /** Share of a bulk order paid online up front, 10–90 (%). */
+  bulkAdvancePercent: number
+}
+
+/** How an order is paid. 'partial' = an advance online, the balance in cash on delivery. */
+export type PaymentMode = 'online' | 'cod' | 'partial'
+
+/**
+ * The payment modes on offer for this order. The checkout shows exactly these
+ * and the order route accepts exactly these, so the two can't disagree.
+ *  - online: whenever Razorpay is on
+ *  - cod: whenever the admin has switched COD on
+ *  - partial: bulk orders only, and only while COD is off and Razorpay is on
+ */
+export function availablePaymentModes(cfg: DeliveryConfig, isBulk: boolean): PaymentMode[] {
+  const modes: PaymentMode[] = []
+  if (cfg.razorpayEnabled) modes.push('online')
+  if (cfg.razorpayEnabled && !cfg.codEnabled && cfg.bulkPartialEnabled && isBulk) modes.push('partial')
+  if (cfg.codEnabled) modes.push('cod')
+  return modes
+}
+
+/** The advance for a part-paid order, in whole rupees (rounded up), never the whole total. */
+export function advanceFor(total: number, percent: number): number {
+  const pct = Math.min(90, Math.max(10, percent))
+  return Math.min(Math.max(0, Math.round(total) - 1), Math.ceil((total * pct) / 100))
 }
 
 export const DEFAULT_DELIVERY_CONFIG: DeliveryConfig = {
@@ -47,6 +77,9 @@ export const DEFAULT_DELIVERY_CONFIG: DeliveryConfig = {
   minOrderValue: MIN_ORDER_VALUE,
   orderHours: DEFAULT_ORDER_HOURS,
   razorpayEnabled: false,
+  codEnabled: false,
+  bulkPartialEnabled: false,
+  bulkAdvancePercent: 25,
 }
 
 /**
@@ -66,6 +99,12 @@ export function parseDeliveryConfig(settingsValue: unknown): DeliveryConfig {
     minOrderValue: Number.isFinite(minOrder) && minOrder >= 0 ? minOrder : MIN_ORDER_VALUE,
     orderHours: parseOrderHours(settingsValue),
     razorpayEnabled: v.razorpay_enabled === true,
+    codEnabled: v.cod_enabled === true,
+    bulkPartialEnabled: v.bulk_partial_enabled === true,
+    bulkAdvancePercent: (() => {
+      const p = Number(v.bulk_advance_percent)
+      return Number.isFinite(p) ? Math.min(90, Math.max(10, Math.round(p))) : 25
+    })(),
   }
 }
 

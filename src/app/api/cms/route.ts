@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import type { AuthMetadata } from '@/types'
+import { withStorefrontRefresh } from '@/lib/revalidate'
+import { requirePermission } from '@/lib/auth/guard'
 
 export async function GET(request: NextRequest) {
   const key = request.nextUrl.searchParams.get('key')
@@ -16,7 +18,8 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(key ? (data?.[0] ?? null) : data)
 }
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
+  const noPerm = await requirePermission('manage_cms', 'manage_banners'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const meta = sessionClaims?.publicMetadata as AuthMetadata | undefined
@@ -40,3 +43,5 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
+
+export const POST = withStorefrontRefresh(POST_handler)

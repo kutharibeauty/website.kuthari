@@ -249,7 +249,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
                   key={m}
                   type="button"
                   onClick={() => setMode(m)}
-                  className={`relative z-10 flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-colors duration-200 ${mode === m ? 'text-white' : 'text-on-surface-variant hover:text-primary'}`}
+                  className={`relative z-10 flex-1 py-3 rounded-xl text-[15px] font-semibold transition-colors duration-200 ${mode === m ? 'text-white' : 'text-on-surface-variant hover:text-primary'}`}
                 >
                   {mode === m && (
                     <motion.span
@@ -266,7 +266,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
 
           {mode === 'signup' && (
             <div>
-              <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant">Name</label>
+              <label className="text-xs font-black text-on-surface-variant">Name</label>
               <div className="relative mt-1.5">
                 <User size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 pointer-events-none" strokeWidth={2.5} />
                 <input
@@ -274,7 +274,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-table-border focus:border-primary bg-surface-card font-medium text-primary placeholder:text-on-surface-variant/40 outline-none transition-all duration-200 focus:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)]"
+                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-table-border focus:border-primary bg-surface-card font-medium text-primary placeholder:text-on-surface-variant/40 outline-none transition duration-200 focus:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)]"
                 />
               </div>
             </div>
@@ -282,7 +282,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
 
           {mode === 'signup' && (
             <div>
-              <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant">Email (optional)</label>
+              <label className="text-xs font-black text-on-surface-variant">Email (optional)</label>
               <div className="relative mt-1.5">
                 <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 pointer-events-none" strokeWidth={2.5} />
                 <input
@@ -290,15 +290,15 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-table-border focus:border-primary bg-surface-card font-medium text-primary placeholder:text-on-surface-variant/40 outline-none transition-all duration-200 focus:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)]"
+                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-table-border focus:border-primary bg-surface-card font-medium text-primary placeholder:text-on-surface-variant/40 outline-none transition duration-200 focus:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)]"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant">Mobile Number</label>
-            <div className="flex items-center mt-1.5 rounded-2xl border-2 border-table-border focus-within:border-primary bg-surface-card transition-all duration-200 focus-within:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)] overflow-hidden">
+            <label className="text-xs font-black text-on-surface-variant">Mobile Number</label>
+            <div className="flex items-center mt-1.5 rounded-2xl border-2 border-table-border focus-within:border-primary bg-surface-card transition duration-200 focus-within:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)] overflow-hidden">
               <span className="flex items-center gap-2 pl-4 pr-3 py-3.5 font-black text-primary border-r-2 border-table-border bg-surface-container-low/50">
                 <Phone size={15} strokeWidth={2.5} /> +91
               </span>
@@ -318,7 +318,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
           <button
             type="submit"
             disabled={loading}
-            className="group mt-2 w-full py-4 rounded-2xl bg-primary text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
+            className="group mt-2 w-full py-4 rounded-2xl bg-primary text-white font-black text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
           >
             {loading ? (
               <Loader2 size={16} className="animate-spin" />
@@ -337,7 +337,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
           <button
             type="button"
             onClick={() => { setStep('phone'); setOtp(''); setError(null) }}
-            className="flex items-center gap-1 text-xs font-black uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors w-max"
+            className="flex items-center gap-1 text-xs font-black text-on-surface-variant hover:text-primary transition-colors w-max"
           >
             <ChevronLeft size={14} /> Back
           </button>
@@ -349,7 +349,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
           )}
 
           <div>
-            <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant">Enter OTP</label>
+            <label className="text-xs font-black text-on-surface-variant">Enter OTP</label>
             <div className="mt-2.5">
               <OtpInput
                 value={otp}
@@ -368,7 +368,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
             id="otp-verify-btn"
             type="submit"
             disabled={loading}
-            className="group w-full py-4 rounded-2xl bg-primary text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
+            className="group w-full py-4 rounded-2xl bg-primary text-white font-black text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
           >
             {loading ? (
               <Loader2 size={16} className="animate-spin" />
@@ -384,7 +384,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
             type="button"
             onClick={handleResend}
             disabled={loading}
-            className="text-xs font-black uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors self-center"
+            className="text-xs font-black text-on-surface-variant hover:text-primary transition-colors self-center"
           >
             Resend OTP
           </button>
@@ -393,9 +393,9 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
 
       {step === 'name' && (
         <form onSubmit={handleSaveName} className="flex flex-col gap-3.5 lg:gap-4">
-          <p className="text-sm font-medium text-on-surface-variant">One last thing — what should we call you?</p>
+          <p className="text-sm font-medium text-on-surface-variant">One last thing: what should we call you?</p>
           <div>
-            <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant">Name</label>
+            <label className="text-xs font-black text-on-surface-variant">Name</label>
             <div className="relative mt-1.5">
               <User size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 pointer-events-none" strokeWidth={2.5} />
               <input
@@ -404,7 +404,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your full name"
                 autoFocus
-                className="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-table-border focus:border-primary bg-surface-card font-medium text-primary placeholder:text-on-surface-variant/40 outline-none transition-all duration-200 focus:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)]"
+                className="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-table-border focus:border-primary bg-surface-card font-medium text-primary placeholder:text-on-surface-variant/40 outline-none transition duration-200 focus:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)]"
               />
             </div>
           </div>
@@ -412,7 +412,7 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
           <button
             type="submit"
             disabled={loading}
-            className="group w-full py-4 rounded-2xl bg-primary text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
+            className="group w-full py-4 rounded-2xl bg-primary text-white font-black text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
           >
             Continue
             <ArrowRight size={16} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform duration-200" />
@@ -434,14 +434,14 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setNotRegistered(false)}
-                className="flex-1 py-2.5 rounded-xl border-2 border-table-border font-black text-xs uppercase tracking-widest text-on-surface-variant hover:border-primary/40 transition-colors"
+                className="flex-1 py-2.5 rounded-xl border-2 border-table-border font-black text-xs text-on-surface-variant hover:border-primary/40 transition-colors"
               >
                 Close
               </button>
               {allowSignup && (
                 <button
                   onClick={() => { setNotRegistered(false); setMode('signup') }}
-                  className="flex-1 py-2.5 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-primary text-white font-black text-xs hover:bg-primary/90 transition-colors"
                 >
                   Sign Up
                 </button>
@@ -461,13 +461,13 @@ export default function PhoneAuthForm({ portal, allowSignup, title, subtitle }: 
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setAlreadyRegistered(false)}
-                className="flex-1 py-2.5 rounded-xl border-2 border-table-border font-black text-xs uppercase tracking-widest text-on-surface-variant hover:border-primary/40 transition-colors"
+                className="flex-1 py-2.5 rounded-xl border-2 border-table-border font-black text-xs text-on-surface-variant hover:border-primary/40 transition-colors"
               >
                 Close
               </button>
               <button
                 onClick={() => { setAlreadyRegistered(false); setError(null); setMode('login') }}
-                className="flex-1 py-2.5 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-primary text-white font-black text-xs hover:bg-primary/90 transition-colors"
               >
                 Log In
               </button>

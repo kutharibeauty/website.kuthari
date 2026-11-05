@@ -23,6 +23,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import type { AuthMetadata } from '@/types'
+import { withStorefrontRefresh } from '@/lib/revalidate'
+import { requirePermission } from '@/lib/auth/guard'
 
 const RowSchema = z.object({
   name:           z.string().min(1, 'name / Full Product Name required'),
@@ -146,7 +148,8 @@ function slugify(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -296,3 +299,5 @@ export async function POST(req: NextRequest) {
     error_csv: errorCsvB64,
   })
 }
+
+export const POST = withStorefrontRefresh(POST_handler)

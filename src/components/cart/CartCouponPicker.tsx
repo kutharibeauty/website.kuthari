@@ -94,12 +94,12 @@ export default function CartCouponPicker({ subtotal, appliedCode, onApply }: Pro
             {c.code} <span className="text-on-surface-variant">· {labelFor(c)}</span>
           </p>
           {short ? (
-            <p className="text-[10px] font-bold text-on-surface-variant/80 mt-0.5">
+            <p className="text-[12px] font-bold text-on-surface-variant/80 mt-0.5">
               Add ₹{(c.min_order_value! - subtotal).toLocaleString('en-IN')} more to use this
             </p>
           ) : (
             desc && (
-              <p className="text-[10px] font-medium text-on-surface-variant/80 mt-0.5 line-clamp-1">{desc}</p>
+              <p className="text-[12px] font-medium text-on-surface-variant/80 mt-0.5 line-clamp-1">{desc}</p>
             )
           )}
         </div>
@@ -107,7 +107,7 @@ export default function CartCouponPicker({ subtotal, appliedCode, onApply }: Pro
           type="button"
           onClick={() => apply(c.code)}
           disabled={short}
-          className="flex-shrink-0 px-3 py-1.5 rounded-lg bg-primary text-white font-black text-[10px] uppercase tracking-widest active:scale-95 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex-shrink-0 px-3 py-1.5 rounded-lg bg-primary text-white font-black text-[12px] active:scale-95 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Apply
         </button>
@@ -140,7 +140,7 @@ export default function CartCouponPicker({ subtotal, appliedCode, onApply }: Pro
           >
             <div className="mx-auto w-10 h-1.5 rounded-full bg-outline-variant/40 mb-4" />
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-black text-sm text-primary uppercase tracking-widest">
+              <h2 className="font-black text-sm text-primary">
                 Available Coupons
               </h2>
               <button
@@ -164,7 +164,7 @@ export default function CartCouponPicker({ subtotal, appliedCode, onApply }: Pro
 
   return (
     <section className="bg-surface-card rounded-2xl border-2 border-table-border p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.15em] text-primary mb-3">
+      <p className="text-[11px] font-black text-primary mb-3">
         {available.length === 1 ? 'Available Coupon' : 'Available Coupons'}
       </p>
 
@@ -177,7 +177,7 @@ export default function CartCouponPicker({ subtotal, appliedCode, onApply }: Pro
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="mt-2 w-full flex items-center justify-center gap-1 py-2.5 rounded-xl border-2 border-table-border font-black text-[10px] uppercase tracking-widest text-primary hover:border-primary/40 transition-colors active:scale-[0.99]"
+          className="mt-2 w-full flex items-center justify-center gap-1 py-2.5 rounded-xl border-2 border-table-border font-black text-[12px] text-primary hover:border-primary/40 transition-colors active:scale-[0.99]"
         >
           View all {available.length} coupons
           <ChevronRight size={14} />

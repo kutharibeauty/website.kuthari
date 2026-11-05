@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Star, Loader2 } from 'lucide-react'
+import { X, Star, Loader2, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -61,19 +61,14 @@ export default function ReviewPopup({ productId, productName, onClose }: Props) 
         >
           {submitted ? (
             <div className="text-center py-8">
-              <span
-                className="material-symbols-outlined text-[48px] text-primary block mb-3"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                check_circle
-              </span>
+              <CheckCircle2 size={48} aria-hidden="true" className="text-primary mx-auto block mb-3" />
               <p className="font-headline-md text-headline-md text-on-surface">Thank you!</p>
               <p className="font-body-md text-body-md text-on-surface-variant mt-1">
                 Your review will appear after approval.
               </p>
               <button
                 onClick={onClose}
-                className="mt-5 px-6 py-2.5 bg-primary text-on-primary rounded-full font-label-sm text-label-sm uppercase tracking-wider"
+                className="mt-5 px-6 py-2.5 bg-primary text-on-primary rounded-full font-label-sm text-label-sm"
               >
                 Close
               </button>
@@ -86,7 +81,7 @@ export default function ReviewPopup({ productId, productName, onClose }: Props) 
 
               {/* Star picker */}
               <div>
-                <label className="font-label-sm text-label-sm text-on-surface-variant block mb-2 uppercase tracking-wider">
+                <label className="font-label-sm text-label-sm text-on-surface-variant block mb-2">
                   Your Rating *
                 </label>
                 <div className="flex gap-1">
@@ -118,7 +113,7 @@ export default function ReviewPopup({ productId, productName, onClose }: Props) 
               <div>
                 <label
                   htmlFor="reviewer-name"
-                  className="font-label-sm text-label-sm text-on-surface-variant block mb-1.5 uppercase tracking-wider"
+                  className="font-label-sm text-label-sm text-on-surface-variant block mb-1.5"
                 >
                   Your Name *
                 </label>
@@ -137,7 +132,7 @@ export default function ReviewPopup({ productId, productName, onClose }: Props) 
               <div>
                 <label
                   htmlFor="review-body"
-                  className="font-label-sm text-label-sm text-on-surface-variant block mb-1.5 uppercase tracking-wider"
+                  className="font-label-sm text-label-sm text-on-surface-variant block mb-1.5"
                 >
                   Your Review
                 </label>
@@ -159,7 +154,7 @@ export default function ReviewPopup({ productId, productName, onClose }: Props) 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 bg-primary text-on-primary rounded-full font-label-sm text-label-sm uppercase tracking-wider hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-primary text-on-primary rounded-full font-label-sm text-label-sm hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {isSubmitting && <Loader2 size={15} className="animate-spin" />}
                 {isSubmitting ? 'Submitting…' : 'Submit Review'}

@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import AdminSidebar from './AdminSidebar'
 import type { AdminPermissions } from '@/types/admin.types'
 import Logo from './Logo'
-import { Menu } from 'lucide-react'
+import { ExternalLink, Menu } from 'lucide-react'
 import NotificationBell, { type AdminNotification } from '@/components/admin/NotificationBell'
 
 export interface AdminBadges {
@@ -31,6 +31,23 @@ const BOTTOM_NAV = [
   { href: '/admin/products',   label: 'Products',icon: 'inventory_2' },
   { href: '/admin/analytics',  label: 'Reports', icon: 'bar_chart' },
   { href: '/admin/profiles',   label: 'Team',    icon: 'group' },
+]
+
+/** The current section's name for the top bar, from the URL. */
+const SECTION: [string, string][] = [
+  ['/admin/dashboard', 'Today'],
+  ['/admin/orders', 'Orders'],
+  ['/admin/products', 'Products'],
+  ['/admin/categories', 'Categories'],
+  ['/admin/coupons', 'Coupons'],
+  ['/admin/referrals', 'Referrals'],
+  ['/admin/banners', 'Homepage & banners'],
+  ['/admin/pincodes', 'Delivery pincodes'],
+  ['/admin/abandoned-carts', 'Abandoned carts'],
+  ['/admin/delivery', 'Delivery team'],
+  ['/admin/profiles', 'Admin profiles'],
+  ['/admin/analytics', 'Analytics'],
+  ['/admin/settings', 'Settings'],
 ]
 
 export default function AdminShell({ role, children, badges, name, permissions, notifications }: Props) {
@@ -79,9 +96,18 @@ export default function AdminShell({ role, children, badges, name, permissions, 
         </header>
 
         {/* Desktop top bar */}
-        <header className="hidden lg:flex sticky top-0 z-40 items-center justify-between px-8 h-16 bg-white border-b-2 border-table-border shadow-sm">
-          <h2 className="font-black text-xl text-primary tracking-tight uppercase">Admin Panel</h2>
-          <div className="flex items-center gap-2">
+        <header className="hidden lg:flex sticky top-0 z-40 items-center justify-between px-8 h-16 bg-surface-card border-b border-table-border">
+          <h2 className="font-bold text-xl text-primary">
+            {SECTION.find(([p]) => pathname.startsWith(p))?.[1] ?? 'Admin'}
+          </h2>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              target="_blank"
+              className="flex items-center gap-1.5 rounded-full border border-table-border px-4 py-2 text-[14px] font-semibold text-primary hover:border-primary/40 transition-colors"
+            >
+              View store <ExternalLink size={14} aria-hidden="true" />
+            </Link>
             <NotificationBell items={notifications ?? []} variant="desktop" />
           </div>
         </header>
@@ -92,7 +118,7 @@ export default function AdminShell({ role, children, badges, name, permissions, 
         </main>
 
         {/* ── Mobile bottom nav ── */}
-        <nav className="lg:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-16 px-2 bg-primary border-t-2 border-primary/50 shadow-[0px_-4px_20px_rgba(0,0,0,0.25)]" style={{ paddingBottom: 'max(0px, env(safe-area-inset-bottom))' }}>
+        <nav className="lg:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-16 px-2 bg-primary border-t-2 border-primary/50 shadow-[var(--shadow-modal)]" style={{ paddingBottom: 'max(0px, env(safe-area-inset-bottom))' }}>
           {BOTTOM_NAV.map((item) => {
             const active = isActive(item.href)
             return (
@@ -100,7 +126,7 @@ export default function AdminShell({ role, children, badges, name, permissions, 
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 px-3 py-1 rounded-xl transition-all',
+                  'flex flex-col items-center justify-center gap-1 px-3 py-1 rounded-xl transition',
                   active
                     ? 'text-white'
                     : 'text-white/40 hover:text-white/80',
@@ -112,7 +138,7 @@ export default function AdminShell({ role, children, badges, name, permissions, 
                 >
                   {item.icon}
                 </span>
-                <span className="font-black text-[9px] uppercase tracking-wider">{item.label}</span>
+                <span className="font-semibold text-[11px]">{item.label}</span>
               </Link>
             )
           })}

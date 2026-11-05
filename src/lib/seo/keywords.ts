@@ -6,9 +6,7 @@
  * kept — buying by the box is a real offer and those are high-intent searches —
  * but it no longer leads.
  *
- * Once the client confirms the exact brands they stock, add them to
- * `categories` ("Lakme distributor Brahmapur", …) — brand terms convert best
- * and can't be guessed.
+ * Brand terms convert best; `brands` lists the brands on the shelf today.
  */
 export const MASTER_KEYWORDS = {
   brand: [
@@ -19,6 +17,15 @@ export const MASTER_KEYWORDS = {
     'Kuthari Beauty Store price list',
     'Kuthari beauty products',
     'Kuthari cosmetics shop',
+  ],
+
+  brands: [
+    'Lotus Herbals facial kit online',
+    'Nisha hair colour online',
+    'VMAT shaving foam',
+    'Ossion salon products',
+    'Aryanveda de tan',
+    'Ozone facial cleanser',
   ],
 
   retail: [
@@ -84,7 +91,7 @@ export const MASTER_KEYWORDS = {
 
   buyIntent: [
     'order beauty products online',
-    'buy cosmetics with cash free delivery',
+    'buy cosmetics with free delivery',
     'best online beauty store India',
     'beauty products delivered to home',
     'buy single piece or full box cosmetics',

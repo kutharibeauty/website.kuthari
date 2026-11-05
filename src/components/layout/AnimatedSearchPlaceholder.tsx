@@ -31,7 +31,7 @@ export default function AnimatedSearchPlaceholder({ terms, interval = 2000 }: Pr
 
   return (
     <span
-      className="absolute left-11 top-1/2 -translate-y-1/2 flex items-center text-sm font-medium text-on-surface-variant/80 pointer-events-none select-none"
+      className="absolute left-12 top-1/2 -translate-y-1/2 flex items-center text-[15px] font-medium text-muted pointer-events-none select-none"
       aria-hidden="true"
     >
       <span className="mr-1">Search</span>

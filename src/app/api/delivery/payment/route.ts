@@ -35,7 +35,8 @@ export async function POST(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: order } = await (supabase as any)
     .from('orders')
-    .select('id, total, status, assigned_to')
+    // '*' so this still works before migration 042 adds amount_due.
+    .select('*')
     .eq('id', body.order_id)
     .maybeSingle()
 
@@ -63,10 +64,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Customer OTP not verified' }, { status: 400 })
   }
 
-  // Create Razorpay payment link for online payment
+  // What is still owed: the balance of a part-paid order, the whole total for
+  // cash on delivery, nothing for an order already paid in full online.
+  const alreadyPaid = order.payment_status === 'collected'
+  const due = alreadyPaid
+    ? 0
+    : typeof order.amount_due === 'number' || typeof order.amount_due === 'string'
+      ? Number(order.amount_due)
+      : Number(order.total)
+
+  // Create Razorpay payment link for the amount still due
   if (body.action === 'create_payment_link') {
+    if (due <= 0) return NextResponse.json({ error: 'Nothing left to collect on this order.' }, { status: 400 })
     try {
-      const paymentUrl = await createDeliveryPaymentLink(body.order_id, order.total)
+      const paymentUrl = await createDeliveryPaymentLink(body.order_id, due)
       return NextResponse.json({ ok: true, payment_url: paymentUrl })
     } catch (e) {
       return NextResponse.json({ error: 'Failed to create payment link', detail: String(e) }, { status: 500 })
@@ -87,7 +98,8 @@ export async function POST(req: NextRequest) {
         delivered_at: new Date().toISOString(),
         payment_status: 'collected',
         payment_collected_by: meta.admin_profile_id,
-        payment_method_used: body.payment_type,
+        payment_method_used: alreadyPaid ? 'online' : body.payment_type,
+        ...('amount_due' in order ? { amount_paid: Number(order.total), amount_due: 0 } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq('id', body.order_id)

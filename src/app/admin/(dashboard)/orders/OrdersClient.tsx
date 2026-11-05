@@ -38,8 +38,15 @@ const STATUS_CHIP: Record<OrderStatus, string> = {
   returned:  'bg-surface-container text-on-surface-variant border-table-border',
 }
 
-export default function OrdersClient({ initialOrders }: { initialOrders: OrderRow[] }) {
-  const [activeTab, setActiveTab] = useState<OrderStatus | 'all'>('all')
+export default function OrdersClient({
+  initialOrders,
+  initialTab = 'all',
+}: {
+  initialOrders: OrderRow[]
+  /** From ?status= so dashboard links open the right tab. */
+  initialTab?: OrderStatus | 'all'
+}) {
+  const [activeTab, setActiveTab] = useState<OrderStatus | 'all'>(initialTab)
   const [search, setSearch] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -99,16 +106,16 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-2 border-table-border pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight capitalize">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight capitalize">
             Orders.
           </h1>
-          <p className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mt-1">
+          <p className="text-sm font-bold text-on-surface-variant mt-1">
             {filtered.length} orders shown
           </p>
         </div>
         <button
           onClick={exportCSV}
-          className="flex items-center justify-center gap-2 px-5 py-3 border-2 border-table-border bg-surface-card text-primary rounded-xl font-bold text-xs uppercase tracking-widest hover:border-primary/40 transition-colors active:scale-95"
+          className="flex items-center justify-center gap-2 px-5 py-3 border-2 border-table-border bg-surface-card text-primary rounded-xl font-bold text-xs hover:border-primary/40 transition-colors active:scale-95"
         >
           <Download size={16} strokeWidth={2.5} />
           Export CSV
@@ -123,7 +130,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                'flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all font-black text-[10px] uppercase tracking-widest whitespace-nowrap',
+                'flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition font-bold text-[12px] whitespace-nowrap',
                 activeTab === tab.key
                   ? 'bg-primary border-primary text-white shadow-md'
                   : 'bg-surface-card border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary',
@@ -132,7 +139,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
               {tab.label}
               {counts[tab.key] !== undefined && (
                 <span className={cn(
-                  'px-2 py-0.5 rounded-md border font-black text-[9px]',
+                  'px-2 py-0.5 rounded-md border font-bold text-[11px]',
                   activeTab === tab.key
                     ? 'bg-white/20 border-white/30 text-white'
                     : 'bg-surface-container border-table-border/60 text-on-surface-variant',
@@ -154,26 +161,26 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
             placeholder="Search order # or customer…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200"
+            className="w-full pl-11 pr-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200"
           />
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="font-black text-[10px] text-primary/40 uppercase tracking-widest">From</span>
+            <span className="font-bold text-[12px] text-primary/40">From</span>
             <input
               type="date"
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
-              className="flex-1 sm:flex-none px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200"
+              className="flex-1 sm:flex-none px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200"
             />
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="font-black text-[10px] text-primary/40 uppercase tracking-widest">To</span>
+            <span className="font-bold text-[12px] text-primary/40">To</span>
             <input
               type="date"
               value={dateTo}
               onChange={e => setDateTo(e.target.value)}
-              className="flex-1 sm:flex-none px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200"
+              className="flex-1 sm:flex-none px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200"
             />
           </div>
           {(dateFrom || dateTo) && (
@@ -182,7 +189,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
               className="p-3 rounded-xl border-2 border-error/20 bg-error/5 text-error hover:bg-error/10 hover:border-error/40 transition-colors w-full sm:w-auto flex items-center justify-center gap-2"
             >
               <X size={16} strokeWidth={2.5} />
-              <span className="sm:hidden font-black text-xs uppercase tracking-widest">Clear Dates</span>
+              <span className="sm:hidden font-bold text-xs">Clear Dates</span>
             </button>
           )}
         </div>
@@ -195,7 +202,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
             <div className="w-16 h-16 bg-surface-container border-2 border-table-border rounded-2xl flex items-center justify-center mb-4">
               <FileText size={24} className="text-on-surface-variant/40" />
             </div>
-            <p className="font-black text-sm text-on-surface-variant uppercase tracking-widest">No orders found.</p>
+            <p className="font-bold text-sm text-on-surface-variant">No orders found.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -204,7 +211,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
                 <tr className="bg-primary">
                   {['Order #', 'Date', 'Customer', 'Items', 'Total', 'Payment', 'Status', ''].map((h, i) => (
                     <th key={h} className={cn(
-                      "py-4 px-5 text-[10px] font-black uppercase tracking-[0.2em] text-white/70 whitespace-nowrap",
+                      "py-4 px-5 text-[12px] font-bold text-white/70 whitespace-nowrap",
                       i !== 7 ? "border-r border-white/10" : ""
                     )}>
                       {h}
@@ -225,7 +232,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
                       )}
                     >
                       <td className="py-4 px-5 border-r border-table-border">
-                        <span className="font-black text-xs text-primary bg-primary/5 px-2 py-1 rounded-md border border-primary/10">
+                        <span className="font-bold text-xs text-primary bg-primary/5 px-2 py-1 rounded-md border border-primary/10">
                           {order.order_number || `#${order.id.slice(-8).toUpperCase()}`}
                         </span>
                       </td>
@@ -237,7 +244,7 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
                       <td className="py-4 px-5 border-r border-table-border">
                         <p className="font-bold text-sm text-on-surface">{addr?.name ?? '—'}</p>
                         {addr?.phone && (
-                          <p className="font-black text-[10px] uppercase tracking-widest text-on-surface-variant mt-0.5">
+                          <p className="font-bold text-[12px] text-on-surface-variant mt-0.5">
                             {addr.phone}
                           </p>
                         )}
@@ -248,24 +255,24 @@ export default function OrdersClient({ initialOrders }: { initialOrders: OrderRo
                         </span>
                       </td>
                       <td className="py-4 px-5 border-r border-table-border">
-                        <span className="font-black text-sm text-primary">
+                        <span className="font-bold text-sm text-primary">
                           ₹{order.total.toLocaleString('en-IN')}
                         </span>
                       </td>
                       <td className="py-4 px-5 border-r border-table-border">
-                        <span className="px-2 py-1 bg-surface border border-table-border text-on-surface-variant rounded-md font-black text-[9px] uppercase tracking-wider whitespace-nowrap">
+                        <span className="px-2 py-1 bg-surface border border-table-border text-on-surface-variant rounded-md font-bold text-[11px] whitespace-nowrap">
                           {order.payment_method}
                         </span>
                       </td>
                       <td className="py-4 px-5 border-r border-table-border">
-                        <span className={cn('px-3 py-1.5 rounded-lg border-2 font-black text-[9px] uppercase tracking-wider whitespace-nowrap', STATUS_CHIP[order.status])}>
+                        <span className={cn('px-3 py-1.5 rounded-lg border-2 font-bold text-[11px] whitespace-nowrap', STATUS_CHIP[order.status])}>
                           {order.status === 'shipping' ? 'Out for Delivery' : order.status}
                         </span>
                       </td>
                       <td className="py-4 px-5">
                         <Link
                           href={`/admin/orders/${order.id}`}
-                          className="flex items-center justify-center p-2 rounded-xl border-2 border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95 bg-surface"
+                          className="flex items-center justify-center p-2 rounded-xl border-2 border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95 bg-surface"
                         >
                           <ArrowRight size={16} strokeWidth={2.5} />
                         </Link>

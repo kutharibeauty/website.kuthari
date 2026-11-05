@@ -262,10 +262,10 @@ export default function ProductsClient({
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b-2 border-table-border pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight capitalize">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight capitalize">
             Products.
           </h1>
-          <p className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mt-1">
+          <p className="text-sm font-bold text-on-surface-variant mt-1">
             {products.length} total · {filtered.length} shown
           </p>
         </div>
@@ -274,21 +274,21 @@ export default function ProductsClient({
           <button
             onClick={() => importRef.current?.click()}
             disabled={importing}
-            className="flex items-center gap-1.5 px-4 py-2 bg-surface-card border-2 border-table-border text-primary rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-primary/40 transition-colors disabled:opacity-50 active:scale-95"
+            className="flex items-center gap-1.5 px-4 py-2 bg-surface-card border-2 border-table-border text-primary rounded-xl font-bold text-[12px] hover:border-primary/40 transition-colors disabled:opacity-50 active:scale-95"
           >
             <Upload size={16} strokeWidth={2.5} />
             {importing ? 'Importing…' : 'Import CSV'}
           </button>
           <button
             onClick={exportCSV}
-            className="flex items-center gap-1.5 px-4 py-2 bg-surface-card border-2 border-table-border text-primary rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-primary/40 transition-colors active:scale-95"
+            className="flex items-center gap-1.5 px-4 py-2 bg-surface-card border-2 border-table-border text-primary rounded-xl font-bold text-[12px] hover:border-primary/40 transition-colors active:scale-95"
           >
             <Download size={16} strokeWidth={2.5} />
             Export CSV
           </button>
           <Link
             href="/admin/products/new"
-            className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add Product
@@ -305,7 +305,7 @@ export default function ProductsClient({
             placeholder="Search name or SKU…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200"
+            className="w-full pl-11 pr-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200"
           />
         </div>
 
@@ -313,7 +313,7 @@ export default function ProductsClient({
           <select
             value={categoryFilter}
             onChange={e => setCategoryFilter(e.target.value)}
-            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 appearance-none"
+            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200 appearance-none"
           >
             <option value="all">All Categories</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -327,7 +327,7 @@ export default function ProductsClient({
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value as StatusFilter)}
-            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 appearance-none"
+            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200 appearance-none"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -342,7 +342,7 @@ export default function ProductsClient({
           <select
             value={stockFilter}
             onChange={e => setStockFilter(e.target.value as StockFilter)}
-            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 appearance-none"
+            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200 appearance-none"
           >
             <option value="all">All Stock</option>
             <option value="in_stock">In Stock</option>
@@ -356,7 +356,7 @@ export default function ProductsClient({
         <button
           onClick={() => setFeaturedOnly(v => !v)}
           className={cn(
-            'flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all font-black text-[10px] uppercase tracking-widest',
+            'flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition font-bold text-[12px]',
             featuredOnly
               ? 'bg-primary border-primary text-white shadow-md'
               : 'bg-surface border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary',
@@ -371,7 +371,7 @@ export default function ProductsClient({
           <select
             value={pageSize}
             onChange={e => setPageSize(parseInt(e.target.value, 10))}
-            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 appearance-none"
+            className="pl-4 pr-10 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200 appearance-none"
             aria-label="Products per page"
           >
             {PAGE_SIZE_OPTIONS.map(n => <option key={n} value={n}>{n} / page</option>)}
@@ -385,26 +385,25 @@ export default function ProductsClient({
       {/* ── Bulk Actions Bar ── */}
       {someSelected && (
         <div className="flex flex-wrap items-center gap-3 px-6 py-4 bg-primary text-white rounded-2xl border-2 border-primary shadow-lg animate-in slide-in-from-bottom-4 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none" />
-          <p className="font-black text-sm uppercase tracking-widest flex-1 relative z-10">
+          <p className="font-bold text-sm flex-1 relative z-10">
             {selectedIds.size} product{selectedIds.size !== 1 ? 's' : ''} selected
           </p>
           <div className="flex gap-2 relative z-10">
             <button
               onClick={() => bulkAction('activate')}
-              className="px-4 py-2 border-2 border-white/20 bg-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-primary transition-colors"
+              className="px-4 py-2 border-2 border-white/20 bg-white/10 text-white rounded-xl font-bold text-[12px] hover:bg-white hover:text-primary transition-colors"
             >
               Activate
             </button>
             <button
               onClick={() => bulkAction('deactivate')}
-              className="px-4 py-2 border-2 border-white/20 bg-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-primary transition-colors"
+              className="px-4 py-2 border-2 border-white/20 bg-white/10 text-white rounded-xl font-bold text-[12px] hover:bg-white hover:text-primary transition-colors"
             >
               Deactivate
             </button>
             <button
               onClick={() => bulkAction('delete')}
-              className="px-4 py-2 border-2 border-error/50 bg-error/20 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-error hover:text-white transition-colors"
+              className="px-4 py-2 border-2 border-error/50 bg-error/20 text-white rounded-xl font-bold text-[12px] hover:bg-error hover:text-white transition-colors"
             >
               Delete
             </button>
@@ -430,7 +429,7 @@ export default function ProductsClient({
                     {allSelected ? <CheckSquare size={20} /> : <Square size={20} />}
                   </button>
                 </th>
-                <th className="py-4 px-5 w-16 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10">
+                <th className="py-4 px-5 w-16 font-bold text-[12px] text-white/70 border-r border-white/10">
                   Image
                 </th>
                 <th className="py-4 px-5 border-r border-white/10">
@@ -439,25 +438,25 @@ export default function ProductsClient({
                 <th className="py-4 px-5 border-r border-white/10">
                   <SortBtn label="Name" field="name" current={sortField} dir={sortDir} onSort={handleSort} />
                 </th>
-                <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10">
+                <th className="py-4 px-5 font-bold text-[12px] text-white/70 border-r border-white/10">
                   Category
                 </th>
                 <th className="py-4 px-5 border-r border-white/10">
                   <SortBtn label="Price" field="price" current={sortField} dir={sortDir} onSort={handleSort} />
                 </th>
-                <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10">
+                <th className="py-4 px-5 font-bold text-[12px] text-white/70 border-r border-white/10">
                   Unit
                 </th>
                 <th className="py-4 px-5 border-r border-white/10">
                   <SortBtn label="Stock" field="stock_qty" current={sortField} dir={sortDir} onSort={handleSort} />
                 </th>
-                <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10">
+                <th className="py-4 px-5 font-bold text-[12px] text-white/70 border-r border-white/10">
                   Featured
                 </th>
-                <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10">
+                <th className="py-4 px-5 font-bold text-[12px] text-white/70 border-r border-white/10">
                   Active
                 </th>
-                <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70">
+                <th className="py-4 px-5 font-bold text-[12px] text-white/70">
                   Actions
                 </th>
               </tr>
@@ -467,7 +466,7 @@ export default function ProductsClient({
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={11} className="py-24 text-center">
-                    <p className="font-black text-sm uppercase tracking-widest text-on-surface-variant">
+                    <p className="font-bold text-sm text-on-surface-variant">
                       No products match your filters.
                     </p>
                   </td>
@@ -510,7 +509,7 @@ export default function ProductsClient({
                   </td>
 
                   {/* SKU */}
-                  <td className="py-4 px-5 border-r border-table-border font-black text-[10px] uppercase tracking-widest text-on-surface-variant">
+                  <td className="py-4 px-5 border-r border-table-border font-bold text-[12px] text-on-surface-variant">
                     {product.sku ?? '—'}
                   </td>
 
@@ -530,7 +529,7 @@ export default function ProductsClient({
                   <td className="py-4 px-5 border-r border-table-border">
                     {editingPriceId === product.id ? (
                       <div className="flex items-center gap-1">
-                        <span className="font-black text-sm text-primary">₹</span>
+                        <span className="font-bold text-sm text-primary">₹</span>
                         <input
                           type="number"
                           value={priceDraft}
@@ -543,7 +542,7 @@ export default function ProductsClient({
                             if (e.key === 'Escape') setEditingPriceId(null)
                           }}
                           onBlur={() => savePrice(product.id)}
-                          className="w-24 px-3 py-1.5 border-2 border-primary rounded-lg font-black text-sm text-primary focus:outline-none"
+                          className="w-24 px-3 py-1.5 border-2 border-primary rounded-lg font-bold text-sm text-primary focus:outline-none"
                         />
                       </div>
                     ) : (
@@ -553,12 +552,12 @@ export default function ProductsClient({
                           setPriceDraft(product.price.toString())
                         }}
                         title="Click to edit price"
-                        className="font-black text-sm text-primary px-3 py-1.5 -mx-3 rounded-lg border-2 border-transparent hover:border-primary/40 hover:bg-surface transition-colors active:scale-95"
+                        className="font-bold text-sm text-primary px-3 py-1.5 -mx-3 rounded-lg border-2 border-transparent hover:border-primary/40 hover:bg-surface transition-colors active:scale-95"
                       >
                         {saving[product.id] ? '…' : `₹${product.price.toLocaleString('en-IN')}`}
                       </button>
                     )}
-                    {product.mrp && <p className="font-bold text-[10px] text-on-surface-variant line-through mt-0.5">₹{product.mrp}</p>}
+                    {product.mrp && <p className="font-bold text-[12px] text-on-surface-variant line-through mt-0.5">₹{product.mrp}</p>}
                   </td>
 
                   {/* Unit */}
@@ -580,7 +579,7 @@ export default function ProductsClient({
                           if (e.key === 'Escape') setEditingStockId(null)
                         }}
                         onBlur={() => saveStock(product.id)}
-                        className="w-20 px-3 py-1.5 border-2 border-primary rounded-lg font-black text-sm text-primary focus:outline-none"
+                        className="w-20 px-3 py-1.5 border-2 border-primary rounded-lg font-bold text-sm text-primary focus:outline-none"
                       />
                     ) : (
                       <button
@@ -590,7 +589,7 @@ export default function ProductsClient({
                         }}
                         title="Click to edit stock"
                         className={cn(
-                          'font-black text-sm px-3 py-1.5 rounded-lg border-2 transition-colors active:scale-95',
+                          'font-bold text-sm px-3 py-1.5 rounded-lg border-2 transition-colors active:scale-95',
                           product.stock_qty === 0
                             ? 'bg-error/10 border-error/30 text-error hover:border-error'
                             : product.stock_qty < 10
@@ -627,21 +626,21 @@ export default function ProductsClient({
                       <Link
                         href={`/admin/products/${product.id}`}
                         title="Edit product"
-                        className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                        className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95"
                       >
                         <Edit3 size={16} strokeWidth={2.5} />
                       </Link>
                       <Link
                         href={`/admin/products/${product.id}/faq`}
                         title="Manage FAQs"
-                        className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                        className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95"
                       >
                         <MessageCircleQuestion size={16} strokeWidth={2.5} />
                       </Link>
                       <Link
                         href={`/admin/products/${product.id}/reviews`}
                         title="Manage reviews"
-                        className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                        className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95"
                       >
                         <MessageSquare size={16} strokeWidth={2.5} />
                       </Link>
@@ -657,24 +656,24 @@ export default function ProductsClient({
             without scrolling the wide table sideways first. */}
         {filtered.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-t-2 border-table-border">
-            <p className="font-bold text-[11px] uppercase tracking-widest text-on-surface-variant">
+            <p className="font-bold text-[11px] text-on-surface-variant">
               Showing {pageStart + 1}–{Math.min(pageStart + pageSize, filtered.length)} of {filtered.length}
             </p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage(currentPage - 1)}
                 disabled={currentPage <= 1}
-                className="flex items-center gap-1 px-3 py-2 rounded-xl border-2 border-table-border font-black text-[10px] uppercase tracking-widest text-primary hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed transition-colors active:scale-95"
+                className="flex items-center gap-1 px-3 py-2 rounded-xl border-2 border-table-border font-bold text-[12px] text-primary hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed transition-colors active:scale-95"
               >
                 <ChevronLeft size={15} /> Prev
               </button>
-              <span className="font-black text-[11px] uppercase tracking-widest text-on-surface-variant px-2 tabular-nums">
+              <span className="font-bold text-[11px] text-on-surface-variant px-2 tabular-nums">
                 Page {currentPage} / {totalPages}
               </span>
               <button
                 onClick={() => setPage(currentPage + 1)}
                 disabled={currentPage >= totalPages}
-                className="flex items-center gap-1 px-3 py-2 rounded-xl border-2 border-table-border font-black text-[10px] uppercase tracking-widest text-primary hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed transition-colors active:scale-95"
+                className="flex items-center gap-1 px-3 py-2 rounded-xl border-2 border-table-border font-bold text-[12px] text-primary hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed transition-colors active:scale-95"
               >
                 Next <ChevronRight size={15} />
               </button>
@@ -729,7 +728,7 @@ function SortBtn({
     <button
       onClick={() => onSort(field)}
       className={cn(
-        'flex items-center gap-1.5 font-black text-[10px] uppercase tracking-[0.2em] transition-colors',
+        'flex items-center gap-1.5 font-bold text-[12px] transition-colors',
         active ? 'text-white' : 'text-white/70 hover:text-white',
       )}
     >

@@ -53,8 +53,8 @@ export default function RecentOrdersTable({ initialOrders }: { initialOrders: Re
   return (
     <section className="bg-surface-card rounded-2xl border-2 border-table-border overflow-hidden">
       <div className="flex items-center justify-between px-6 py-5 border-b-2 border-table-border bg-surface-container-low">
-        <h4 className="font-black text-lg text-primary uppercase tracking-wider">Recent Orders</h4>
-        <Link href="/admin/orders" className="text-xs font-black text-primary uppercase tracking-widest hover:underline decoration-2 underline-offset-4">
+        <h4 className="font-bold text-lg text-primary">Recent Orders</h4>
+        <Link href="/admin/orders" className="text-xs font-bold text-primary hover:underline decoration-2 underline-offset-4">
           View all →
         </Link>
       </div>
@@ -64,7 +64,7 @@ export default function RecentOrdersTable({ initialOrders }: { initialOrders: Re
           <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-4">
             <span className="material-symbols-outlined text-3xl text-on-surface-variant/50">receipt_long</span>
           </div>
-          <p className="font-black text-sm text-on-surface-variant uppercase tracking-widest">No recent orders.</p>
+          <p className="font-bold text-sm text-on-surface-variant">No recent orders.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -73,7 +73,7 @@ export default function RecentOrdersTable({ initialOrders }: { initialOrders: Re
               <tr className="bg-primary">
                 {['Order #', 'Customer', 'Items', 'Total', 'Status', 'Date', ''].map((h, i) => (
                   <th key={h} className={cn(
-                    "py-3 px-5 text-[10px] font-black uppercase tracking-[0.2em] text-white/70 whitespace-nowrap",
+                    "py-3 px-5 text-[12px] font-bold text-white/70 whitespace-nowrap",
                     i !== 6 ? "border-r border-white/10" : ""
                   )}>
                     {h}
@@ -97,13 +97,13 @@ export default function RecentOrdersTable({ initialOrders }: { initialOrders: Re
                       {/* The invoice number as printed on the PDF, not a slice of
                           the internal UUID. Falls back to the old truncated id
                           only for legacy rows that predate order_number. */}
-                      <span className="font-black text-xs text-primary bg-primary/5 px-2 py-1 rounded-md border border-primary/10">
+                      <span className="font-bold text-xs text-primary bg-primary/5 px-2 py-1 rounded-md border border-primary/10">
                         {order.order_number ?? `#${order.id.slice(-8).toUpperCase()}`}
                       </span>
                     </td>
                     <td className="py-4 px-5 border-r border-table-border">
                       <p className="font-bold text-sm text-on-surface">{addr?.name ?? '—'}</p>
-                      <p className="font-black text-[10px] uppercase tracking-widest text-on-surface-variant mt-0.5">{addr?.phone ?? ''}</p>
+                      <p className="font-bold text-[12px] text-on-surface-variant mt-0.5">{addr?.phone ?? ''}</p>
                     </td>
                     <td className="py-4 px-5 border-r border-table-border">
                       <span className="font-bold text-sm text-on-surface">
@@ -111,7 +111,7 @@ export default function RecentOrdersTable({ initialOrders }: { initialOrders: Re
                       </span>
                     </td>
                     <td className="py-4 px-5 border-r border-table-border">
-                      <span className="font-black text-sm text-primary">
+                      <span className="font-bold text-sm text-primary">
                         ₹{order.total.toLocaleString('en-IN')}
                       </span>
                     </td>
@@ -122,7 +122,7 @@ export default function RecentOrdersTable({ initialOrders }: { initialOrders: Re
                           disabled={updating === order.id}
                           onChange={e => changeStatus(order.id, e.target.value as OrderStatus)}
                           className={cn(
-                            'font-black text-[10px] uppercase tracking-wider rounded-xl px-4 py-2 border-2 outline-none cursor-pointer appearance-none disabled:opacity-50 transition-all focus:ring-2 focus:ring-primary focus:ring-offset-1 w-full',
+                            'font-bold text-[12px] rounded-xl px-4 py-2 border-2 outline-none cursor-pointer appearance-none disabled:opacity-50 transition focus:ring-2 focus:ring-primary focus:ring-offset-1 w-full',
                             STATUS_CHIP[order.status],
                           )}
                         >
@@ -141,7 +141,7 @@ export default function RecentOrdersTable({ initialOrders }: { initialOrders: Re
                     <td className="py-4 px-5">
                       <Link
                         href={`/admin/orders/${order.id}`}
-                        className="flex items-center justify-center p-2 rounded-xl border-2 border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                        className="flex items-center justify-center p-2 rounded-xl border-2 border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95"
                       >
                         <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                       </Link>

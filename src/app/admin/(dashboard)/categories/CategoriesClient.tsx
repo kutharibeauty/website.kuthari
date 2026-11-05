@@ -92,16 +92,16 @@ export default function CategoriesClient({
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b-2 border-table-border pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight capitalize">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight capitalize">
             Categories.
           </h1>
-          <p className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mt-1">
+          <p className="text-sm font-bold text-on-surface-variant mt-1">
             {categories.length} total categories
           </p>
         </div>
         <Link
           href="/admin/categories/new"
-          className="flex items-center gap-1.5 px-5 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+          className="flex items-center gap-1.5 px-5 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
         >
           <Plus size={16} strokeWidth={2.5} />
           Add Category
@@ -115,10 +115,10 @@ export default function CategoriesClient({
             <div className="w-16 h-16 bg-surface border-2 border-table-border rounded-2xl flex items-center justify-center mb-4">
               <Folder size={24} className="text-on-surface-variant/40" />
             </div>
-            <p className="font-black text-sm uppercase tracking-widest text-on-surface-variant mb-6">No categories yet.</p>
+            <p className="font-bold text-sm text-on-surface-variant mb-6">No categories yet.</p>
             <Link
               href="/admin/categories/new"
-              className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+              className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
             >
               <Plus size={16} strokeWidth={2.5} />
               Create first category
@@ -129,13 +129,13 @@ export default function CategoriesClient({
             <table className="w-full text-left border-collapse whitespace-nowrap">
               <thead>
                 <tr className="bg-primary text-white">
-                  <th className="py-4 px-5 w-16 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10">Image</th>
-                  <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10">Name</th>
-                  <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10">Slug</th>
-                  <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10 text-center">Products</th>
-                  <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10 text-center">Order</th>
-                  <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 border-r border-white/10 text-center">Active</th>
-                  <th className="py-4 px-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/70 text-center">Actions</th>
+                  <th className="py-4 px-5 w-16 font-bold text-[12px] text-white/70 border-r border-white/10">Image</th>
+                  <th className="py-4 px-5 font-bold text-[12px] text-white/70 border-r border-white/10">Name</th>
+                  <th className="py-4 px-5 font-bold text-[12px] text-white/70 border-r border-white/10">Slug</th>
+                  <th className="py-4 px-5 font-bold text-[12px] text-white/70 border-r border-white/10 text-center">Products</th>
+                  <th className="py-4 px-5 font-bold text-[12px] text-white/70 border-r border-white/10 text-center">Order</th>
+                  <th className="py-4 px-5 font-bold text-[12px] text-white/70 border-r border-white/10 text-center">Active</th>
+                  <th className="py-4 px-5 font-bold text-[12px] text-white/70 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,19 +167,19 @@ export default function CategoriesClient({
                     <td className="py-4 px-5 border-r border-table-border min-w-[200px]">
                       <p className="font-bold text-sm text-primary">{cat.name}</p>
                       {cat.name_or && (
-                        <p className="font-black text-[10px] uppercase tracking-widest text-on-surface-variant mt-0.5">{cat.name_or}</p>
+                        <p className="font-bold text-[12px] text-on-surface-variant mt-0.5">{cat.name_or}</p>
                       )}
                     </td>
 
                     {/* Slug */}
-                    <td className="py-4 px-5 border-r border-table-border font-black text-[10px] uppercase tracking-widest text-on-surface-variant">
+                    <td className="py-4 px-5 border-r border-table-border font-bold text-[12px] text-on-surface-variant">
                       {cat.slug}
                     </td>
 
                     {/* Product count */}
                     <td className="py-4 px-5 border-r border-table-border text-center">
                       <span className={cn(
-                        'px-2.5 py-1 rounded-lg border-2 font-black text-[10px] uppercase tracking-widest',
+                        'px-2.5 py-1 rounded-lg border-2 font-bold text-[12px]',
                         (productCounts[cat.id] ?? 0) > 0
                           ? 'bg-primary/5 text-primary border-primary/20'
                           : 'bg-surface text-on-surface-variant border-table-border',
@@ -196,7 +196,7 @@ export default function CategoriesClient({
                           value={orderDraft}
                           autoFocus
                           min={0}
-                          className="w-16 px-3 py-1.5 border-2 border-primary rounded-lg font-black text-sm text-center text-primary focus:outline-none"
+                          className="w-16 px-3 py-1.5 border-2 border-primary rounded-lg font-bold text-sm text-center text-primary focus:outline-none"
                           onChange={e => setOrderDraft(e.target.value)}
                           onKeyDown={e => {
                             if (e.key === 'Enter') saveOrder(cat.id)
@@ -208,7 +208,7 @@ export default function CategoriesClient({
                         <button
                           onClick={() => { setEditOrderId(cat.id); setOrderDraft(cat.display_order.toString()) }}
                           title="Click to edit order"
-                          className="font-black text-sm text-primary px-3 py-1.5 rounded-lg border-2 border-transparent hover:border-table-border transition-colors active:scale-95"
+                          className="font-bold text-sm text-primary px-3 py-1.5 rounded-lg border-2 border-transparent hover:border-table-border transition-colors active:scale-95"
                         >
                           {saving[cat.id] ? '…' : cat.display_order}
                         </button>
@@ -241,7 +241,7 @@ export default function CategoriesClient({
                         <Link
                           href={`/admin/categories/${cat.id}`}
                           title="Edit"
-                          className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                          className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95"
                         >
                           <Edit3 size={16} strokeWidth={2.5} />
                         </Link>
@@ -249,7 +249,7 @@ export default function CategoriesClient({
                           onClick={() => deleteCategory(cat.id, cat.name)}
                           disabled={deleting === cat.id}
                           title="Delete"
-                          className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition-all disabled:opacity-40 active:scale-95"
+                          className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition disabled:opacity-40 active:scale-95"
                         >
                           {deleting === cat.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} strokeWidth={2.5} />}
                         </button>

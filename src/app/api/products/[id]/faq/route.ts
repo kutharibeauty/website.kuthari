@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { buildFaqRow } from '@/lib/faq'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
+import { withStorefrontRefresh } from '@/lib/revalidate'
+import { requirePermission } from '@/lib/auth/guard'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -21,7 +23,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   return NextResponse.json(data ?? [])
 }
 
-export async function POST(req: NextRequest, { params }: Params) {
+async function POST_handler(req: NextRequest, { params }: Params) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const meta = sessionClaims?.publicMetadata as AuthMetadata | undefined
@@ -55,3 +58,5 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data, { status: 201 })
 }
+
+export const POST = withStorefrontRefresh(POST_handler)

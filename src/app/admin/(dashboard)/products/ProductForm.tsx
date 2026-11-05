@@ -410,16 +410,16 @@ export default function ProductForm({
             type="button"
             onClick={goBack}
             aria-label="Back to products"
-            className="group/back p-2.5 rounded-xl border-2 border-table-border bg-surface-card hover:bg-surface-container-low hover:border-primary/40 transition-all duration-200 text-primary active:scale-95"
+            className="group/back p-2.5 rounded-xl border-2 border-table-border bg-surface-card hover:bg-surface-container-low hover:border-primary/40 transition duration-200 text-primary active:scale-95"
           >
             <span className="material-symbols-outlined text-[20px] inline-block transition-transform duration-200 group-hover/back:-translate-x-0.5">arrow_back</span>
           </button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-primary tracking-tight capitalize">
+            <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight capitalize">
               {isEdit ? form.name || 'Edit Product' : 'New Product.'}
             </h1>
             {isEdit && (
-              <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">{product.sku ?? 'No SKU'}</p>
+              <p className="font-bold text-[12px] text-on-surface-variant mt-1">{product.sku ?? 'No SKU'}</p>
             )}
           </div>
         </div>
@@ -429,14 +429,14 @@ export default function ProductForm({
           <button
             type="button"
             onClick={goBack}
-            className="flex-1 md:flex-none px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-xs uppercase tracking-widest hover:border-primary/40 hover:text-primary hover:-translate-y-0.5 transition-all duration-200 active:scale-95"
+            className="flex-1 md:flex-none px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-bold text-xs hover:border-primary/40 hover:text-primary hover:-translate-y-0.5 transition duration-200 active:scale-95"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="gold-sheen relative overflow-hidden flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:hover:translate-y-0 active:scale-95 shadow-sm"
+            className="gold-sheen relative overflow-hidden flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md transition duration-200 disabled:opacity-60 disabled:hover:translate-y-0 active:scale-95 shadow-sm"
           >
             {saving && <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>}
             {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Product'}
@@ -463,8 +463,8 @@ export default function ProductForm({
                 onClick={() => setTab(i)}
                 aria-current={tab === i ? 'page' : undefined}
                 className={cn(
-                  'group relative flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest whitespace-nowrap',
-                  'transition-all duration-200 ease-out active:scale-95',
+                  'group relative flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-bold text-[12px] whitespace-nowrap',
+                  'transition duration-200 ease-out active:scale-95',
                   tab === i
                     ? 'border-primary text-white shadow-sm'
                     : 'bg-surface-card border-table-border text-on-surface-variant hover:border-primary/40 hover:text-primary hover:-translate-y-0.5',
@@ -607,7 +607,7 @@ export default function ProductForm({
                 packaged differently. */}
             <div className="p-5 bg-surface-card rounded-2xl border-2 border-table-border space-y-3">
               <div>
-                <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest">Packaging</p>
+                <p className="font-bold text-[12px] text-on-surface-variant">Packaging</p>
                 <p className="font-medium text-[11px] text-on-surface-variant/70 mt-1">
                   How is this product packed? The customer buys the whole box, or one of the smaller units inside it.
                 </p>
@@ -623,19 +623,19 @@ export default function ProductForm({
                     onClick={() => setPackagingModel(o.id)}
                     aria-pressed={packagingModel === o.id}
                     className={cn(
-                      'text-left rounded-xl border-2 p-3 transition-all active:scale-[0.98]',
+                      'text-left rounded-xl border-2 p-3 transition active:scale-[0.98]',
                       packagingModel === o.id
                         ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27, 44, 61,0.06)]'
                         : 'border-table-border hover:border-primary/40',
                     )}
                   >
-                    <span className="block font-black text-[12px] text-primary">{o.title}</span>
-                    <span className="block font-medium text-[10px] text-on-surface-variant/70 mt-1 leading-snug">{o.sub}</span>
+                    <span className="block font-bold text-[12px] text-primary">{o.title}</span>
+                    <span className="block font-medium text-[12px] text-on-surface-variant/70 mt-1 leading-snug">{o.sub}</span>
                   </button>
                 ))}
               </div>
               {isSpiceCategory && !isHangerModel && (
-                <p className="text-[10px] font-bold text-on-surface-variant/60">
+                <p className="text-[12px] font-bold text-on-surface-variant/60">
                   Tip: ₹5 / ₹10 sachet strips usually use Box → Hanger → Piece.
                 </p>
               )}
@@ -644,7 +644,7 @@ export default function ProductForm({
             {isHangerModel && (
               <div className="p-5 bg-primary/5 rounded-2xl border-2 border-primary/20 space-y-4">
                 <div>
-                  <p className="font-black text-[10px] text-primary uppercase tracking-widest">Spices — Box → Hanger → Piece</p>
+                  <p className="font-bold text-[12px] text-primary">Spices — Box → Hanger → Piece</p>
                   <p className="font-medium text-[11px] text-on-surface-variant mt-1">
                     The customer buys a whole <b>box</b> or individual <b>hangers</b> (never single pieces). Set how many pieces make a hanger and how many hangers make a box. The <b>Selling Price below is the price per hanger</b> — the box price is calculated automatically.
                   </p>
@@ -680,7 +680,7 @@ export default function ProductForm({
 
             {!isHangerModel && (
             <div className="p-5 bg-surface-card rounded-2xl border-2 border-table-border space-y-6">
-              <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest">
+              <p className="font-bold text-[12px] text-on-surface-variant">
                 Bulk Pack Details
               </p>
 
@@ -829,7 +829,7 @@ export default function ProductForm({
             {/* ── Bulk pricing ── */}
             <div className="card-lift animate-rise p-5 bg-surface-card rounded-2xl border-2 border-table-border space-y-4 hover:border-primary/25">
               <div>
-                <p className="font-black text-[10px] text-primary uppercase tracking-widest">Bulk Price</p>
+                <p className="font-bold text-[12px] text-primary">Bulk Price</p>
                 <p className="font-medium text-[11px] text-on-surface-variant mt-1">
                   The bulk rate. Always required — it is the base price for this product.
                 </p>
@@ -867,7 +867,7 @@ export default function ProductForm({
             {/* ── Retail pricing ── */}
             <div className="card-lift animate-rise stagger-1 p-5 bg-primary/5 rounded-2xl border-2 border-primary/20 space-y-4">
               <div>
-                <p className="font-black text-[10px] text-primary uppercase tracking-widest">Retail Price</p>
+                <p className="font-bold text-[12px] text-primary">Retail Price</p>
                 <p className="font-medium text-[11px] text-on-surface-variant mt-1">
                   The single-unit rate for walk-up customers. Set this and the customer
                   sees <b>both</b> Single piece and Bulk on the product page and
@@ -948,13 +948,13 @@ export default function ProductForm({
             {/* Price preview */}
             {form.price && (
               <div className="p-5 bg-surface-card rounded-2xl border-2 border-table-border">
-                <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest mb-3">Price Preview</p>
+                <p className="font-bold text-[12px] text-on-surface-variant mb-3">Price Preview</p>
                 <div className="flex items-baseline gap-3">
-                  <span className="font-black text-2xl text-primary tracking-tight">₹{parseFloat(form.price).toFixed(2)}</span>
+                  <span className="font-bold text-2xl text-primary tracking-tight">₹{parseFloat(form.price).toFixed(2)}</span>
                   {form.mrp && parseFloat(form.mrp) > parseFloat(form.price) && (
                     <>
                       <span className="font-bold text-sm text-on-surface-variant line-through">₹{parseFloat(form.mrp).toFixed(2)}</span>
-                      <span className="px-2.5 py-1 bg-primary text-white rounded-lg font-black text-[10px] uppercase tracking-widest">
+                      <span className="px-2.5 py-1 bg-primary text-white rounded-lg font-bold text-[12px]">
                         {Math.round((1 - parseFloat(form.price) / parseFloat(form.mrp)) * 100)}% off
                       </span>
                     </>
@@ -983,7 +983,7 @@ export default function ProductForm({
             <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-[18px]">auto_awesome</span>
-                <h3 className="font-black text-sm text-primary uppercase tracking-widest">Generate with AI</h3>
+                <h3 className="font-bold text-sm text-primary">Generate with AI</h3>
               </div>
               <p className="font-medium text-xs text-on-surface-variant">
                 Writes the product description from the details above. Add an optional prompt to steer the tone or points to highlight.
@@ -993,14 +993,14 @@ export default function ProductForm({
                 onChange={e => setAiPrompt(e.target.value)}
                 rows={2}
                 placeholder="Optional prompt — e.g. 'emphasise cold-pressed, great for restaurants, mention 15L bulk pack'"
-                className="w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-medium text-sm text-primary placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 resize-none"
+                className="w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-medium text-sm text-primary placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200 resize-none"
               />
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={generateDescription}
                   disabled={generatingDesc}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 disabled:opacity-60 transition-all active:scale-95 shadow-sm"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 disabled:opacity-60 transition active:scale-95 shadow-sm"
                 >
                   <span className={`material-symbols-outlined text-[16px] ${generatingDesc ? 'animate-spin' : ''}`}>
                     {generatingDesc ? 'progress_activity' : 'auto_awesome'}
@@ -1025,15 +1025,15 @@ export default function ProductForm({
           <div className="space-y-6">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-black text-xl text-primary tracking-tight">SEO Settings</h3>
-                <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">
+                <h3 className="font-bold text-xl text-primary tracking-tight">SEO Settings</h3>
+                <p className="font-bold text-[12px] text-on-surface-variant mt-1">
                   Controls how this product appears in search results.
                 </p>
               </div>
               <button
                 onClick={() => generateSeo()}
                 disabled={generatingSeo}
-                className="flex items-center gap-2 px-5 py-2.5 bg-surface-card border-2 border-table-border text-primary rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-primary/40 transition-all disabled:opacity-60 active:scale-95"
+                className="flex items-center gap-2 px-5 py-2.5 bg-surface-card border-2 border-table-border text-primary rounded-xl font-bold text-[12px] hover:border-primary/40 transition disabled:opacity-60 active:scale-95"
               >
                 {generatingSeo
                   ? <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
@@ -1071,7 +1071,7 @@ export default function ProductForm({
                   {form.tags.map(tag => (
                     <span
                       key={tag}
-                      className="flex items-center gap-1.5 px-3 py-1 bg-surface-card border-2 border-table-border text-primary rounded-lg font-black text-[10px] uppercase tracking-widest"
+                      className="flex items-center gap-1.5 px-3 py-1 bg-surface-card border-2 border-table-border text-primary rounded-lg font-bold text-[12px]"
                     >
                       {tag}
                       <button
@@ -1106,7 +1106,7 @@ export default function ProductForm({
 
             {/* SEO Preview */}
             <div>
-              <p className="font-black text-[10px] text-on-surface-variant mb-3 uppercase tracking-widest">Google Preview</p>
+              <p className="font-bold text-[12px] text-on-surface-variant mb-3">Google Preview</p>
               <div className="p-5 border-2 border-table-border rounded-xl bg-surface space-y-1 max-w-xl">
                 <p className="text-[#1a0dab] text-lg font-bold truncate">
                   {form.meta_title || form.name || 'Product Title'}
@@ -1126,14 +1126,14 @@ export default function ProductForm({
         {tab === 5 && (
           <div className="space-y-6">
             <div>
-              <h3 className="font-black text-xl text-primary tracking-tight">Google Merchant Center</h3>
-              <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">
+              <h3 className="font-bold text-xl text-primary tracking-tight">Google Merchant Center</h3>
+              <p className="font-bold text-[12px] text-on-surface-variant mt-1">
                 Data pulled from Basic Info and Pricing tabs and fed into Google Shopping.
               </p>
             </div>
 
             <div className="p-6 bg-surface-card rounded-2xl border-2 border-table-border space-y-4">
-              <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest">Shopping Preview</p>
+              <p className="font-bold text-[12px] text-on-surface-variant">Shopping Preview</p>
               <div className="flex gap-4">
                 {images[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -1145,10 +1145,10 @@ export default function ProductForm({
                 )}
                 <div>
                   <p className="font-bold text-lg text-primary">{form.name || 'Product Name'}</p>
-                  <p className="font-black text-2xl text-primary tracking-tight mt-1">
+                  <p className="font-bold text-2xl text-primary tracking-tight mt-1">
                     {form.price ? `₹${parseFloat(form.price).toFixed(2)}` : '—'}
                   </p>
-                  <p className="font-black text-[10px] uppercase tracking-widest text-on-surface-variant mt-2">{form.brand || 'Kuthari Beauty Store'}</p>
+                  <p className="font-bold text-[12px] text-on-surface-variant mt-2">{form.brand || 'Kuthari Beauty Store'}</p>
                 </div>
               </div>
             </div>
@@ -1158,7 +1158,7 @@ export default function ProductForm({
                 href={`/api/merchant-feed?product_id=${product.id}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-card border-2 border-table-border text-primary rounded-xl font-black text-[10px] uppercase tracking-widest hover:border-primary/40 transition-all active:scale-95"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-card border-2 border-table-border text-primary rounded-xl font-bold text-[12px] hover:border-primary/40 transition active:scale-95"
               >
                 <span className="material-symbols-outlined text-[16px]">open_in_new</span>
                 View Merchant Feed
@@ -1171,15 +1171,15 @@ export default function ProductForm({
         {tab === 6 && (
           <div className="space-y-6">
             <div>
-              <h3 className="font-black text-xl text-primary tracking-tight">FAQ</h3>
-              <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">
+              <h3 className="font-bold text-xl text-primary tracking-tight">FAQ</h3>
+              <p className="font-bold text-[12px] text-on-surface-variant mt-1">
                 Manage frequently asked questions for this product.
               </p>
             </div>
             {isEdit ? (
               <Link
                 href={`/admin/products/${product.id}/faq`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-opacity active:scale-95 shadow-sm"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-opacity active:scale-95 shadow-sm"
               >
                 <span className="material-symbols-outlined text-[18px]">quiz</span>
                 Manage FAQs
@@ -1196,15 +1196,15 @@ export default function ProductForm({
         {tab === 7 && (
           <div className="space-y-6">
             <div>
-              <h3 className="font-black text-xl text-primary tracking-tight">Reviews</h3>
-              <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">
+              <h3 className="font-bold text-xl text-primary tracking-tight">Reviews</h3>
+              <p className="font-bold text-[12px] text-on-surface-variant mt-1">
                 Approve and manage customer reviews for this product.
               </p>
             </div>
             {isEdit ? (
               <Link
                 href={`/admin/products/${product.id}/reviews`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-opacity active:scale-95 shadow-sm"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-opacity active:scale-95 shadow-sm"
               >
                 <span className="material-symbols-outlined text-[18px]">reviews</span>
                 Manage Reviews
@@ -1230,10 +1230,10 @@ function Field({
 }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
-      <label className="font-black text-xs text-primary uppercase tracking-widest flex items-center">
+      <label className="font-bold text-xs text-primary flex items-center">
         {label}
         {required && <span className="text-error ml-1">*</span>}
-        {hint && <span className="font-bold text-[10px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
+        {hint && <span className="font-bold text-[12px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
       </label>
       {children}
     </div>
@@ -1248,8 +1248,8 @@ function ToggleField({
   return (
     <div className="flex items-center justify-between gap-6 p-5 bg-surface-card rounded-2xl border-2 border-table-border min-w-[240px]">
       <div>
-        <p className="font-black text-xs text-primary uppercase tracking-widest">{label}</p>
-        <p className="font-bold text-[10px] text-on-surface-variant mt-1">{sub}</p>
+        <p className="font-bold text-xs text-primary">{label}</p>
+        <p className="font-bold text-[12px] text-on-surface-variant mt-1">{sub}</p>
       </div>
       <button
         type="button"
@@ -1387,7 +1387,7 @@ function ImageUploader({
 
       {images.length < 8 && (
         <label className={cn(
-          'flex items-center gap-4 px-6 py-8 border-2 border-dashed border-table-border bg-surface-card rounded-2xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all active:scale-[0.99]',
+          'flex items-center gap-4 px-6 py-8 border-2 border-dashed border-table-border bg-surface-card rounded-2xl cursor-pointer hover:border-primary hover:bg-primary/5 transition active:scale-[0.99]',
           uploading && 'opacity-50 pointer-events-none',
         )}>
           <div className="p-3 bg-surface border-2 border-table-border rounded-xl">
@@ -1397,7 +1397,7 @@ function ImageUploader({
             <p className="font-bold text-sm text-primary">
               {uploading ? 'Uploading…' : 'Click to upload images'}
             </p>
-            <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">
+            <p className="font-bold text-[12px] text-on-surface-variant mt-1">
               {images.length}/8 images · PNG, JPG, WebP
             </p>
           </div>
@@ -1445,7 +1445,7 @@ function SortableImage({
         {...listeners}
       />
       {isPrimary && (
-        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-primary text-on-primary font-label-sm text-label-sm rounded text-[10px]">
+        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-primary text-on-primary font-label-sm text-label-sm rounded text-[12px]">
           Primary
         </span>
       )}
@@ -1466,4 +1466,4 @@ function SortableImage({
 // and dimming the colour, an example like "Pouch" or "10" renders in the same
 // bold dark text as a real entry, and the admin can't tell an empty required
 // field from a completed one.
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200'

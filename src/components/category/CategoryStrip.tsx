@@ -54,7 +54,7 @@ export default function CategoryStrip({
             >
               <div
                 className={cn(
-                  'w-[88px] h-[88px] sm:w-[104px] sm:h-[104px] rounded-full flex items-center justify-center overflow-hidden border-2 transition-all duration-200 active:scale-95',
+                  'w-[88px] h-[88px] sm:w-[104px] sm:h-[104px] rounded-full flex items-center justify-center overflow-hidden border-2 transition duration-200 active:scale-95',
                   active
                     // Arbitrary values cannot contain spaces — `rgba(27, 44, 61,0.07)`
                     // silently produced no class at all, so the ring never rendered.

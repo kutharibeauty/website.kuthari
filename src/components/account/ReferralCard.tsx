@@ -40,11 +40,10 @@ export default function ReferralCard({ code, referralsCount, usesLeft, benefit }
 
   return (
     <section className="relative overflow-hidden rounded-2xl border-2 border-primary bg-primary p-5 text-white">
-      <div className="absolute inset-0 opacity-[0.08] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-1">
           <Gift size={16} className="text-white/80" />
-          <h3 className="font-black text-sm uppercase tracking-widest">Refer &amp; Earn</h3>
+          <h3 className="font-black text-sm">Refer &amp; Earn</h3>
         </div>
         <p className="text-xs font-medium text-white/60 mb-4">{benefit} · Share your code with friends.</p>
 

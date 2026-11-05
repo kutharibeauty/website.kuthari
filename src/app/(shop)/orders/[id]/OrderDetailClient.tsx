@@ -84,7 +84,7 @@ function OrderItemRow({ item }: { item: OrderItem }) {
           <h4 className="font-black text-primary text-sm leading-snug truncate">{item.name}</h4>
           <p className="font-black text-primary text-base whitespace-nowrap flex-shrink-0">{fmt(item.price)}</p>
         </div>
-        <span className="inline-block border border-table-border rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-on-surface-variant/50 mb-2">
+        <span className="inline-block border border-table-border rounded-full px-2 py-0.5 text-[12px] font-black text-on-surface-variant/50 mb-2">
           {item.unit}
         </span>
         <div className="flex items-center justify-between">
@@ -211,14 +211,14 @@ function SuccessOverlay({
             transition={{ delay: 0.4 }}
           >
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-outline">
+              <span className="text-xs font-bold text-outline">
                 Order ID
               </span>
               <span className="text-base font-bold text-primary">#{orderId}</span>
             </div>
             <hr className="border-table-border" />
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-outline block mb-2">
+              <span className="text-xs font-bold text-outline block mb-2">
                 Estimated Delivery
               </span>
               <div className="flex items-center gap-3">
@@ -238,7 +238,7 @@ function SuccessOverlay({
           <motion.a
             href={`/api/orders/${order.id}/invoice?download=1`}
             download
-            className="w-full h-12 mb-6 rounded-xl border-2 border-primary/25 bg-primary/[0.04] text-primary text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary/10 hover:border-primary/40 active:scale-95 transition-all"
+            className="w-full h-12 mb-6 rounded-xl border-2 border-primary/25 bg-primary/[0.04] text-primary text-sm font-black flex items-center justify-center gap-2 hover:bg-primary/10 hover:border-primary/40 active:scale-95 transition"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45 }}
@@ -255,10 +255,10 @@ function SuccessOverlay({
               transition={{ delay: 0.55, type: 'spring', damping: 14 }}
             >
               <p className="text-sm font-black text-primary flex items-center gap-1.5">
-                🎉 Here&apos;s your referral code!
+                Here&apos;s your referral code
               </p>
               {referralBenefit && (
-                <p className="text-xs font-medium text-on-surface-variant/70 mt-0.5">{referralBenefit} — share it with friends.</p>
+                <p className="text-xs font-medium text-on-surface-variant/70 mt-0.5">{referralBenefit}. Share it with friends.</p>
               )}
               <div className="flex items-stretch gap-2 mt-3">
                 <div className="flex-1 min-w-0 rounded-lg bg-surface border-2 border-primary/20 px-3 py-2.5 flex items-center">
@@ -457,14 +457,14 @@ export default function OrderDetailClient({
               <button
                 onClick={() => setShowCancelConfirm(false)}
                 disabled={cancelling}
-                className="flex-1 py-3 rounded-xl border-2 border-table-border font-black text-xs uppercase tracking-widest text-on-surface-variant hover:border-primary/40 hover:text-primary transition-colors disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl border-2 border-table-border font-black text-xs text-on-surface-variant hover:border-primary/40 hover:text-primary transition-colors disabled:opacity-50"
               >
                 Keep Order
               </button>
               <button
                 onClick={handleCancel}
                 disabled={cancelling}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-error text-white font-black text-xs uppercase tracking-widest hover:bg-error/90 transition-colors active:scale-95 disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-error text-white font-black text-xs hover:bg-error/90 transition-colors active:scale-95 disabled:opacity-50"
               >
                 {cancelling && <Loader2 size={15} className="animate-spin" />}
                 {cancelling ? 'Cancelling…' : 'Cancel Order'}
@@ -477,16 +477,15 @@ export default function OrderDetailClient({
       <div className="min-h-screen">
         {/* ── Hero strip ── */}
         <div className="relative overflow-hidden bg-primary border-b-2 border-primary mb-6">
-          <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none" />
           <div className="relative z-10 px-4 max-w-4xl mx-auto py-7 md:py-9 flex items-end justify-between gap-4">
             <div>
-              <button onClick={() => router.push('/orders')} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white/70 transition-colors mb-2">
+              <button onClick={() => router.push('/orders')} className="flex items-center gap-1.5 text-[12px] font-black text-white/40 hover:text-white/70 transition-colors mb-2">
                 <ArrowLeft size={12} strokeWidth={2.5} /> Orders
               </button>
               <h1 className="text-2xl font-black text-white tracking-tight">Order Details</h1>
-              <p className="text-xs text-white/45 font-black mt-0.5 uppercase tracking-wider">#{orderId}</p>
+              <p className="text-xs text-white/45 font-black mt-0.5">#{orderId}</p>
             </div>
-            <span className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border-2 flex-shrink-0 ${
+            <span className={`flex items-center gap-1.5 text-[13px] font-bold px-3 py-1.5 rounded-full border-2 flex-shrink-0 ${
               order.status === 'delivered' ? 'border-success/50 text-success bg-success/10'
               : order.status === 'cancelled' || order.status === 'returned' ? 'border-error/50 text-error bg-error/10'
               : 'border-white/30 text-white bg-white/10'
@@ -503,11 +502,11 @@ export default function OrderDetailClient({
           <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5 mb-4">
             <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 mb-5">
               <div>
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-on-surface-variant/40 mb-1">Order Date</p>
+                <p className="text-[11px] font-black text-on-surface-variant/40 mb-1">Order Date</p>
                 <p className="font-black text-primary text-sm">{fmtDateTime(order.created_at)}</p>
               </div>
               <div className="md:text-right">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-on-surface-variant/40 mb-1">Estimated Delivery</p>
+                <p className="text-[11px] font-black text-on-surface-variant/40 mb-1">Estimated Delivery</p>
                 <p className="font-black text-primary text-sm flex items-center gap-1 md:justify-end">
                   <CalendarCheck size={13} strokeWidth={2.5} /> {estimatedDelivery(order)}
                 </p>
@@ -519,7 +518,7 @@ export default function OrderDetailClient({
           {/* Admin note */}
           {order.custom_message && (
             <div className="border-2 border-primary/30 bg-primary/4 rounded-2xl p-4 mb-4 flex items-start gap-3">
-              <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary/60 mt-0.5 flex-shrink-0">Note</span>
+              <span className="text-[11px] font-black text-primary/60 mt-0.5 flex-shrink-0">Note</span>
               <p className="text-sm font-medium text-on-surface/80">{order.custom_message}</p>
             </div>
           )}
@@ -528,7 +527,7 @@ export default function OrderDetailClient({
           <section className="mb-4">
             <div className="flex items-center gap-3 mb-3">
               <div className="h-px flex-1 bg-table-border" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/40">
+              <span className="text-[12px] font-black text-on-surface-variant/40">
                 {order.items.length} {order.items.length === 1 ? 'Item' : 'Items'} Ordered
               </span>
               <div className="h-px flex-1 bg-table-border" />
@@ -548,7 +547,7 @@ export default function OrderDetailClient({
                 <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                   <MapPin size={14} className="text-white" />
                 </div>
-                <h4 className="font-black text-sm uppercase tracking-wider text-primary">Delivery Address</h4>
+                <h4 className="font-black text-sm text-primary">Delivery Address</h4>
               </div>
               <div className="text-sm space-y-1">
                 <p className="font-black text-primary">{order.address.name}</p>
@@ -564,7 +563,7 @@ export default function OrderDetailClient({
                 <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                   <CreditCard size={14} className="text-white" />
                 </div>
-                <h4 className="font-black text-sm uppercase tracking-wider text-primary">Payment</h4>
+                <h4 className="font-black text-sm text-primary">Payment</h4>
               </div>
               <div className="flex flex-col justify-center items-center py-4 bg-primary/4 rounded-xl border-2 border-primary/20">
                 <p className="text-2xl font-black text-primary mb-1">ONLINE</p>
@@ -574,19 +573,18 @@ export default function OrderDetailClient({
 
             {/* Order summary */}
             <div className="relative bg-primary rounded-2xl overflow-hidden p-5 md:col-span-2 lg:col-span-1">
-              <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none" />
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">
                     <Receipt size={14} className="text-white" />
                   </div>
-                  <h4 className="font-black text-sm uppercase tracking-wider text-white">Summary</h4>
+                  <h4 className="font-black text-sm text-white">Summary</h4>
                 </div>
                 <div className="flex flex-col gap-2 text-sm">
                   <div className="flex justify-between"><span className="text-white/50 font-medium">Subtotal ({totalItems})</span><span className="text-white font-black">{fmt(order.subtotal)}</span></div>
                   {discount > 0 && <div className="flex justify-between"><span className="text-white/50 font-medium">Discount</span><span className="text-white font-black">-{fmt(discount)}</span></div>}
                   <div className="flex justify-between pb-2 border-b border-white/15"><span className="text-white/50 font-medium">Delivery</span><span className="text-white font-black">{order.delivery_fee === 0 ? 'FREE' : fmt(order.delivery_fee)}</span></div>
-                  <div className="flex justify-between items-end pt-1"><span className="text-[10px] font-black uppercase tracking-widest text-white/40">Grand Total</span><span className="font-black text-2xl text-white">{fmt(order.total)}</span></div>
+                  <div className="flex justify-between items-end pt-1"><span className="text-[12px] font-black text-white/40">Grand Total</span><span className="font-black text-2xl text-white">{fmt(order.total)}</span></div>
                 </div>
               </div>
             </div>
@@ -597,7 +595,7 @@ export default function OrderDetailClient({
             <div className="flex items-start gap-3 p-4 rounded-2xl border-2 border-error/30 bg-error/5 mb-4">
               <AlertTriangle size={16} className="text-error flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-black text-error uppercase tracking-wide mb-1">{skippedItems.length} item{skippedItems.length > 1 ? 's' : ''} out of stock</p>
+                <p className="text-sm font-black text-error mb-1">{skippedItems.length} item{skippedItems.length > 1 ? 's' : ''} out of stock</p>
                 <p className="text-xs font-medium text-on-surface-variant/70">{skippedItems.join(', ')}</p>
               </div>
             </div>
@@ -608,18 +606,18 @@ export default function OrderDetailClient({
             {canCancel && (
               <button
                 onClick={() => { setCancelError(null); setShowCancelConfirm(true) }}
-                className="px-5 py-3 rounded-xl text-sm font-black uppercase tracking-wider text-error border-2 border-error/30 hover:border-error hover:bg-error/5 active:scale-95 transition-all flex items-center justify-center gap-2 print:hidden sm:mr-auto"
+                className="px-5 py-3 rounded-xl text-sm font-black text-error border-2 border-error/30 hover:border-error hover:bg-error/5 active:scale-95 transition flex items-center justify-center gap-2 print:hidden sm:mr-auto"
               >
                 <XCircle size={15} /> Cancel Order
               </button>
             )}
-            <button onClick={() => window.print()} className="px-5 py-3 rounded-xl text-sm font-black uppercase tracking-wider text-on-surface border-2 border-table-border hover:border-primary/40 hover:text-primary active:scale-95 transition-all flex items-center justify-center gap-2 print:hidden">
+            <button onClick={() => window.print()} className="px-5 py-3 rounded-xl text-sm font-black text-on-surface border-2 border-table-border hover:border-primary/40 hover:text-primary active:scale-95 transition flex items-center justify-center gap-2 print:hidden">
               <Printer size={15} /> Print
             </button>
-            <a href={`/api/orders/${order.id}/invoice?download=1`} download className="px-5 py-3 rounded-xl text-sm font-black uppercase tracking-wider text-on-surface border-2 border-table-border hover:border-primary/40 hover:text-primary active:scale-95 transition-all flex items-center justify-center gap-2 print:hidden">
+            <a href={`/api/orders/${order.id}/invoice?download=1`} download className="px-5 py-3 rounded-xl text-sm font-black text-on-surface border-2 border-table-border hover:border-primary/40 hover:text-primary active:scale-95 transition flex items-center justify-center gap-2 print:hidden">
               <Download size={15} /> Download PDF
             </a>
-            <button onClick={handleReorder} disabled={reordering} className="px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest text-white bg-primary border-2 border-primary hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60">
+            <button onClick={handleReorder} disabled={reordering} className="px-6 py-3 rounded-xl text-sm font-black text-white bg-primary border-2 border-primary hover:bg-primary/90 active:scale-95 transition flex items-center justify-center gap-2 disabled:opacity-60">
               {reordering ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />} Reorder
             </button>
           </div>

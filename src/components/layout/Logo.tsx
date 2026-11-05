@@ -40,3 +40,44 @@ export default function Logo({ className = 'h-10 w-auto', priority, sizes = '64p
     />
   )
 }
+
+/**
+ * The crest lockup used across the site: the mirror mark beside KUTHARI set in
+ * the serif, with "Beauty store" under it, echoing the supplied logo artwork.
+ * `tone="light"` is for navy grounds.
+ */
+export function BrandLockup({
+  size = 'md',
+  tone = 'dark',
+  priority,
+}: {
+  size?: 'sm' | 'md' | 'lg'
+  tone?: 'dark' | 'light'
+  priority?: boolean
+}) {
+  const mark = { sm: 'h-10', md: 'h-12', lg: 'h-20' }[size]
+  const word = { sm: 'text-[22px]', md: 'text-[26px]', lg: 'text-[44px]' }[size]
+  const sub = { sm: 'text-[10px]', md: 'text-[10px]', lg: 'text-[13px]' }[size]
+  return (
+    <span className="flex items-center gap-2.5">
+      <Logo className={`${mark} w-auto`} priority={priority} sizes={size === 'lg' ? '64px' : '40px'} />
+      <span className="flex flex-col leading-none">
+        <span
+          className={`font-serif not-italic font-semibold uppercase tracking-[0.06em] ${word} ${
+            tone === 'light' ? 'text-paper-raised' : 'text-ink'
+          }`}
+          style={{ fontVariationSettings: "'opsz' 144, 'SOFT' 0" }}
+        >
+          Kuthari
+        </span>
+        <span
+          className={`mt-1 font-sans font-semibold uppercase tracking-[0.28em] ${sub} ${
+            tone === 'light' ? 'text-periwinkle' : 'text-indigo'
+          }`}
+        >
+          Beauty store
+        </span>
+      </span>
+    </span>
+  )
+}

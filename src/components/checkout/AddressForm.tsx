@@ -19,9 +19,9 @@ interface Props {
 }
 
 const inputCls =
-  'w-full px-4 py-3 rounded-xl border-2 border-table-border bg-surface-card text-sm font-medium text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)] transition-all duration-200'
+  'w-full px-4 py-3 rounded-xl border-2 border-table-border bg-surface-card text-sm font-medium text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:shadow-[0_0_0_4px_rgba(27, 44, 61,0.06)] transition duration-200'
 const errorCls = 'text-[11px] font-bold text-error mt-1'
-const labelCls = 'text-[11px] font-black text-on-surface-variant/70 uppercase tracking-[0.1em] block mb-1.5'
+const labelCls = 'text-[11px] font-black text-on-surface-variant/70 block mb-1.5'
 
 export default function AddressForm({ profileId, onSaved, onClose, address }: Props) {
   const isEditing = !!address
@@ -123,7 +123,7 @@ export default function AddressForm({ profileId, onSaved, onClose, address }: Pr
                   <input type="radio" {...register('label')} value={lbl} className="sr-only" />
                   <span
                     className={cn(
-                      'flex items-center justify-center px-2 py-2.5 rounded-xl text-[13px] font-bold border-2 transition-all duration-200 active:scale-95',
+                      'flex items-center justify-center px-2 py-2.5 rounded-xl text-[13px] font-bold border-2 transition duration-200 active:scale-95',
                       watch('label') === lbl
                         ? 'bg-primary text-on-primary border-primary shadow-sm shadow-primary/20'
                         : 'bg-surface-card text-on-surface-variant border-table-border hover:border-primary/40 hover:text-primary',
@@ -261,14 +261,14 @@ export default function AddressForm({ profileId, onSaved, onClose, address }: Pr
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3.5 rounded-xl border-2 border-table-border text-on-surface-variant font-black text-xs uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors active:scale-[0.98]"
+              className="px-6 py-3.5 rounded-xl border-2 border-table-border text-on-surface-variant font-black text-xs hover:border-primary/40 hover:text-primary transition-colors active:scale-[0.98]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="flex-1 py-3.5 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-60 disabled:hover:translate-y-0 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
+              className="flex-1 py-3.5 rounded-xl bg-primary text-white font-black text-xs shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-60 disabled:hover:translate-y-0 transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
             >
               {isSaving && <Loader2 size={14} className="animate-spin" />}
               {isSaving ? 'Saving…' : isEditing ? 'Save Changes' : 'Save Address'}

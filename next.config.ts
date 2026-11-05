@@ -36,6 +36,16 @@ const nextConfig: NextConfig = {
           // disables it site-wide, so the browser blocks getCurrentPosition and
           // never even prompts (surfaces as PERMISSION_DENIED / "Location is blocked").
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+          // A deliberately narrow CSP: it blocks being framed, plugins, <base>
+          // hijacking and forms posting off-site, without restricting the
+          // scripts, styles and images the store (and Razorpay) need.
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+          },
+          // Isolate our window from cross-origin openers, but keep popups
+          // (Razorpay checkout, payment pages) able to talk back.
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
         ],
       },
       {

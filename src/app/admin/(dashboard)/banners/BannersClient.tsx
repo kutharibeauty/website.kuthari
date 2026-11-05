@@ -21,7 +21,7 @@ type TrustBadge = { icon: string; text: string; text_or: string }
 type FooterLink  = { label: string; href: string }
 
 const TABS = ['Banners', 'Homepage', 'Footer', 'Announcements']
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_var(--color-haze)] transition duration-200'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -65,10 +65,10 @@ export default function BannersClient({
 
       {/* ── Header ── */}
       <div className="border-b-2 border-table-border pb-6">
-        <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight capitalize">
+        <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight capitalize">
           Banners &amp; CMS.
         </h1>
-        <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">
+        <p className="font-bold text-[12px] text-on-surface-variant mt-2">
           Manage homepage content and settings
         </p>
       </div>
@@ -80,8 +80,8 @@ export default function BannersClient({
             key={i}
             onClick={() => setTab(i)}
             className={cn(
-              'px-6 py-3 font-black text-xs uppercase tracking-widest rounded-xl',
-              'transition-all duration-200 ease-out active:scale-95',
+              'px-6 py-3 font-bold text-xs rounded-xl',
+              'transition duration-200 ease-out active:scale-95',
               tab === i
                 ? 'bg-primary text-white border-2 border-primary shadow-sm'
                 : 'bg-surface text-on-surface-variant border-2 border-transparent hover:border-table-border hover:bg-surface-card hover:-translate-y-0.5'
@@ -275,12 +275,12 @@ function BannerSection({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-black text-lg text-primary tracking-tight">{title}</h3>
-          <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">{hint}</p>
+          <h3 className="font-bold text-lg text-primary tracking-tight">{title}</h3>
+          <p className="font-bold text-[12px] text-on-surface-variant mt-1">{hint}</p>
         </div>
         <button
           onClick={onAdd}
-          className="flex items-center gap-1.5 px-5 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+          className="flex items-center gap-1.5 px-5 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
         >
           <Plus size={16} strokeWidth={2.5} />
           Add
@@ -292,7 +292,7 @@ function BannerSection({
           <div className="w-16 h-16 mx-auto bg-surface border-2 border-table-border rounded-2xl flex items-center justify-center mb-4">
             <ImageIcon size={24} className="text-on-surface-variant/40" />
           </div>
-          <p className="font-black text-sm text-on-surface-variant uppercase tracking-widest">None yet.</p>
+          <p className="font-bold text-sm text-on-surface-variant">None yet.</p>
         </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -341,7 +341,7 @@ function SortableBannerRow({
           style={{ backgroundColor: banner.background_color }}
         >
           <span
-            className="text-[10px] font-black uppercase tracking-widest text-center leading-tight truncate"
+            className="text-[12px] font-bold text-center leading-tight truncate"
             style={{ color: banner.text_color }}
           >
             {banner.title || 'Text banner'}
@@ -353,7 +353,7 @@ function SortableBannerRow({
           {banner.title || '(no title)'}
         </p>
         {banner.link_url && (
-          <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest truncate mt-1">{banner.link_url}</p>
+          <p className="font-bold text-[12px] text-on-surface-variant truncate mt-1">{banner.link_url}</p>
         )}
       </div>
       <div className="flex items-center gap-4 flex-shrink-0">
@@ -370,10 +370,10 @@ function SortableBannerRow({
         >
           <span className={cn('inline-block h-3.5 w-3.5 rounded-full shadow transition-transform', banner.is_active ? 'translate-x-5 bg-white' : 'translate-x-1.5 bg-on-surface-variant/50')} />
         </button>
-        <button onClick={onEdit} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95">
+        <button onClick={onEdit} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95">
           <Edit3 size={16} strokeWidth={2.5} />
         </button>
-        <button onClick={onDelete} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition-all active:scale-95">
+        <button onClick={onDelete} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-error/40 hover:text-error hover:bg-error/5 transition active:scale-95">
           <Trash2 size={16} strokeWidth={2.5} />
         </button>
       </div>
@@ -418,7 +418,7 @@ function BannerFormModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-surface rounded-2xl shadow-xl w-full max-w-2xl max-h-[90dvh] overflow-y-auto border-2 border-table-border">
         <div className="flex items-center justify-between px-6 py-4 border-b-2 border-table-border">
-          <h3 className="font-black text-xl text-primary tracking-tight">
+          <h3 className="font-bold text-xl text-primary tracking-tight">
             {banner ? 'Edit Banner.' : `Add ${PLACEMENT_LABELS[form.placement] ?? 'Banner'}.`}
           </h3>
           <button onClick={onClose} className="p-2 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:bg-surface-card transition-colors active:scale-95">
@@ -428,7 +428,7 @@ function BannerFormModal({
         <div className="p-6 space-y-6">
           {/* Live preview */}
           <div className="space-y-2">
-            <label className="font-black text-xs text-primary uppercase tracking-widest">Live Preview</label>
+            <label className="font-bold text-xs text-primary">Live Preview</label>
             <div
               className="relative overflow-hidden rounded-2xl p-5 flex flex-col justify-center border-2 border-table-border"
               style={form.image_url ? { aspectRatio: '5 / 2' } : { backgroundColor: form.background_color, minHeight: 110 }}
@@ -438,7 +438,7 @@ function BannerFormModal({
                 <img src={form.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
               )}
               <div className="relative z-10">
-                <p className="font-black text-lg leading-tight" style={{ color: form.text_color }}>
+                <p className="font-bold text-lg leading-tight" style={{ color: form.text_color }}>
                   {form.title || (form.image_url ? '' : 'Banner title')}
                 </p>
                 {form.subtitle && (
@@ -459,7 +459,7 @@ function BannerFormModal({
           {/* Placement + Colors */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">Placement</label>
+              <label className="font-bold text-xs text-primary">Placement</label>
               <select
                 value={form.placement}
                 onChange={e => setForm(p => ({ ...p, placement: e.target.value as Banner['placement'] }))}
@@ -474,7 +474,7 @@ function BannerFormModal({
                 setting would be meaningless outside the carousel. */}
             {form.placement === 'hero' && (
               <div className="space-y-2">
-                <label className="font-black text-xs text-primary uppercase tracking-widest">
+                <label className="font-bold text-xs text-primary">
                   Display Time
                 </label>
                 <div className="flex items-center gap-2">
@@ -510,33 +510,33 @@ function BannerFormModal({
                 image covers it, so hide it once an image is uploaded. */}
             {!form.image_url && (
               <div className="space-y-2">
-                <label className="font-black text-xs text-primary uppercase tracking-widest">Background</label>
+                <label className="font-bold text-xs text-primary">Background</label>
                 <div className="flex gap-2 items-center">
                   <div className="relative w-11 h-11 flex-shrink-0">
                     <input type="color" value={form.background_color} onChange={e => setForm(p => ({ ...p, background_color: e.target.value }))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                     <div className="w-full h-full rounded-lg border-2 border-table-border pointer-events-none" style={{ backgroundColor: form.background_color }} />
                   </div>
-                  <input type="text" value={form.background_color} onChange={e => setForm(p => ({ ...p, background_color: e.target.value }))} className={cn(inputCls, 'flex-1 font-mono uppercase text-xs px-3')} />
+                  <input type="text" value={form.background_color} onChange={e => setForm(p => ({ ...p, background_color: e.target.value }))} className={cn(inputCls, 'flex-1 font-mono text-xs px-3')} />
                 </div>
               </div>
             )}
             <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">Text Color</label>
+              <label className="font-bold text-xs text-primary">Text Color</label>
               <div className="flex gap-2 items-center">
                 <div className="relative w-11 h-11 flex-shrink-0">
                   <input type="color" value={form.text_color} onChange={e => setForm(p => ({ ...p, text_color: e.target.value }))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                   <div className="w-full h-full rounded-lg border-2 border-table-border pointer-events-none" style={{ backgroundColor: form.text_color }} />
                 </div>
-                <input type="text" value={form.text_color} onChange={e => setForm(p => ({ ...p, text_color: e.target.value }))} className={cn(inputCls, 'flex-1 font-mono uppercase text-xs px-3')} />
+                <input type="text" value={form.text_color} onChange={e => setForm(p => ({ ...p, text_color: e.target.value }))} className={cn(inputCls, 'flex-1 font-mono text-xs px-3')} />
               </div>
             </div>
           </div>
 
           {/* Image (optional) */}
           <div className="space-y-2">
-            <label className="font-black text-xs text-primary uppercase tracking-widest flex items-center">
+            <label className="font-bold text-xs text-primary flex items-center">
               Banner Image
-              <span className="font-bold text-[10px] text-on-surface-variant ml-3 normal-case tracking-normal">Optional — text-only banners work fine</span>
+              <span className="font-bold text-[12px] text-on-surface-variant ml-3 normal-case tracking-normal">Optional — text-only banners work fine</span>
             </label>
             {form.image_url ? (
               <div className="relative inline-block group w-full">
@@ -552,7 +552,7 @@ function BannerFormModal({
               </div>
             ) : (
               <label className={cn(
-                'flex flex-col items-center justify-center h-32 border-2 border-dashed border-table-border bg-surface-card rounded-2xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all active:scale-[0.99]',
+                'flex flex-col items-center justify-center h-32 border-2 border-dashed border-table-border bg-surface-card rounded-2xl cursor-pointer hover:border-primary hover:bg-primary/5 transition active:scale-[0.99]',
                 uploading && 'opacity-50 pointer-events-none',
               )}>
                 <div className="p-3 bg-surface border-2 border-table-border rounded-xl mb-3">
@@ -576,31 +576,31 @@ function BannerFormModal({
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">Title</label>
+              <label className="font-bold text-xs text-primary">Title</label>
               <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className={inputCls} placeholder="Stock up on beauty essentials" />
             </div>
             <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">Subtitle</label>
+              <label className="font-bold text-xs text-primary">Subtitle</label>
               <input type="text" value={form.subtitle} onChange={e => setForm(p => ({ ...p, subtitle: e.target.value }))} className={inputCls} />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="font-black text-xs text-primary uppercase tracking-widest">Link URL</label>
+            <label className="font-bold text-xs text-primary">Link URL</label>
             <input type="text" value={form.link_url} onChange={e => setForm(p => ({ ...p, link_url: e.target.value }))} className={inputCls} placeholder="/search?category=skincare" />
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="font-black text-xs text-primary uppercase tracking-widest">CTA Text</label>
+              <label className="font-bold text-xs text-primary">CTA Text</label>
               <input type="text" value={form.cta_text} onChange={e => setForm(p => ({ ...p, cta_text: e.target.value }))} className={inputCls} placeholder="Shop Now" />
             </div>
           </div>
 
           <div className="flex items-center justify-between gap-6 p-5 bg-surface-card rounded-2xl border-2 border-table-border max-w-sm">
             <div>
-              <p className="font-black text-xs text-primary uppercase tracking-widest">Active</p>
-              <p className="font-bold text-[10px] text-on-surface-variant mt-1">Show on site</p>
+              <p className="font-bold text-xs text-primary">Active</p>
+              <p className="font-bold text-[12px] text-on-surface-variant mt-1">Show on site</p>
             </div>
             <button
               type="button"
@@ -614,13 +614,13 @@ function BannerFormModal({
           </div>
 
           <div className="flex gap-4 pt-4 border-t-2 border-table-border">
-            <button onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-table-border bg-surface font-black text-xs text-on-surface-variant uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors active:scale-95">
+            <button onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-table-border bg-surface font-bold text-xs text-on-surface-variant hover:border-primary/40 hover:text-primary transition-colors active:scale-95">
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 py-3 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-widest hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm"
+              className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm"
             >
               {saving ? 'Saving…' : 'Save Banner'}
             </button>
@@ -636,18 +636,34 @@ function BannerFormModal({
 function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToast: Toast }) {
   const heroRaw = asObj(getCms(cmsContent, 'hero'))
   const trustRaw = asArr<TrustBadge>(getCms(cmsContent, 'trust_badges'))
+  const statsRaw = asObj(getCms(cmsContent, 'store_stats'))
+  const statItemsRaw = Array.isArray(statsRaw.items) ? (statsRaw.items as { value?: unknown; label?: unknown }[]) : []
+  const reviewsRaw = asArr<{ name?: unknown; text?: unknown; rating?: unknown; source?: unknown }>(getCms(cmsContent, 'testimonials'))
+  // Real reviews copied from Google or Justdial for the home page wall.
+  const [testimonials, setTestimonials] = useState(
+    reviewsRaw.map((r) => ({ name: str(r.name), text: str(r.text), rating: Number(r.rating) || 5, source: str(r.source) || 'Google' })),
+  )
 
   const [hero, setHero] = useState({
     title_en: str(heroRaw.title_en),
+    accent_en: str(heroRaw.accent_en),
     title_or: str(heroRaw.title_or),
     subtitle_en: str(heroRaw.subtitle_en),
     subtitle_or: str(heroRaw.subtitle_or),
   })
+  // Home page "years behind the counter" band. Empty fields fall back to the
+  // site's current copy, so nothing here is required.
+  const [stats, setStats] = useState({
+    headline: str(statsRaw.headline),
+    accent: str(statsRaw.accent),
+    blurb: str(statsRaw.blurb),
+    items: [0, 1, 2, 3].map((i) => ({ value: str(statItemsRaw[i]?.value), label: str(statItemsRaw[i]?.label) })),
+  })
   const [badges, setBadges] = useState<TrustBadge[]>(
     trustRaw.length > 0 ? trustRaw : [
-      { icon: 'local_shipping', text: 'Fast Delivery', text_or: '' },
-      { icon: 'verified', text: 'Quality Assured', text_or: '' },
-      { icon: 'support_agent', text: '24/7 Support', text_or: '' },
+      { icon: 'inventory_2', text: 'One piece or a full box', text_or: '' },
+      { icon: 'payments', text: 'Secure online payment', text_or: '' },
+      { icon: 'local_shipping', text: 'Delivery across India', text_or: '' },
     ],
   )
   const [saving, setSaving] = useState(false)
@@ -657,6 +673,21 @@ function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToas
     const results = await Promise.all([
       fetch('/api/cms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'hero', value: hero }) }),
       fetch('/api/cms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'trust_badges', value: badges }) }),
+      fetch('/api/cms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'store_stats', value: { ...stats, items: stats.items.filter((i) => i.value.trim()) } }),
+      }),
+      fetch('/api/cms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: 'testimonials',
+          value: testimonials
+            .map((t) => ({ ...t, name: t.name.trim(), text: t.text.trim().slice(0, 400), rating: Math.min(5, Math.max(1, t.rating)) }))
+            .filter((t) => t.name && t.text),
+        }),
+      }),
     ])
     setSaving(false)
     const ok = results.every(r => r.ok)
@@ -665,14 +696,117 @@ function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToas
 
   return (
     <div className="space-y-10 max-w-4xl">
-      <CmsSection title="Hero Section">
+      <CmsSection title="Hero headline">
+        <p className="text-sm text-on-surface-variant -mt-2 mb-4">The big text at the top of the home page. Leave a field empty to keep the current wording.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <CmsField label="Hero Title">
-            <input type="text" value={hero.title_en} onChange={e => setHero(p => ({ ...p, title_en: e.target.value }))} className={inputCls} placeholder="Beautiful. Trusted. Delivered." />
+          <CmsField label="Headline (big capitals)" hint="Keep it short: 2 to 4 words.">
+            <input type="text" value={hero.title_en} onChange={e => setHero(p => ({ ...p, title_en: e.target.value }))} className={inputCls} placeholder="The beauty counter," />
           </CmsField>
-          <CmsField label="Hero Subtitle">
-            <input type="text" value={hero.subtitle_en} onChange={e => setHero(p => ({ ...p, subtitle_en: e.target.value }))} className={inputCls} placeholder="Your trusted beauty store" />
+          <CmsField label="Second line (italic)" hint="Shown under the headline in the italic font.">
+            <input type="text" value={hero.accent_en} onChange={e => setHero(p => ({ ...p, accent_en: e.target.value }))} className={inputCls} placeholder="at your door." />
           </CmsField>
+          <CmsField label="One sentence under it" extraClass="md:col-span-2">
+            <input type="text" value={hero.subtitle_en} onChange={e => setHero(p => ({ ...p, subtitle_en: e.target.value }))} className={inputCls} placeholder="Skincare, haircare and salon stock from our Brahmapur shop, sent across India." />
+          </CmsField>
+        </div>
+      </CmsSection>
+
+      <CmsSection title="Customer reviews">
+        <p className="text-sm text-on-surface-variant -mt-2 mb-4">
+          Shown on the home page under approved product reviews. Copy real reviews word for word from Google or Justdial, with the reviewer&apos;s name as it appears there.
+        </p>
+        <div className="space-y-4">
+          {testimonials.map((t, i) => (
+            <div key={i} className="grid gap-3 rounded-2xl border border-table-border bg-surface-card p-4 md:grid-cols-[1fr_140px_120px_auto]">
+              <input
+                type="text"
+                value={t.name}
+                onChange={(e) => setTestimonials((p) => p.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
+                className={cn(inputCls, 'py-2.5')}
+                placeholder="Reviewer's name"
+                aria-label={`Review ${i + 1} name`}
+              />
+              <select
+                value={t.source}
+                onChange={(e) => setTestimonials((p) => p.map((x, j) => (j === i ? { ...x, source: e.target.value } : x)))}
+                className={cn(inputCls, 'py-2.5')}
+                aria-label={`Review ${i + 1} source`}
+              >
+                <option>Google</option>
+                <option>Justdial</option>
+                <option>IndiaMART</option>
+                <option>In store</option>
+              </select>
+              <select
+                value={t.rating}
+                onChange={(e) => setTestimonials((p) => p.map((x, j) => (j === i ? { ...x, rating: Number(e.target.value) } : x)))}
+                className={cn(inputCls, 'py-2.5')}
+                aria-label={`Review ${i + 1} stars`}
+              >
+                {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n} stars</option>)}
+              </select>
+              <button
+                type="button"
+                onClick={() => setTestimonials((p) => p.filter((_, j) => j !== i))}
+                className="rounded-xl border border-table-border px-3 text-on-surface-variant hover:border-error/40 hover:text-error"
+                aria-label={`Remove review ${i + 1}`}
+              >
+                <Trash2 size={16} />
+              </button>
+              <textarea
+                value={t.text}
+                onChange={(e) => setTestimonials((p) => p.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
+                className={cn(inputCls, 'md:col-span-4 min-h-[80px]')}
+                placeholder="The review, word for word"
+                maxLength={400}
+                aria-label={`Review ${i + 1} text`}
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setTestimonials((p) => [...p, { name: '', text: '', rating: 5, source: 'Google' }])}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-table-border py-4 text-[14px] font-semibold text-on-surface-variant hover:border-primary hover:text-primary"
+          >
+            <Plus size={16} /> Add a review
+          </button>
+        </div>
+      </CmsSection>
+
+      <CmsSection title="Store figures band">
+        <p className="text-sm text-on-surface-variant -mt-2 mb-4">The dark band near the bottom of the home page. Only use numbers you can stand behind.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CmsField label="Headline">
+            <input type="text" value={stats.headline} onChange={e => setStats(p => ({ ...p, headline: e.target.value }))} className={inputCls} placeholder="27 years" />
+          </CmsField>
+          <CmsField label="Italic line">
+            <input type="text" value={stats.accent} onChange={e => setStats(p => ({ ...p, accent: e.target.value }))} className={inputCls} placeholder="behind the counter." />
+          </CmsField>
+          <CmsField label="Sentence" extraClass="md:col-span-2">
+            <input type="text" value={stats.blurb} onChange={e => setStats(p => ({ ...p, blurb: e.target.value }))} className={inputCls} placeholder="Retail and bulk, from one shop in Sano Bazar, Brahmapur." />
+          </CmsField>
+        </div>
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {stats.items.map((item, i) => (
+            <div key={i} className="flex gap-3 rounded-2xl border border-table-border bg-surface-card p-3">
+              <input
+                type="text"
+                value={item.value}
+                onChange={e => setStats(p => ({ ...p, items: p.items.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))}
+                className={cn(inputCls, 'w-28 py-2.5')}
+                placeholder={['27+', '4', '350K+', ''][i] || 'Number'}
+                aria-label={`Figure ${i + 1} number`}
+              />
+              <input
+                type="text"
+                value={item.label}
+                onChange={e => setStats(p => ({ ...p, items: p.items.map((x, j) => j === i ? { ...x, label: e.target.value } : x) }))}
+                className={cn(inputCls, 'flex-1 py-2.5')}
+                placeholder={['years in business', 'states served', 'happy customers', 'optional fourth figure'][i]}
+                aria-label={`Figure ${i + 1} label`}
+              />
+            </div>
+          ))}
         </div>
       </CmsSection>
 
@@ -708,7 +842,7 @@ function HomepageTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToas
           ))}
           <button
             onClick={() => setBadges(prev => [...prev, { icon: 'star', text: '', text_or: '' }])}
-            className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-table-border bg-surface-card rounded-2xl font-black text-[10px] text-on-surface-variant uppercase tracking-widest hover:border-primary hover:text-primary transition-colors active:scale-[0.99]"
+            className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-table-border bg-surface-card rounded-2xl font-bold text-[12px] text-on-surface-variant hover:border-primary hover:text-primary transition-colors active:scale-[0.99]"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add Badge
@@ -734,12 +868,9 @@ function FooterTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToast:
     phone: str(footerRaw.phone),
     email: str(footerRaw.email),
     address: str(footerRaw.address),
+    hours: str(footerRaw.hours),
   })
-  const [links, setLinks] = useState<FooterLink[]>(linksRaw.length > 0 ? linksRaw : [
-    { label: 'Home', href: '/' },
-    { label: 'Products', href: '/products' },
-    { label: 'About', href: '/about' },
-  ])
+  const [links, setLinks] = useState<FooterLink[]>(linksRaw)
   const [social, setSocial] = useState({
     instagram: str(socialRaw.instagram),
     facebook: str(socialRaw.facebook),
@@ -768,10 +899,13 @@ function FooterTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToast:
             <input type="text" value={footer.tagline_en} onChange={e => setFooter(p => ({ ...p, tagline_en: e.target.value }))} className={inputCls} placeholder="Your trusted beauty store" />
           </CmsField>
           <CmsField label="Phone">
-            <input type="text" value={footer.phone} onChange={e => setFooter(p => ({ ...p, phone: e.target.value }))} className={inputCls} placeholder="+91 XXXXX XXXXX" />
+            <input type="text" value={footer.phone} onChange={e => setFooter(p => ({ ...p, phone: e.target.value }))} className={inputCls} placeholder="+91 98612 35276, +91 78490 76520" />
           </CmsField>
           <CmsField label="Email">
             <input type="email" value={footer.email} onChange={e => setFooter(p => ({ ...p, email: e.target.value }))} className={inputCls} placeholder="smortika@gmail.com" />
+          </CmsField>
+          <CmsField label="Shop hours">
+            <input type="text" value={footer.hours} onChange={e => setFooter(p => ({ ...p, hours: e.target.value }))} className={inputCls} placeholder="Monday to Saturday, 9 am to 6 pm" />
           </CmsField>
           <CmsField label="Address" extraClass="md:col-span-2">
             <input type="text" value={footer.address} onChange={e => setFooter(p => ({ ...p, address: e.target.value }))} className={inputCls} placeholder="Brahmapur, Odisha" />
@@ -790,7 +924,7 @@ function FooterTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; onToast:
               </button>
             </div>
           ))}
-          <button onClick={() => setLinks(prev => [...prev, { label: '', href: '' }])} className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-table-border bg-surface-card rounded-2xl font-black text-[10px] text-on-surface-variant uppercase tracking-widest hover:border-primary hover:text-primary transition-colors active:scale-[0.99]">
+          <button onClick={() => setLinks(prev => [...prev, { label: '', href: '' }])} className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-table-border bg-surface-card rounded-2xl font-bold text-[12px] text-on-surface-variant hover:border-primary hover:text-primary transition-colors active:scale-[0.99]">
             <Plus size={16} strokeWidth={2.5} />
             Add Link
           </button>
@@ -864,9 +998,9 @@ function AnnouncementsTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; o
     <div className="space-y-10 max-w-2xl">
       {/* Live preview */}
       <div className="space-y-3">
-        <label className="font-black text-xs text-primary uppercase tracking-widest">Live Preview</label>
+        <label className="font-bold text-xs text-primary">Live Preview</label>
         <div
-          className="px-6 py-4 rounded-2xl text-center font-bold text-sm transition-all border-2 border-table-border shadow-sm"
+          className="px-6 py-4 rounded-2xl text-center font-bold text-sm transition border-2 border-table-border shadow-sm"
           style={{ backgroundColor: form.background_color, color: form.text_color }}
         >
           {form.text || 'Announcement preview will appear here…'}
@@ -884,7 +1018,7 @@ function AnnouncementsTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; o
                 <input type="color" value={form.background_color} onChange={e => setForm(p => ({ ...p, background_color: e.target.value }))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 <div className="w-full h-full rounded-xl border-2 border-table-border pointer-events-none" style={{ backgroundColor: form.background_color }} />
               </div>
-              <input type="text" value={form.background_color} onChange={e => setForm(p => ({ ...p, background_color: e.target.value }))} className={cn(inputCls, 'flex-1 font-mono uppercase')} />
+              <input type="text" value={form.background_color} onChange={e => setForm(p => ({ ...p, background_color: e.target.value }))} className={cn(inputCls, 'flex-1 font-mono')} />
             </div>
           </CmsField>
           <CmsField label="Text Color">
@@ -893,7 +1027,7 @@ function AnnouncementsTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; o
                 <input type="color" value={form.text_color} onChange={e => setForm(p => ({ ...p, text_color: e.target.value }))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 <div className="w-full h-full rounded-xl border-2 border-table-border pointer-events-none" style={{ backgroundColor: form.text_color }} />
               </div>
-              <input type="text" value={form.text_color} onChange={e => setForm(p => ({ ...p, text_color: e.target.value }))} className={cn(inputCls, 'flex-1 font-mono uppercase')} />
+              <input type="text" value={form.text_color} onChange={e => setForm(p => ({ ...p, text_color: e.target.value }))} className={cn(inputCls, 'flex-1 font-mono')} />
             </div>
           </CmsField>
         </div>
@@ -903,8 +1037,8 @@ function AnnouncementsTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; o
 
         <div className="flex items-center justify-between gap-6 p-5 bg-surface-card rounded-2xl border-2 border-table-border max-w-sm">
           <div>
-            <p className="font-black text-xs text-primary uppercase tracking-widest">Active</p>
-            <p className="font-bold text-[10px] text-on-surface-variant mt-1">Show on site</p>
+            <p className="font-bold text-xs text-primary">Active</p>
+            <p className="font-bold text-[12px] text-on-surface-variant mt-1">Show on site</p>
           </div>
           <button
             type="button"
@@ -952,7 +1086,7 @@ function AnnouncementsTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; o
         <button
           type="button"
           onClick={() => setLines(prev => [...prev, { text: '', text_or: '' }])}
-          className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-table-border rounded-xl font-black text-[10px] text-on-surface-variant uppercase tracking-widest hover:border-primary hover:text-primary transition-colors active:scale-[0.99]"
+          className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-table-border rounded-xl font-bold text-[12px] text-on-surface-variant hover:border-primary hover:text-primary transition-colors active:scale-[0.99]"
         >
           <Plus size={16} />
           Add Line
@@ -969,7 +1103,7 @@ function AnnouncementsTab({ cmsContent, onToast }: { cmsContent: CmsContent[]; o
 function CmsSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-6">
-      <h3 className="font-black text-xl text-primary tracking-tight border-b-2 border-table-border pb-3">{title}</h3>
+      <h3 className="font-bold text-xl text-primary tracking-tight border-b-2 border-table-border pb-3">{title}</h3>
       {children}
     </section>
   )
@@ -980,9 +1114,9 @@ function CmsField({ label, hint, children, extraClass }: {
 }) {
   return (
     <div className={cn('space-y-2', extraClass)}>
-      <label className="font-black text-xs text-primary uppercase tracking-widest flex items-center">
+      <label className="font-bold text-xs text-primary flex items-center">
         {label}
-        {hint && <span className="font-bold text-[10px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
+        {hint && <span className="font-bold text-[12px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
       </label>
       {children}
     </div>
@@ -995,7 +1129,7 @@ function SaveBar({ saving, onSave }: { saving: boolean; onSave: () => void }) {
       <button
         onClick={onSave}
         disabled={saving}
-        className="flex items-center justify-center gap-2 px-8 py-3 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm"
+        className="flex items-center justify-center gap-2 px-8 py-3 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm"
       >
         {saving && <Loader2 size={16} className="animate-spin" />}
         {saving ? 'Saving…' : 'Save Changes'}

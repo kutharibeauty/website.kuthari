@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
 
 /**
  * GET /api/geocode?lat=..&lon=..  →  { pincode, city, state, area }
@@ -84,6 +85,9 @@ async function viaPhoton(lat: string, lon: string): Promise<GeoResult | null> {
 }
 
 export async function GET(req: NextRequest) {
+  // Proxies a third-party geocoder; keep one visitor from burning its quota.
+  const rl = await rateLimit({ key: `geocode:ip:${getClientIp(req)}`, limit: 30, windowSec: 600 })
+  if (!rl.ok) return rateLimitResponse(rl)
   const lat = req.nextUrl.searchParams.get('lat')
   const lon = req.nextUrl.searchParams.get('lon')
 

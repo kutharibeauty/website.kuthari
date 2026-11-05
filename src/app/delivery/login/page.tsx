@@ -18,7 +18,7 @@ export default async function DeliveryLoginPage() {
           <PackageX size={30} className="text-on-surface-variant/50" />
         </div>
         <div className="max-w-sm">
-          <h1 className="text-xl font-black text-primary tracking-tight">Delivery panel unavailable</h1>
+          <h1 className="text-xl font-bold text-primary tracking-tight">Delivery panel unavailable</h1>
           <p className="text-sm font-medium text-on-surface-variant/70 mt-2 leading-relaxed">
             The delivery portal is currently turned off. Please contact your administrator.
           </p>

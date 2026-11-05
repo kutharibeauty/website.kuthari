@@ -47,11 +47,10 @@ export default function AddressesClient({
     <div className="min-h-screen bg-background">
       {/* Hero strip */}
       <div className="relative overflow-hidden bg-primary border-b-2 border-primary mb-6">
-        <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none" />
         <div className="relative z-10 px-4 max-w-2xl mx-auto py-7 md:py-9">
           <Link
             href="/profile"
-            className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white/70 transition-colors mb-2"
+            className="inline-flex items-center gap-1.5 text-[12px] font-black text-white/40 hover:text-white/70 transition-colors mb-2"
           >
             <ArrowLeft size={12} strokeWidth={2.5} /> Back to Profile
           </Link>
@@ -63,7 +62,7 @@ export default function AddressesClient({
       <div className="max-w-2xl mx-auto px-4 pb-16">
         <button
           onClick={() => setShowForm(true)}
-          className="w-full mb-5 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-dashed border-table-border text-primary font-black text-xs uppercase tracking-widest hover:border-primary hover:bg-primary/5 transition-colors active:scale-[0.99]"
+          className="w-full mb-5 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-dashed border-table-border text-primary font-black text-xs hover:border-primary hover:bg-primary/5 transition-colors active:scale-[0.99]"
         >
           <Plus size={16} strokeWidth={3} /> Add New Address
         </button>
@@ -84,12 +83,12 @@ export default function AddressesClient({
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     {addr.label && (
-                      <span className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-black text-[10px] uppercase tracking-widest">
+                      <span className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-black text-[12px]">
                         {addr.label}
                       </span>
                     )}
                     {addr.is_default && (
-                      <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-success/10 text-success font-black text-[10px] uppercase tracking-widest">
+                      <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-success/10 text-success font-black text-[12px]">
                         <Star size={11} className="fill-success" /> Default
                       </span>
                     )}
@@ -117,7 +116,7 @@ export default function AddressesClient({
                 <p className="font-black text-sm text-primary">{addr.name}</p>
                 <p className="text-sm font-medium text-on-surface-variant/80 leading-relaxed mt-0.5">
                   {addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}<br />
-                  {addr.city}, {addr.state} — {addr.pincode}
+                  {addr.city}, {addr.state} {addr.pincode}
                 </p>
                 <p className="text-xs font-bold text-on-surface-variant/60 mt-1">{addr.phone}</p>
 
@@ -126,7 +125,7 @@ export default function AddressesClient({
                     onClick={() => setDefault(addr.id)}
                     disabled={busy === addr.id}
                     className={cn(
-                      'mt-3 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-on-surface-variant/70 hover:text-primary transition-colors disabled:opacity-50',
+                      'mt-3 flex items-center gap-1.5 text-[11px] font-black text-on-surface-variant/70 hover:text-primary transition-colors disabled:opacity-50',
                     )}
                   >
                     <Star size={13} /> Set as default

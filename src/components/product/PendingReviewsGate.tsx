@@ -1,252 +1,257 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Star, Loader2, Check } from 'lucide-react'
+import { Star, Loader2, X, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import type { PendingReviewProduct } from '@/app/api/reviews/pending/route'
 
+const GOOGLE_REVIEW_URL = 'https://search.google.com/local/writereview?placeid=ChIJ-ccrQRtQPToRSU6_TG62QZs'
+const SKIP_KEY = 'kbs-review-skips'
+const SKIP_DAYS = 7
+const QUICK_TAGS = ['Great quality', 'Value for money', 'Packed well', 'Fast delivery', 'Would buy again']
+const WORDS = ['', 'Poor', 'Okay', 'Good', 'Very good', 'Loved it']
+
+/** Product ids the customer said "not now" to, and when. */
+function readSkips(): Record<string, number> {
+  try {
+    return JSON.parse(localStorage.getItem(SKIP_KEY) || '{}') as Record<string, number>
+  } catch {
+    return {}
+  }
+}
+function writeSkips(ids: string[]) {
+  try {
+    const all = readSkips()
+    const now = Date.now()
+    ids.forEach((id) => { all[id] = now })
+    localStorage.setItem(SKIP_KEY, JSON.stringify(all))
+  } catch { /* private mode: they'll simply be asked again next visit */ }
+}
+
 /**
- * Mandatory review gate.
- *
- * When a customer opens the site with products they've received but not
- * reviewed, this asks for a rating on each in turn. Per the client's spec there
- * is deliberately NO close, cancel or back control — the only way past it is to
- * rate every product.
- *
- * Escape hatches that exist only to prevent a permanent trap (never a way to
- * skip an unrated product):
- *   • a product the API rejects as unpurchased is stepped over, otherwise a bad
- *     row would wedge the customer behind a popup they cannot satisfy;
- *   • checkout lives outside the (shop) group, so this can never block a sale.
+ * The quick review after a delivery. One sheet per received product: tap a
+ * star, optionally tap a tag or two, send. "Not now" skips it for a week, and
+ * the close button skips the rest. After a review it offers the shop's Google
+ * review link. Never shown on a brand-new order's page or at checkout.
  */
 export default function PendingReviewsGate() {
   const [queue, setQueue] = useState<PendingReviewProduct[]>([])
   const [idx, setIdx] = useState(0)
   const [rating, setRating] = useState(0)
   const [hovered, setHovered] = useState(0)
-  const [body, setBody] = useState('')
+  const [tags, setTags] = useState<string[]>([])
+  const [note, setNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [done, setDone] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const [rated, setRated] = useState(0)
+  const [finished, setFinished] = useState(false)
   const { isSignedIn, isLoaded } = useSupabaseUser()
 
-  useEffect(() => setMounted(true), [])
-
   useEffect(() => {
-    // The endpoint is session-scoped and 401s for a signed-out visitor. Firing
-    // it unconditionally logged a console error on every logged-out page load,
-    // so wait until the session is resolved and only ask when signed in.
-    // Behaviour for a signed-in customer is unchanged.
+    // Signed-in customers only; the endpoint 401s otherwise.
     if (!isLoaded || !isSignedIn) return
-
+    if (new URLSearchParams(window.location.search).get('new') === '1') return
     let cancelled = false
     void (async () => {
-      // Don't crash the celebration on a brand-new order — that page owns the
-      // screen. The gate will come up on their next visit.
-      if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('new') === '1') return
       try {
         const res = await fetch('/api/reviews/pending')
         if (!res.ok) return
         const { products } = (await res.json()) as { products: PendingReviewProduct[] }
-        if (!cancelled && products?.length) setQueue(products)
-      } catch { /* storefront must work regardless */ }
+        const skips = readSkips()
+        const fresh = (products ?? []).filter((p) => !skips[p.id] || Date.now() - skips[p.id] > SKIP_DAYS * 86400000)
+        if (!cancelled && fresh.length) setQueue(fresh)
+      } catch { /* the store must work regardless */ }
     })()
     return () => { cancelled = true }
   }, [isLoaded, isSignedIn])
 
-  const open = queue.length > 0 && idx < queue.length
-
-  // Lock background scroll while the gate is up.
-  useEffect(() => {
-    if (!open && !done) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
-  }, [open, done])
-
   const current = queue[idx]
+  const open = !!current || finished
 
-  const advance = useCallback(() => {
-    setRating(0); setHovered(0); setBody(''); setError('')
+  const next = () => {
+    setRating(0); setHovered(0); setTags([]); setNote(''); setError('')
     if (idx + 1 >= queue.length) {
-      setDone(true)
       setIdx(queue.length)
-      setTimeout(() => { setDone(false); setQueue([]) }, 2200)
+      setFinished(true)
     } else {
       setIdx((i) => i + 1)
     }
-  }, [idx, queue.length])
+  }
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!current) return
-    if (!rating) { setError('Please select a rating.'); return }
-    setError('')
+  const skipOne = () => {
+    if (current) writeSkips([current.id])
+    next()
+  }
+
+  const closeAll = () => {
+    writeSkips(queue.slice(idx).map((p) => p.id))
+    setQueue([])
+    setFinished(false)
+  }
+
+  const send = async () => {
+    if (!current || !rating) return
     setSubmitting(true)
+    setError('')
+    const text = [tags.join(', '), note.trim()].filter(Boolean).join('. ')
     try {
       const res = await fetch(`/api/products/${current.id}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating, body: body.trim() }),
+        body: JSON.stringify({ rating, body: text }),
       })
-      if (res.status === 403 || res.status === 409) { advance(); return }  // can't review it — don't wedge them here
-      if (!res.ok) throw new Error()
-      advance()
+      if (res.ok) setRated((n) => n + 1)
+      // Already reviewed or not eligible: move on rather than trap them.
+      if (res.ok || res.status === 403 || res.status === 409) next()
+      else setError('Could not send your review. Please try again.')
     } catch {
-      setError('Could not submit your review. Please try again.')
+      setError('Could not send your review. Please try again.')
     } finally {
       setSubmitting(false)
     }
   }
 
-  if (!mounted || (!open && !done)) return null
+  // Nothing opens until the client-side fetch fills the queue, so this never
+  // renders on the server and createPortal always has a document.
+  if (!open) return null
 
-  const gate = (
+  const shown = hovered || rating
+
+  const sheet = (
     <AnimatePresence>
       <motion.div
-        key="review-gate"
-        className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm"
+        key="quick-review"
+        className="fixed inset-0 z-[70] flex items-end justify-center bg-ink/50 backdrop-blur-sm sm:items-center sm:p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="review-gate-title"
+        onClick={(e) => { if (e.target === e.currentTarget) closeAll() }}
       >
         <motion.div
-          className="w-full sm:max-w-md bg-surface-card rounded-t-2xl sm:rounded-2xl shadow-2xl border border-table-border overflow-hidden max-h-[92dvh] flex flex-col"
-          initial={{ y: 40, scale: 0.97, opacity: 0 }}
-          animate={{ y: 0, scale: 1, opacity: 1 }}
-          exit={{ y: 20, opacity: 0 }}
-          transition={{ type: 'spring', damping: 24, stiffness: 300 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="quick-review-title"
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+          className="relative w-full max-w-md rounded-t-[1.75rem] bg-paper-raised p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-[var(--shadow-modal)] sm:rounded-[1.75rem]"
         >
-          <div className="h-1 w-full bg-primary" />
+          <button
+            type="button"
+            onClick={closeAll}
+            className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-muted hover:bg-paper-sunk hover:text-ink"
+            aria-label="Close, I'll review later"
+          >
+            <X size={18} />
+          </button>
 
-          {done ? (
-            <div className="p-8 text-center flex flex-col items-center">
-              <motion.div
-                className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center mb-4"
-                initial={{ scale: 0 }} animate={{ scale: 1 }}
-                transition={{ type: 'spring', damping: 12, stiffness: 200 }}
-              >
-                <Check size={32} className="text-on-primary" strokeWidth={2.5} />
-              </motion.div>
-              <p className="text-xl font-black text-primary">Thank you!</p>
-              <p className="text-sm font-medium text-on-surface-variant mt-1">
-                Your reviews will appear once approved.
-              </p>
-            </div>
-          ) : current ? (
+          {current ? (
             <>
-              <div className="px-5 sm:px-6 pt-5 pb-4 border-b border-table-border">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 id="review-gate-title" className="text-base font-black text-primary uppercase tracking-wider">
-                    Rate your purchase
-                  </h2>
-                  {queue.length > 1 && (
-                    <span className="text-[11px] font-black text-on-surface-variant/60 tabular-nums shrink-0">
-                      {idx + 1} of {queue.length}
-                    </span>
-                  )}
-                </div>
-                <p className="text-[11px] font-medium text-on-surface-variant/70 mt-1">
-                  You received these items — please rate {queue.length > 1 ? 'each of them' : 'it'} to continue.
-                </p>
-                {queue.length > 1 && (
-                  <div className="mt-3 h-1 w-full rounded-full bg-surface-container overflow-hidden">
-                    <motion.div
-                      className="h-full bg-primary rounded-full"
-                      initial={false}
-                      animate={{ width: `${(idx / queue.length) * 100}%` }}
-                      transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-                    />
-                  </div>
+              <p className="text-[14px] font-semibold text-indigo">
+                {queue.length > 1 ? `Item ${idx + 1} of ${queue.length}` : 'Your recent order'}
+              </p>
+              <div className="mt-3 flex items-center gap-3 pr-8">
+                {current.image && (
+                  <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-paper-sunk">
+                    <Image src={current.image} alt="" fill sizes="56px" className="object-cover" />
+                  </span>
                 )}
+                <h2 id="quick-review-title" className="text-[19px] font-bold leading-snug text-ink capitalize">
+                  How was {current.name}?
+                </h2>
               </div>
 
-              <form
-                onSubmit={submit}
-                className="px-5 sm:px-6 py-5 flex flex-col gap-5 overflow-y-auto overscroll-contain"
-                style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}
-              >
-                <div className="flex items-center gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={current.image ?? ''}
-                    alt=""
-                    className="w-14 h-14 rounded-xl object-contain bg-surface-container border border-table-border shrink-0"
-                  />
-                  <p className="font-black text-sm text-primary leading-snug line-clamp-2">{current.name}</p>
+              <div className="mt-5 flex items-center justify-between" onMouseLeave={() => setHovered(0)}>
+                <div className="flex gap-1" role="radiogroup" aria-label="Your rating">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      role="radio"
+                      aria-checked={rating === n}
+                      aria-label={`${n} star${n > 1 ? 's' : ''}`}
+                      onClick={() => setRating(n)}
+                      onMouseEnter={() => setHovered(n)}
+                      className="p-1 transition-transform active:scale-90"
+                    >
+                      <Star size={36} strokeWidth={1.75} className={n <= shown ? 'fill-indigo text-indigo' : 'text-lavender'} />
+                    </button>
+                  ))}
                 </div>
+                <span className="text-[15px] font-semibold text-ink">{WORDS[shown]}</span>
+              </div>
 
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 block mb-2">
-                    Your rating *
-                  </label>
-                  <div className="flex gap-1.5" onMouseLeave={() => setHovered(0)}>
-                    {[1, 2, 3, 4, 5].map((s) => (
+              {rating > 0 && (
+                <div className="mt-4 animate-drop-in">
+                  <div className="flex flex-wrap gap-2">
+                    {QUICK_TAGS.map((t) => (
                       <button
-                        key={s}
+                        key={t}
                         type="button"
-                        onMouseEnter={() => setHovered(s)}
-                        onClick={() => { setRating(s); setError('') }}
-                        className="transition-transform hover:scale-110 active:scale-95"
-                        aria-label={`${s} star${s > 1 ? 's' : ''}`}
-                        aria-pressed={rating === s}
+                        aria-pressed={tags.includes(t)}
+                        onClick={() => setTags((p) => (p.includes(t) ? p.filter((x) => x !== t) : [...p, t]))}
+                        className={cn(
+                          'rounded-full border px-3.5 py-2 text-[14px] font-semibold transition-colors',
+                          tags.includes(t) ? 'border-ink bg-ink text-paper-raised' : 'border-line text-ink hover:border-ink',
+                        )}
                       >
-                        <Star
-                          size={32}
-                          className={cn(
-                            'transition-colors',
-                            s <= (hovered || rating) ? 'fill-secondary stroke-secondary' : 'fill-none stroke-outline',
-                          )}
-                        />
+                        {t}
                       </button>
                     ))}
                   </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="gate-review-body"
-                    className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 block mb-1.5"
-                  >
-                    Your review <span className="text-on-surface-variant/40">(optional)</span>
-                  </label>
                   <textarea
-                    id="gate-review-body"
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    rows={3}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    rows={2}
                     maxLength={500}
-                    placeholder="How was the quality, packaging and delivery?"
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-table-border bg-surface text-sm font-medium text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-primary transition-colors resize-none"
+                    placeholder="Anything else? (optional)"
+                    className="mt-3 w-full resize-none rounded-xl border border-line bg-paper px-3 py-2.5 text-[15px] text-ink outline-none focus:border-ink"
                   />
                 </div>
+              )}
 
-                {error && <p className="text-xs font-bold text-error">{error}</p>}
+              {error && <p className="mt-2 text-[14px] font-semibold text-error">{error}</p>}
 
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full h-12 rounded-xl bg-primary text-white text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60 shadow-sm"
-                >
-                  {submitting && <Loader2 size={15} className="animate-spin" />}
-                  {submitting
-                    ? 'Submitting…'
-                    : idx + 1 >= queue.length ? 'Submit review' : 'Submit & next'}
+              <div className="mt-5 flex items-center gap-3">
+                <button type="button" onClick={skipOne} className="btn-pill flex-1 !bg-transparent !text-ink border border-line hover:!border-ink">
+                  Not now
                 </button>
-              </form>
+                <button type="button" onClick={send} disabled={!rating || submitting} className="btn-pill flex-1">
+                  {submitting ? <Loader2 size={18} className="animate-spin" /> : 'Send review'}
+                </button>
+              </div>
             </>
-          ) : null}
+          ) : (
+            <div className="pr-8">
+              <h2 id="quick-review-title" className="display text-[40px]">{rated > 0 ? 'Thank you' : 'All done'}</h2>
+              <p className="accent-line text-[30px]">{rated > 0 ? 'for the stars.' : 'see you soon.'}</p>
+              <p className="mt-4 text-[16px] leading-relaxed text-ink/80">
+                Would you rate the shop on Google too? It takes a few seconds and helps people near Sano Bazar find us.
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={GOOGLE_REVIEW_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={closeAll}
+                  className="btn-pill flex-1"
+                >
+                  Rate us on Google <ExternalLink size={16} aria-hidden="true" />
+                </a>
+                <button type="button" onClick={closeAll} className="btn-pill flex-1 !bg-transparent !text-ink border border-line hover:!border-ink">
+                  Maybe later
+                </button>
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>
   )
 
-  return createPortal(gate, document.body)
+  return createPortal(sheet, document.body)
 }

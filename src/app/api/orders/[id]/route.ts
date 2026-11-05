@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import type { Order } from '@/types/database.types'
@@ -16,7 +16,9 @@ export async function GET(
   if (!profileId) return NextResponse.json({ error: 'Profile not configured' }, { status: 400 })
 
   const { id } = await params
-  const supabase = await createClient()
+  // Server-side client: RLS no longer lets browser keys read orders, and the
+  // user_id filter below is what scopes this to the signed-in customer.
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('orders')

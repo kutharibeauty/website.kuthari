@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import EmptyState from '@/components/ui/EmptyState'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { Heart } from 'lucide-react'
@@ -47,20 +47,12 @@ export default async function WishlistPage() {
       </div>
 
       {products.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center py-20 gap-4">
-          <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center">
-            <Heart size={26} className="text-on-surface-variant/50" />
-          </div>
-          <p className="font-bold text-on-surface-variant/80 max-w-sm">
-            Your wishlist is empty. Tap the ♡ on any product to save it for later.
-          </p>
-          <Link
-            href="/search"
-            className="px-6 py-3 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95"
-          >
-            Browse products
-          </Link>
-        </div>
+        <EmptyState
+          art="dropper"
+          title="Nothing saved yet"
+          text="Tap the heart on any product to keep it here for later."
+          action={{ href: '/search', label: 'Browse products' }}
+        />
       ) : (
         <div className="flex flex-wrap gap-4">
           <ProductGrid products={products} />

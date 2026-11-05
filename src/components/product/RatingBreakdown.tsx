@@ -1,5 +1,6 @@
 import StarRating from '@/components/ui/StarRating'
 import type { RatingStats } from '@/lib/data/product'
+import { Star } from 'lucide-react'
 
 interface Props {
   stats: RatingStats
@@ -30,15 +31,10 @@ export default function RatingBreakdown({ stats }: Props) {
               <span className="font-label-sm text-label-sm text-on-surface-variant w-3 text-right">
                 {star}
               </span>
-              <span
-                className="material-symbols-outlined text-secondary text-[14px]"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                star
-              </span>
+              <Star size={14} aria-hidden="true" className="fill-secondary text-secondary" />
               <div className="flex-1 h-2 rounded-full bg-surface-container-high overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-secondary transition-all duration-500"
+                  className="h-full rounded-full bg-secondary transition duration-500"
                   style={{ width: `${pct}%` }}
                 />
               </div>

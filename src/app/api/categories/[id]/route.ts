@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { writeStrippingMissingColumns } from '@/lib/supabase/tolerant-write'
+import { withStorefrontRefresh } from '@/lib/revalidate'
+import { requirePermission } from '@/lib/auth/guard'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -19,7 +21,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   return NextResponse.json(data)
 }
 
-export async function PUT(req: NextRequest, { params }: Params) {
+async function PUT_handler(req: NextRequest, { params }: Params) {
+  const noPerm = await requirePermission('manage_categories'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const meta = sessionClaims?.publicMetadata as AuthMetadata | undefined
@@ -36,7 +39,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
   return NextResponse.json({ ok: true })
 }
 
-export async function PATCH(req: NextRequest, { params }: Params) {
+async function PATCH_handler(req: NextRequest, { params }: Params) {
+  const noPerm = await requirePermission('manage_categories'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const meta = sessionClaims?.publicMetadata as AuthMetadata | undefined
@@ -58,7 +62,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   return NextResponse.json({ ok: true })
 }
 
-export async function DELETE(_req: NextRequest, { params }: Params) {
+async function DELETE_handler(_req: NextRequest, { params }: Params) {
+  const noPerm = await requirePermission('manage_categories'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const meta = sessionClaims?.publicMetadata as AuthMetadata | undefined
@@ -100,3 +105,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   }
   return NextResponse.json({ ok: true })
 }
+
+export const PUT = withStorefrontRefresh(PUT_handler)
+export const PATCH = withStorefrontRefresh(PATCH_handler)
+export const DELETE = withStorefrontRefresh(DELETE_handler)

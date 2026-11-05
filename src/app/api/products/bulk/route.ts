@@ -2,10 +2,13 @@ import { auth } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
+import { withStorefrontRefresh } from '@/lib/revalidate'
+import { requirePermission } from '@/lib/auth/guard'
 
 type BulkAction = 'activate' | 'deactivate' | 'delete'
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
+  const noPerm = await requirePermission('manage_products'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -38,3 +41,5 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true, count: ids.length })
 }
+
+export const POST = withStorefrontRefresh(POST_handler)

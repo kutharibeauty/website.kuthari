@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import EmptyState from '@/components/ui/EmptyState'
 import { useRouter } from 'next/navigation'
 import {
   Minus, Plus, Trash2, ShoppingBag, Tag, X,
@@ -64,11 +64,11 @@ function CartItemRow({ item, onQtyChange, onRemove }: {
             {item.name}
           </h4>
           <div className="flex flex-wrap items-center gap-1.5 mt-1">
-            <span className="inline-block text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 border border-table-border rounded-full px-2 py-0.5">
+            <span className="inline-block text-[12px] font-black text-on-surface-variant/60 border border-table-border rounded-full px-2 py-0.5">
               {item.unit}
             </span>
             {item.units_each && item.units_each > 1 && (
-              <span className="inline-block text-[10px] font-black uppercase tracking-wider text-primary bg-primary/8 rounded-full px-2 py-0.5">
+              <span className="inline-block text-[12px] font-black text-primary bg-primary/8 rounded-full px-2 py-0.5">
                 {(item.quantity * item.units_each).toLocaleString('en-IN')} units total
               </span>
             )}
@@ -117,7 +117,7 @@ function CartItemRow({ item, onQtyChange, onRemove }: {
       {/* Remove */}
       <button
         onClick={onRemove}
-        className="flex-shrink-0 p-2 rounded-xl border-2 border-transparent hover:border-error/30 hover:bg-error/5 text-on-surface-variant/40 hover:text-error transition-all duration-200"
+        className="flex-shrink-0 p-2 rounded-xl border-2 border-transparent hover:border-error/30 hover:bg-error/5 text-on-surface-variant/40 hover:text-error transition duration-200"
         aria-label="Remove item"
       >
         <Trash2 size={16} />
@@ -142,14 +142,12 @@ function CouponInputSection({
   if (appliedCoupon) {
     return (
       <div className="relative overflow-hidden bg-surface-card rounded-2xl border-2 border-primary p-4 flex items-center justify-between gap-3">
-        {/* Dot texture */}
-        <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle,#000_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none rounded-2xl" />
         <div className="flex items-center gap-3 relative z-10">
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
             <BadgeCheck size={18} className="text-white" />
           </div>
           <div>
-            <p className="text-sm font-black text-primary uppercase tracking-wider">
+            <p className="text-sm font-black text-primary">
               {appliedCoupon.code} applied
             </p>
             {appliedCoupon.description && (
@@ -161,7 +159,7 @@ function CouponInputSection({
         </div>
         <button
           onClick={onRemove}
-          className="relative z-10 text-[11px] font-black uppercase tracking-wider text-on-surface-variant border-2 border-table-border rounded-xl px-3 py-1.5 hover:border-error/40 hover:text-error transition-all duration-200 flex items-center gap-1 flex-shrink-0"
+          className="relative z-10 text-[11px] font-black text-on-surface-variant border-2 border-table-border rounded-xl px-3 py-1.5 hover:border-error/40 hover:text-error transition duration-200 flex items-center gap-1 flex-shrink-0"
         >
           <X size={11} /> Remove
         </button>
@@ -173,7 +171,7 @@ function CouponInputSection({
     <div className="bg-surface-card rounded-2xl border-2 border-table-border p-4">
       <div className="flex items-center gap-2 mb-3">
         <Tag size={15} className="text-primary" strokeWidth={2.5} />
-        <span className="text-[11px] font-black uppercase tracking-[0.15em] text-primary">Apply Coupon</span>
+        <span className="text-[11px] font-black text-primary">Apply Coupon</span>
       </div>
       <div className="flex items-stretch gap-2">
         <input
@@ -182,12 +180,12 @@ function CouponInputSection({
           onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
           onKeyDown={(e) => e.key === 'Enter' && onApply()}
           placeholder="ENTER CODE"
-          className="flex-1 min-w-0 border-2 border-table-border focus:border-primary rounded-xl px-4 py-2.5 text-sm bg-surface-container-low placeholder:text-on-surface-variant/30 focus:outline-none transition-colors font-black tracking-widest uppercase"
+          className="flex-1 min-w-0 border-2 border-table-border focus:border-primary rounded-xl px-4 py-2.5 text-base bg-surface-container-low placeholder:text-on-surface-variant/50 focus:outline-none transition-colors font-bold uppercase"
         />
         <button
           onClick={onApply}
           disabled={!couponInput.trim() || loading}
-          className="shrink-0 whitespace-nowrap px-5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-xl border-2 border-primary hover:bg-primary/90 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+          className="shrink-0 whitespace-nowrap px-5 bg-primary text-white text-[11px] font-black rounded-xl border-2 border-primary hover:bg-primary/90 transition duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
         >
           {loading ? '...' : 'Apply'}
         </button>
@@ -212,11 +210,9 @@ function OrderSummaryCard({
 
   return (
     <section className="relative bg-primary rounded-2xl p-5 overflow-hidden">
-      {/* Dot texture */}
-      <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
 
       <div className="relative z-10">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-4">
+        <p className="text-[12px] font-black text-white/40 mb-4">
           Order Summary
         </p>
 
@@ -243,7 +239,7 @@ function OrderSummaryCard({
               {deliveryFee === 0 ? (
                 <>
                   <span className="line-through text-white/30 text-xs">₹50.00</span>
-                  <span className="text-white font-black text-xs uppercase tracking-wider">Free</span>
+                  <span className="text-white font-black text-xs">Free</span>
                 </>
               ) : (
                 <span className="text-white font-black">{fmt(deliveryFee)}</span>
@@ -252,14 +248,14 @@ function OrderSummaryCard({
           </div>
 
           <div className="flex justify-between items-end pt-1">
-            <span className="font-black text-white/70 text-xs uppercase tracking-widest">Grand Total</span>
+            <span className="font-black text-white/70 text-xs">Grand Total</span>
             <span className="font-black text-white text-2xl">{fmt(total)}</span>
           </div>
         </div>
 
         {/* Payment badge */}
         <div className="mt-4 flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2 border border-white/15">
-          <span className="text-[10px] font-black text-white bg-white/20 px-2 py-0.5 rounded-full uppercase tracking-wider">Secure</span>
+          <span className="text-[12px] font-black text-white bg-white/20 px-2 py-0.5 rounded-full">Secure</span>
           <span className="text-xs text-white/50 font-medium">Online payment via UPI, Card &amp; Net Banking</span>
         </div>
       </div>
@@ -270,33 +266,14 @@ function OrderSummaryCard({
 // ── Empty Cart State ──────────────────────────────────────────────────────────
 function EmptyCart() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-      <div className="relative mb-6">
-        <div className="w-24 h-24 border-2 border-table-border bg-surface-card rounded-3xl flex items-center justify-center">
-          <ShoppingBag size={40} className="text-on-surface-variant/25" strokeWidth={1.5} />
-        </div>
-        <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-          <span className="text-white text-[10px] font-black">0</span>
-        </div>
-      </div>
-      <h2 className="text-xl font-black text-primary uppercase tracking-tight mb-2">
-        Your cart is empty
-      </h2>
-      <p className="text-sm font-medium text-on-surface-variant/70 mb-7 max-w-xs leading-relaxed">
-        Add products from the catalogue to start your bulk order
-      </p>
-      <div className="flex items-center gap-3 w-full max-w-xs mb-6">
-        <div className="h-px flex-1 bg-table-border" />
-        <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/40">or</span>
-        <div className="h-px flex-1 bg-table-border" />
-      </div>
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-black text-xs uppercase tracking-widest rounded-xl hover:bg-primary/90 transition-all duration-200 active:scale-95 shadow-sm"
-      >
-        Browse Products <ArrowRight size={15} strokeWidth={2.5} />
-      </Link>
-    </div>
+    <EmptyState
+      art="bag"
+      title="Your bag is empty"
+      accent="for now."
+      text="Pick a single piece at retail price, or a whole box at bulk price."
+      action={{ href: '/', label: 'Start shopping' }}
+      secondary={{ href: '/search', label: 'Browse every aisle' }}
+    />
   )
 }
 
@@ -438,9 +415,8 @@ export default function CartPage() {
     <div className="min-h-screen">
       {/* ── Page hero strip ── */}
       <div className="relative overflow-hidden bg-primary border-b-2 border-primary mb-6">
-        <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none" />
         <div className="relative z-10 px-4 max-w-5xl mx-auto py-7 md:py-9">
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-2 block">
+          <span className="text-[11px] font-black text-white/40 mb-2 block">
             Your Order
           </span>
           <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
@@ -463,7 +439,7 @@ export default function CartPage() {
               <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
                 <Truck size={15} className="text-white" />
               </div>
-              <p className="text-sm font-black text-primary uppercase tracking-wide">
+              <p className="text-sm font-black text-primary">
                 Free Delivery Unlocked!
               </p>
             </div>
@@ -480,7 +456,7 @@ export default function CartPage() {
           <section>
             <div className="flex items-center gap-3 mb-3">
               <div className="h-px flex-1 bg-table-border" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/40">
+              <span className="text-[12px] font-black text-on-surface-variant/40">
                 {items.length} {items.length === 1 ? 'Item' : 'Items'}
               </span>
               <div className="h-px flex-1 bg-table-border" />
@@ -537,7 +513,7 @@ export default function CartPage() {
               </p>
             ) : belowMinOrder ? (
               <p className="hidden lg:block text-center text-xs font-black text-error bg-error/10 border-2 border-error/20 rounded-xl py-2.5 px-3">
-                Minimum order ₹{minOrderValue.toLocaleString('en-IN')} — add ₹{amountToMin.toLocaleString('en-IN')} more to checkout
+                Minimum order ₹{minOrderValue.toLocaleString('en-IN')}. Add ₹{amountToMin.toLocaleString('en-IN')} more to check out.
               </p>
             ) : null}
 
@@ -545,7 +521,7 @@ export default function CartPage() {
             <button
               onClick={goToCheckout}
               disabled={checkoutDisabled}
-              className="hidden lg:flex w-full bg-primary text-white font-black text-sm uppercase tracking-widest py-4 rounded-2xl items-center justify-center gap-2 hover:bg-primary/90 transition-all duration-200 active:scale-95 shadow-sm border-2 border-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+              className="hidden lg:flex w-full bg-primary text-white font-black text-sm py-4 rounded-2xl items-center justify-center gap-2 hover:bg-primary/90 transition duration-200 active:scale-95 shadow-sm border-2 border-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
             >
               Proceed to Checkout
               <ArrowRight size={17} strokeWidth={2.5} />
@@ -553,10 +529,10 @@ export default function CartPage() {
 
             {/* Trust badges */}
             <div className="hidden lg:flex justify-center gap-5 text-on-surface-variant/40 mt-1">
-              <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider">
+              <div className="flex items-center gap-1.5 text-[11px] font-black">
                 <ShieldCheck size={13} strokeWidth={2.5} /> Secure
               </div>
-              <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider">
+              <div className="flex items-center gap-1.5 text-[11px] font-black">
                 <ShoppingBag size={13} strokeWidth={2.5} /> Bulk
               </div>
             </div>
@@ -564,7 +540,7 @@ export default function CartPage() {
         </div>
 
         {/* ── Mobile sticky checkout bar ── */}
-        <div className="lg:hidden fixed bottom-16 inset-x-0 bg-primary border-t-2 border-primary px-4 py-3 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.25)] z-40">
+        <div className="lg:hidden fixed bottom-16 inset-x-0 bg-primary border-t-2 border-primary px-4 py-3 shadow-[var(--shadow-modal)] z-40">
           {!storeOpen ? (
             <p className="max-w-lg mx-auto mb-2 text-center text-[11px] font-black text-white bg-error/30 border border-error/40 rounded-lg py-1.5 px-2">
               Orders open {openLabel}–{closeLabel} — currently closed
@@ -576,7 +552,7 @@ export default function CartPage() {
           ) : null}
           <div className="flex justify-between items-center max-w-lg mx-auto gap-4">
             <div>
-              <span className="text-[9px] font-black uppercase tracking-widest text-white/40 block">
+              <span className="text-[11px] font-black text-white/40 block">
                 Total to pay
               </span>
               <span className="text-lg font-black text-white">
@@ -586,7 +562,7 @@ export default function CartPage() {
             <button
               onClick={goToCheckout}
               disabled={checkoutDisabled}
-              className="flex-shrink-0 bg-white text-primary font-black text-sm uppercase tracking-wider px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-white/90 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+              className="flex-shrink-0 bg-white text-primary font-black text-sm px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-white/90 transition duration-200 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
             >
               Checkout <ChevronRight size={16} strokeWidth={2.5} />
             </button>

@@ -3,8 +3,10 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { nanoid } from 'nanoid'
+import { requirePermission } from '@/lib/auth/guard'
 
 export async function POST(req: NextRequest) {
+  const noPerm = await requirePermission('manage_products', 'manage_banners', 'manage_categories'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 

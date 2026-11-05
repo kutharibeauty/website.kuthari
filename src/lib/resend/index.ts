@@ -36,6 +36,9 @@ export interface OrderEmailData {
   gstBusinessName?: string | null
   /** Admin-set email subject line; overrides the auto-generated one when set. */
   customSubject?: string | null
+  /** 'online' | 'partial' | 'cod' and what was paid online now. */
+  paymentMethod?: string | null
+  amountPaid?: number | null
 }
 
 export interface AdminRecipient {

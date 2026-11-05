@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { getReferralConfig } from '@/lib/referral/config'
+import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
 
 /**
  * GET /api/referral/validate?code=XYZ — check a referral code for the signed-in
@@ -10,6 +11,9 @@ import { getReferralConfig } from '@/lib/referral/config'
  * shape so the cart can preview it. The order route re-validates authoritatively.
  */
 export async function GET(req: NextRequest) {
+  // Slow down code guessing.
+  const rl = await rateLimit({ key: `referral:ip:${getClientIp(req)}`, limit: 30, windowSec: 600 })
+  if (!rl.ok) return rateLimitResponse(rl)
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const meta = sessionClaims?.publicMetadata as AuthMetadata | undefined

@@ -22,6 +22,9 @@ type OrderDetail = {
   address: Address | null
   items: OrderItem[]
   payment_method: string
+  payment_status?: string | null
+  amount_paid?: number | string | null
+  amount_due?: number | string | null
   notes: string | null
   is_bulk: boolean
   estimated_delivery?: string | null
@@ -121,10 +124,10 @@ export default function OrderDetailClient({
             <ArrowLeft size={20} strokeWidth={2.5} />
           </Link>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-primary tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight">
               {order.order_number || `#${order.id.slice(-8).toUpperCase()}`}
             </h1>
-            <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mt-1">
+            <p className="text-xs font-bold text-on-surface-variant mt-1">
               {new Date(order.created_at).toLocaleString('en-IN', {
                 day: '2-digit', month: 'long', year: 'numeric',
                 hour: '2-digit', minute: '2-digit',
@@ -141,14 +144,14 @@ export default function OrderDetailClient({
           <Link
             href={`/api/orders/${order.id}/invoice`}
             target="_blank"
-            className="flex items-center justify-center gap-2 px-5 py-3 border-2 border-table-border bg-surface-card text-primary rounded-xl font-bold text-xs uppercase tracking-widest hover:border-primary/40 transition-colors active:scale-95"
+            className="flex items-center justify-center gap-2 px-5 py-3 border-2 border-table-border bg-surface-card text-primary rounded-xl font-bold text-xs hover:border-primary/40 transition-colors active:scale-95"
           >
             <Download size={16} strokeWidth={2.5} />
             Invoice
           </Link>
           <Link
             href={`/admin/orders/${order.id}/timeline`}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
           >
             <Clock size={16} strokeWidth={2.5} />
             Timeline
@@ -165,11 +168,11 @@ export default function OrderDetailClient({
           <Card title="Customer Profile">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5">Name</p>
+                <p className="font-bold text-[12px] text-on-surface-variant mb-1.5">Name</p>
                 <p className="font-bold text-base text-primary">{addr?.name ?? '—'}</p>
               </div>
               <div>
-                <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5">Phone</p>
+                <p className="font-bold text-[12px] text-on-surface-variant mb-1.5">Phone</p>
                 {addr?.phone ? (
                   <a
                     href={`tel:${addr.phone}`}
@@ -194,7 +197,7 @@ export default function OrderDetailClient({
                   <p className="font-bold text-sm text-on-surface">{addr.city}, {addr.state} — {addr.pincode}</p>
                   <p className="font-bold text-sm text-on-surface-variant mt-1">{addr.phone}</p>
                   {addr.label && (
-                    <span className="inline-block mt-2 px-2.5 py-1 border-2 border-table-border text-on-surface-variant rounded-lg font-black text-[10px] uppercase tracking-widest">
+                    <span className="inline-block mt-2 px-2.5 py-1 border-2 border-table-border text-on-surface-variant rounded-lg font-bold text-[12px]">
                       {addr.label}
                     </span>
                   )}
@@ -224,12 +227,12 @@ export default function OrderDetailClient({
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-sm text-primary truncate">{item.name}</p>
-                    <p className="font-black text-[10px] uppercase tracking-widest text-on-surface-variant mt-0.5">{item.unit}</p>
+                    <p className="font-bold text-[12px] text-on-surface-variant mt-0.5">{item.unit}</p>
                     <div className="flex items-center justify-between mt-2">
                       <p className="font-bold text-xs text-on-surface-variant">
                         {fmt(item.price)} × <span className="text-primary">{item.quantity}</span>
                       </p>
-                      <p className="font-black text-sm text-primary">
+                      <p className="font-bold text-sm text-primary">
                         {fmt(item.price * item.quantity)}
                       </p>
                     </div>
@@ -246,8 +249,8 @@ export default function OrderDetailClient({
               )}
               <Row label="Delivery" value={order.delivery_fee === 0 ? 'FREE' : fmt(order.delivery_fee)} />
               <div className="flex justify-between items-end pt-3 mt-1 border-t-2 border-table-border">
-                <span className="font-black text-[10px] uppercase tracking-widest text-primary/50">Grand Total</span>
-                <span className="font-black text-2xl text-primary tracking-tight">{fmt(order.total)}</span>
+                <span className="font-bold text-[12px] text-primary/50">Grand Total</span>
+                <span className="font-bold text-2xl text-primary tracking-tight">{fmt(order.total)}</span>
               </div>
             </div>
           </Card>
@@ -258,13 +261,12 @@ export default function OrderDetailClient({
 
           {/* Current status */}
           <div className="bg-primary p-6 rounded-2xl border-2 border-primary relative overflow-hidden">
-            <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none" />
             <div className="relative z-10 space-y-5">
               <div className="flex flex-col gap-2 border-b-2 border-white/10 pb-4">
-                <h3 className="font-black text-xs text-white/50 uppercase tracking-widest">
+                <h3 className="font-bold text-xs text-white/50">
                   Current Status
                 </h3>
-                <span className={cn('w-fit px-4 py-1.5 rounded-xl border-2 font-black text-xs uppercase tracking-widest', 
+                <span className={cn('w-fit px-4 py-1.5 rounded-xl border-2 font-bold text-xs', 
                   order.status === 'delivered' ? 'bg-success/20 text-success border-success/30' : 
                   order.status === 'cancelled' ? 'bg-error/20 text-error border-error/30' : 
                   'bg-white text-primary border-white'
@@ -274,7 +276,7 @@ export default function OrderDetailClient({
               </div>
 
               <div className="space-y-4">
-                <label className="block font-black text-[10px] text-white/70 uppercase tracking-widest">
+                <label className="block font-bold text-[12px] text-white/70">
                   Update Status
                 </label>
                 <div className="relative">
@@ -313,7 +315,7 @@ export default function OrderDetailClient({
                 <button
                   onClick={updateStatus}
                   disabled={updatingStatus || newStatus === order.status}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-white text-primary rounded-xl font-black text-xs uppercase tracking-widest hover:bg-white/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-white text-primary rounded-xl font-bold text-xs hover:bg-white/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm"
                 >
                   {updatingStatus && <Loader2 size={16} className="animate-spin" />}
                   {updatingStatus ? 'Updating…' : 'Save Status'}
@@ -325,17 +327,30 @@ export default function OrderDetailClient({
           {/* Payment */}
           <Card title="Payment">
             <div className="space-y-4">
-              <Row label="Method" value={order.payment_method.toUpperCase()} />
-              <Row label="Amount" value={fmt(order.total)} />
-              <div className="flex items-center justify-between pt-2 border-t-2 border-table-border">
-                <span className="font-black text-[10px] uppercase tracking-widest text-on-surface-variant">Collection</span>
-                <span className={cn(
-                  'px-3 py-1 rounded-lg border-2 font-black text-[10px] uppercase tracking-widest',
-                  order.status === 'delivered' ? 'bg-success/10 text-success border-success/30' : 'bg-surface-container-high text-on-surface border-table-border',
-                )}>
-                  {order.status === 'delivered' ? 'Collected' : 'Pending'}
-                </span>
-              </div>
+              <Row
+                label="Method"
+                value={order.payment_method === 'online' ? 'Paid online' : order.payment_method === 'partial' ? 'Part online, rest cash on delivery' : 'Cash on delivery'}
+              />
+              <Row label="Order total" value={fmt(order.total)} />
+              {(() => {
+                const fullyPaid = order.payment_status === 'collected'
+                const paid = fullyPaid ? Number(order.total) : Number(order.amount_paid ?? (order.payment_method === 'online' ? order.total : 0))
+                const due = fullyPaid ? 0 : Number(order.amount_due ?? Number(order.total) - paid)
+                return (
+                  <>
+                    <Row label="Paid so far" value={fmt(paid)} />
+                    <div className="flex items-center justify-between pt-2 border-t-2 border-table-border">
+                      <span className="font-bold text-[12px] text-on-surface-variant">Still to collect</span>
+                      <span className={cn(
+                        'px-3 py-1 rounded-lg border-2 font-bold text-[13px]',
+                        due <= 0 ? 'bg-success/10 text-success border-success/30' : 'bg-error/5 text-error border-error/30',
+                      )}>
+                        {due <= 0 ? 'Nothing, fully paid' : `${fmt(due)} in cash`}
+                      </span>
+                    </div>
+                  </>
+                )
+              })()}
             </div>
           </Card>
 
@@ -347,12 +362,12 @@ export default function OrderDetailClient({
                 onChange={e => setNotes(e.target.value)}
                 rows={4}
                 placeholder="Internal notes (not visible to customer)…"
-                className="w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 resize-none"
+                className="w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200 resize-none"
               />
               <button
                 onClick={saveNotes}
                 disabled={savingNotes || notes === (order.notes ?? '')}
-                className="w-full flex items-center justify-center gap-2 py-3 border-2 border-table-border bg-surface-card text-primary rounded-xl font-black text-xs uppercase tracking-widest hover:border-primary/40 disabled:opacity-50 transition-colors active:scale-95"
+                className="w-full flex items-center justify-center gap-2 py-3 border-2 border-table-border bg-surface-card text-primary rounded-xl font-bold text-xs hover:border-primary/40 disabled:opacity-50 transition-colors active:scale-95"
               >
                 <Edit3 size={14} strokeWidth={2.5} />
                 {savingNotes ? 'Saving…' : 'Save Notes'}
@@ -365,7 +380,7 @@ export default function OrderDetailClient({
 
       {/* ── Toast ── */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-primary text-white border-2 border-primary rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_8px_30px_rgba(44,24,16,0.3)]">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-primary text-white border-2 border-primary rounded-xl font-bold text-xs shadow-[0_8px_30px_rgba(44,24,16,0.3)]">
           {toast}
         </div>
       )}
@@ -378,7 +393,7 @@ export default function OrderDetailClient({
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-surface-card rounded-2xl border-2 border-table-border p-6 space-y-5">
-      <h3 className="font-black text-sm text-primary uppercase tracking-wider border-b-2 border-table-border pb-3">
+      <h3 className="font-bold text-sm text-primary border-b-2 border-table-border pb-3">
         {title}
       </h3>
       {children}
@@ -389,7 +404,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 function Row({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest">{label}</span>
+      <span className="font-bold text-[12px] text-on-surface-variant">{label}</span>
       <span className={cn('font-bold text-sm text-primary', valueClass)}>{value}</span>
     </div>
   )

@@ -30,11 +30,13 @@ import { notifyOrderEvent } from '@/lib/resend/notify'
 import { NextRequest, NextResponse, after } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { restoreStockForOrder } from '@/lib/orders/stock'
+import { requirePermission } from '@/lib/auth/guard'
 
 export async function PATCH(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const noPerm = await requirePermission('update_order_status'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 

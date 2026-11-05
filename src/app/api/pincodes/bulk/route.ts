@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin } from '@/lib/auth/guard'
+import { requireAdmin, requirePermission } from '@/lib/auth/guard'
 
 interface IncomingRow {
   pincode?: string
@@ -13,6 +13,7 @@ interface IncomingRow {
 // POST — bulk CSV import of serviceable pincodes.
 // Body: { rows: IncomingRow[] } → returns { inserted: Row[] }.
 export async function POST(request: Request) {
+  const noPerm = await requirePermission('manage_pincodes'); if (noPerm) return noPerm
   const denied = await requireAdmin(); if (denied) return denied
 
   const body = await request.json().catch(() => null) as { rows?: IncomingRow[] } | null

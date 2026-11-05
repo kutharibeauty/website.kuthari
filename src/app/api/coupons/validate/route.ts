@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthMetadata } from '@/types'
+import { rateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
 
 /**
  * POST /api/coupons/validate — check a coupon FOR THE CURRENT CUSTOMER.
@@ -17,6 +18,9 @@ import type { AuthMetadata } from '@/types'
  * be bypassed by applying while logged out.
  */
 export async function POST(req: NextRequest) {
+  // Slow down code guessing.
+  const rl = await rateLimit({ key: `coupon:ip:${getClientIp(req)}`, limit: 30, windowSec: 600 })
+  if (!rl.ok) return rateLimitResponse(rl)
   let body: { code?: string; subtotal?: number }
   try {
     body = await req.json()

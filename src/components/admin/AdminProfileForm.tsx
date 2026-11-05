@@ -14,7 +14,7 @@ interface Props {
 }
 
 const inputCls =
-  'w-full px-3 py-2.5 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed'
+  'w-full px-3 py-2.5 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed'
 
 export default function AdminProfileForm({ profile }: Props) {
   const router = useRouter()
@@ -92,11 +92,11 @@ export default function AdminProfileForm({ profile }: Props) {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1.5">Name *</label>
+            <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1.5">Name *</label>
             <input value={name} onChange={(e) => setName(e.target.value)} required disabled={isSuperAdmin} placeholder="Full name" className={inputCls} />
           </div>
           <div>
-            <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1.5">
+            <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1.5">
               Phone *{isEdit && <span className="normal-case ml-1 opacity-50">(read-only)</span>}
             </label>
             <input value={phone} onChange={(e) => setPhone(e.target.value)} required disabled={isEdit} placeholder="+91 9876543210" className={inputCls} />
@@ -105,12 +105,12 @@ export default function AdminProfileForm({ profile }: Props) {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1.5">Email</label>
+            <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1.5">Email</label>
             <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" disabled={isSuperAdmin} placeholder="email@example.com" className={inputCls} />
           </div>
           {!isSuperAdmin && (
             <div>
-              <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1.5">
+              <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1.5">
                 Role *{isEdit && <span className="normal-case ml-1 opacity-50">(read-only)</span>}
               </label>
               <select value={role} onChange={(e) => setRole(e.target.value as 'admin' | 'delivery')} disabled={isEdit} className={inputCls}>
@@ -149,7 +149,7 @@ export default function AdminProfileForm({ profile }: Props) {
         <button
           type="submit"
           disabled={submitting || isSuperAdmin}
-          className="flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-full font-label-sm text-label-sm uppercase tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-full font-label-sm text-label-sm hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {submitting && <Loader2 size={14} className="animate-spin" />}
           {submitting ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Profile'}
@@ -157,7 +157,7 @@ export default function AdminProfileForm({ profile }: Props) {
         <button
           type="button"
           onClick={() => router.push('/admin/profiles')}
-          className="px-6 py-3 rounded-full border-[1.5px] border-outline-variant text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-container transition-colors"
+          className="px-6 py-3 rounded-full border-[1.5px] border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container transition-colors"
         >
           Cancel
         </button>
@@ -166,7 +166,7 @@ export default function AdminProfileForm({ profile }: Props) {
             type="button"
             onClick={handleDeactivate}
             disabled={submitting}
-            className={cn('ml-auto px-6 py-3 rounded-full border-[1.5px] border-error text-error font-label-sm text-label-sm uppercase tracking-wider hover:bg-error/5 transition-colors disabled:opacity-60')}
+            className={cn('ml-auto px-6 py-3 rounded-full border-[1.5px] border-error text-error font-label-sm text-label-sm hover:bg-error/5 transition-colors disabled:opacity-60')}
           >
             Deactivate
           </button>

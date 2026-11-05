@@ -1,27 +1,36 @@
 import type { Metadata, Viewport } from 'next'
-import { Poppins, Playfair_Display } from 'next/font/google'
+import { Anton, Fraunces, Familjen_Grotesk } from 'next/font/google'
 import { MASTER_KEYWORDS } from '@/lib/seo/keywords'
 import AuthTokenCatcher from '@/components/auth/AuthTokenCatcher'
 import AdminShortcut from '@/components/auth/AdminShortcut'
 import SessionKeepAlive from '@/components/auth/SessionKeepAlive'
 import './globals.css'
 
-// TODO(Phase 2): replace with the real production domain once confirmed.
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.kutharibeauty.com'
 const OG_IMAGE = '/og-image.jpg'
 
-// Main site font
-const poppins = Poppins({
+// Body and every functional heading.
+const familjen = Familjen_Grotesk({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-poppins',
+  variable: '--font-familjen',
+  display: 'swap',
 })
 
-// Heading / sub-heading font — elegant high-contrast serif
-const playfair = Playfair_Display({
+// Display: statement heads, always uppercase.
+const anton = Anton({
   subsets: ['latin'],
-  weight: ['500', '600', '700', '800', '900'],
-  variable: '--font-playfair',
+  weight: '400',
+  variable: '--font-anton',
+  display: 'swap',
+})
+
+// Accent line under a display head, set in italic.
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  axes: ['opsz', 'SOFT'],
+  variable: '--font-fraunces',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -30,11 +39,8 @@ export const metadata: Metadata = {
     default: 'KUTHARI BEAUTY STORE — Cosmetics, Skincare, Haircare & Salon Products',
     template: '%s | KUTHARI BEAUTY STORE',
   },
-  // Placeholder copy — refine with the client's real coverage area/positioning in Phase 2.
   description:
     'Kuthari Beauty Store is your trusted store for cosmetics, skincare, haircare, salon and grooming products. Buy a single piece at retail price or order in bulk. Secure online payment, delivery across India.',
-  // TODO(Phase 2): MASTER_KEYWORDS still lists grocery/commodity terms — replace with
-  // real cosmetics/salon/grooming SEO keywords once the client confirms brands/categories.
   keywords: [
     ...MASTER_KEYWORDS.brand,
     ...MASTER_KEYWORDS.retail,
@@ -88,7 +94,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1b2c3d',
+  themeColor: '#f3f2ee',
   width: 'device-width',
   initialScale: 1,
   // Required for env(safe-area-inset-*) to return real values on iPhone.
@@ -99,13 +105,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${poppins.variable} ${playfair.variable}`}>
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
-        />
-      </head>
+    <html lang="en" className={`${familjen.variable} ${anton.variable} ${fraunces.variable}`}>
       <body>
         <AuthTokenCatcher />
         <AdminShortcut />

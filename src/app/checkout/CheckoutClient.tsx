@@ -15,6 +15,9 @@ import { useStoreOpen } from '@/hooks/useStoreOpen'
 import { formatMinute } from '@/lib/store-hours'
 import { cn } from '@/lib/utils'
 import PincodeChecker from '@/components/checkout/PincodeChecker'
+import PaymentOptions from '@/components/checkout/PaymentOptions'
+import { availablePaymentModes, advanceFor, type PaymentMode } from '@/lib/cart/delivery'
+import { RETAIL_LABEL } from '@/lib/products/packaging'
 import AddressForm from '@/components/checkout/AddressForm'
 import { Skeleton, AddressCardSkeleton } from '@/components/ui/Skeleton'
 import { isValidGstin } from '@/lib/validations/gst'
@@ -130,12 +133,18 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
   // Minimum-order gate (admin-set, 0 = none). The order route enforces this too.
   const minOrderValue = deliveryConfig.minOrderValue
   const belowMinOrder = minOrderValue > 0 && subtotal < minOrderValue
-  const razorpayEnabled = deliveryConfig.razorpayEnabled
-  // No Cash on Delivery — every order pays online, so checkout can't proceed
-  // at all until the admin has Razorpay configured and enabled.
-  // Delivery is all-India, so the destination never blocks checkout — the
+  // Payment: what the admin has switched on and what this order qualifies for.
+  // A bulk order has any line above the single-piece retail option; the order
+  // route decides this again from the database.
+  const isBulkOrder = items.some((i) => i.variant !== RETAIL_LABEL)
+  const paymentModes = availablePaymentModes(deliveryConfig, isBulkOrder)
+  const [chosenMode, setChosenMode] = useState<PaymentMode | null>(null)
+  const payMode: PaymentMode | null = chosenMode && paymentModes.includes(chosenMode) ? chosenMode : (paymentModes[0] ?? null)
+  const cashTotal = Math.round(grandTotal)
+  const advance = advanceFor(cashTotal, deliveryConfig.bulkAdvancePercent)
+  // Delivery is all-India, so the destination never blocks checkout; the
   // pincode lookup only decides the delivery charge.
-  const canPlace = !!selectedId && gstOk && !belowMinOrder && storeOpen && razorpayEnabled
+  const canPlace = !!selectedId && gstOk && !belowMinOrder && storeOpen && payMode !== null
   const openLabel = formatMinute(deliveryConfig.orderHours.openMinute)
   const closeLabel = formatMinute(deliveryConfig.orderHours.closeMinute)
 
@@ -260,7 +269,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
     gstin: gstEnabled ? gstin.trim().toUpperCase() || undefined : undefined,
     gst_business_name: gstEnabled ? gstBusinessName.trim() || undefined : undefined,
     referral_code: referralApplied?.code || undefined,
-    payment_method: 'online' as const,
+    payment_method: payMode ?? undefined,
     ...extra,
   })
 
@@ -291,7 +300,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
       if (json.error_code === 'referral_invalid') {
         setReferralApplied(null)
         setReferralError(json.error ?? 'Referral code could not be applied.')
-        setError('Your referral code could not be applied. It has been removed — please place your order again.')
+        setError('Your referral code could not be applied. It has been removed. Please place your order again.')
         return null
       }
       throw new Error(json.detail ? `${json.error}: ${json.detail}` : (json.error ?? 'Failed to place order'))
@@ -340,9 +349,9 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
       amount: rz.amount,
       currency: rz.currency,
       name: 'Kuthari Beauty Store',
-      description: 'Order payment',
+      description: payMode === 'partial' ? 'Advance for your bulk order' : 'Order payment',
       prefill: { email: email.trim(), name: addr?.name || '', contact: addr?.phone || '' },
-      theme: { color: '#1b2c3d' },
+      theme: { color: '#292966' },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       handler: async (resp: any) => {
         // Phase 2 — verify the payment server-side, which creates the order.
@@ -384,7 +393,14 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
     setError('')
     setIsPlacing(true)
     try {
-      await placeOnlineOrder()
+      if (payMode === 'cod') {
+        // Cash on delivery: one call, no payment window.
+        const done = await submitOrder()
+        if (!done) { setIsPlacing(false); return }
+        finishOrder(done.order_id)
+      } else {
+        await placeOnlineOrder()
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
       setIsPlacing(false)
@@ -413,8 +429,6 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
     <>
       {/* ── Fixed header ── */}
       <header className="fixed top-0 left-0 w-full z-50 flex items-center px-4 h-16 lg:h-[68px] bg-surface border-b-2 border-table-border shadow-sm">
-        {/* Dot texture */}
-        <div className="absolute inset-0 opacity-[0.05] bg-[radial-gradient(circle,#1B2C3D_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
         <button
           onClick={() => router.back()}
           className="relative z-10 p-2 -ml-1 text-primary/70 hover:text-primary transition-colors rounded-xl hover:bg-primary/5"
@@ -427,7 +441,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
             <Logo className="h-12 lg:h-[52px] w-auto" />
           </Link>
         </div>
-        <div className="relative z-10 ml-auto flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-on-surface-variant">
+        <div className="relative z-10 ml-auto flex items-center gap-1.5 text-[12px] font-black text-on-surface-variant">
           <ShieldCheck size={12} strokeWidth={2.5} /> Secure
         </div>
       </header>
@@ -440,10 +454,10 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
 
           {/* Page title */}
           <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-on-surface-variant/40 mb-1">
+            <p className="text-[11px] font-black text-on-surface-variant/40 mb-1">
               Step 1 of 1
             </p>
-            <h1 className="text-2xl font-black text-primary tracking-tight uppercase">
+            <h1 className="text-2xl font-black text-primary tracking-tight">
               Checkout
             </h1>
           </div>
@@ -451,7 +465,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
           {/* ── Delivery Address ── */}
           <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-black text-sm uppercase tracking-widest text-primary flex items-center gap-2">
+              <h2 className="font-black text-sm text-primary flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                   <MapPin size={14} className="text-white" />
                 </div>
@@ -459,7 +473,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
               </h2>
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-on-surface-variant border-2 border-table-border rounded-xl px-3 py-1.5 hover:border-primary/40 hover:text-primary transition-all duration-200"
+                className="flex items-center gap-1.5 text-[11px] font-black text-on-surface-variant border-2 border-table-border rounded-xl px-3 py-1.5 hover:border-primary/40 hover:text-primary transition duration-200"
               >
                 <Plus size={12} strokeWidth={2.5} /> Add New
               </button>
@@ -468,10 +482,10 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
             {addresses.length === 0 ? (
               <button
                 onClick={() => setShowForm(true)}
-                className="w-full py-10 border-2 border-dashed border-table-border rounded-2xl flex flex-col items-center gap-3 text-on-surface-variant/40 hover:border-primary/40 hover:text-primary transition-all duration-200"
+                className="w-full py-10 border-2 border-dashed border-table-border rounded-2xl flex flex-col items-center gap-3 text-on-surface-variant/40 hover:border-primary/40 hover:text-primary transition duration-200"
               >
                 <MapPin size={28} strokeWidth={1.5} />
-                <span className="text-[11px] font-black uppercase tracking-wider">Add a delivery address</span>
+                <span className="text-[11px] font-black">Add a delivery address</span>
               </button>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
@@ -482,21 +496,21 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                       key={addr.id}
                       onClick={() => setSelectedId(addr.id)}
                       className={cn(
-                        'relative rounded-2xl border-2 p-4 text-left transition-all duration-200',
+                        'relative rounded-2xl border-2 p-4 text-left transition duration-200',
                         isSelected
-                          ? 'border-primary bg-primary/3 shadow-[0_0_0_4px_rgba(0,0,0,0.04)]'
+                          ? 'border-primary bg-primary/3 shadow-[0_0_0_4px_var(--color-haze)]'
                           : 'border-table-border hover:border-primary/30',
                       )}
                     >
                       {/* Selected tick */}
                       {isSelected && (
                         <div className="absolute top-3 right-3 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                          <span className="text-white text-[10px]">✓</span>
+                          <span className="text-white text-[12px]">✓</span>
                         </div>
                       )}
 
                       {addr.label && (
-                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-on-surface-variant/40 mb-1">
+                        <p className="text-[11px] font-black text-on-surface-variant/40 mb-1">
                           {addr.label}
                         </p>
                       )}
@@ -505,7 +519,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                         {addr.line1}
                         {addr.line2 && `, ${addr.line2}`}
                         <br />
-                        {addr.city}, {addr.state} — {addr.pincode}
+                        {addr.city}, {addr.state} {addr.pincode}
                       </p>
                       <p className="text-xs font-medium text-on-surface-variant/50 mt-1.5">{addr.phone}</p>
 
@@ -517,7 +531,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                             tabIndex={0}
                             onClick={() => setEditing(addr)}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setEditing(addr) } }}
-                            className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors cursor-pointer mb-3"
+                            className="inline-flex items-center gap-1.5 text-[11px] font-black text-on-surface-variant hover:text-primary transition-colors cursor-pointer mb-3"
                           >
                             <Pencil size={12} strokeWidth={2.5} /> Edit address
                           </span>
@@ -536,7 +550,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
 
           {/* ── Delivery Method ── */}
           <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5">
-            <h2 className="font-black text-sm uppercase tracking-widest text-primary flex items-center gap-2 mb-4">
+            <h2 className="font-black text-sm text-primary flex items-center gap-2 mb-4">
               <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                 <Truck size={14} className="text-white" />
               </div>
@@ -544,10 +558,10 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
             </h2>
             <div className="rounded-2xl border-2 border-primary bg-primary/3 p-4 flex items-start gap-4">
               <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-white text-[10px] font-black">✓</span>
+                <span className="text-white text-[12px] font-black">✓</span>
               </div>
               <div>
-                <p className="font-black text-sm text-primary uppercase tracking-wide">
+                <p className="font-black text-sm text-primary">
                   Kuthari Beauty Store Direct Delivery
                 </p>
                 <p className="text-xs font-medium text-on-surface-variant/60 mt-1 leading-relaxed">
@@ -559,51 +573,30 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
 
           {/* ── Payment Method ── */}
           <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5">
-            <h2 className="font-black text-sm uppercase tracking-widest text-primary flex items-center gap-2 mb-4">
+            <h2 className="font-black text-sm text-primary flex items-center gap-2 mb-4">
               <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                 <Wallet size={14} className="text-white" />
               </div>
               Payment Method
             </h2>
-            {razorpayEnabled ? (
-              <div className="rounded-2xl border-2 border-primary bg-primary/3 p-4 flex items-start gap-4">
-                <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-[10px] font-black">✓</span>
-                </div>
-                <div>
-                  <p className="font-black text-sm text-primary uppercase tracking-wide">
-                    Online Payment
-                  </p>
-                  <p className="text-xs font-medium text-on-surface-variant/60 mt-1">
-                    UPI · Card · Net Banking — secured by Razorpay. Cash on Delivery is not available.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-2xl border-2 border-error/40 bg-error/5 p-4 flex items-start gap-4">
-                <div className="w-5 h-5 rounded-full bg-error flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-[10px] font-black">!</span>
-                </div>
-                <div>
-                  <p className="font-black text-sm text-error uppercase tracking-wide">
-                    Online payment not yet set up
-                  </p>
-                  <p className="text-xs font-medium text-on-surface-variant/60 mt-1">
-                    Orders can&apos;t be placed until online payment is configured. Please contact us directly for now.
-                  </p>
-                </div>
-              </div>
-            )}
+            <PaymentOptions
+              modes={paymentModes}
+              value={payMode}
+              onChange={setChosenMode}
+              total={cashTotal}
+              advance={advance}
+              advancePercent={deliveryConfig.bulkAdvancePercent}
+            />
           </section>
 
           {/* ── GST Invoice (optional) ── */}
           <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5">
-            <h2 className="font-black text-sm uppercase tracking-widest text-primary flex items-center gap-2 mb-4">
+            <h2 className="font-black text-sm text-primary flex items-center gap-2 mb-4">
               <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                 <Receipt size={14} className="text-white" />
               </div>
               GST Invoice
-              <span className="text-[10px] normal-case tracking-normal text-on-surface-variant/50 font-medium">
+              <span className="text-[12px] normal-case tracking-normal text-on-surface-variant/50 font-medium">
                 (optional)
               </span>
             </h2>
@@ -629,26 +622,26 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                 />
               </div>
               <span className="text-sm font-bold text-on-surface-variant leading-snug">
-                I&apos;m buying for my business — add my GST details so I can claim input tax credit.
+                I&apos;m buying for my business. Add my GST details so I can claim input tax credit.
               </span>
             </label>
 
             {gstEnabled && (
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label htmlFor="gst-business" className="text-[11px] font-black text-on-surface-variant/70 uppercase tracking-[0.1em] block mb-1.5">
+                  <label htmlFor="gst-business" className="text-[11px] font-black text-on-surface-variant/70 block mb-1.5">
                     Registered Business Name *
                   </label>
                   <input
                     id="gst-business"
                     value={gstBusinessName}
                     onChange={(e) => setGstBusinessName(e.target.value)}
-                    placeholder="e.g. Ramesh Kirana Stores"
+                    placeholder="e.g. Glow Beauty Parlour"
                     className="w-full px-4 py-3 rounded-xl border-2 border-table-border bg-background text-sm font-medium text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label htmlFor="gst-number" className="text-[11px] font-black text-on-surface-variant/70 uppercase tracking-[0.1em] block mb-1.5">
+                  <label htmlFor="gst-number" className="text-[11px] font-black text-on-surface-variant/70 block mb-1.5">
                     GSTIN *
                   </label>
                   <input
@@ -659,7 +652,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                     maxLength={15}
                     autoCapitalize="characters"
                     className={cn(
-                      'w-full px-4 py-3 rounded-xl border-2 bg-background text-sm font-bold tracking-wider uppercase text-on-surface placeholder:text-on-surface-variant/40 placeholder:font-medium placeholder:tracking-normal focus:outline-none transition-colors',
+                      'w-full px-4 py-3 rounded-xl border-2 bg-background text-base font-bold uppercase text-on-surface placeholder:text-on-surface-variant/40 placeholder:font-medium placeholder:tracking-normal focus:outline-none transition-colors',
                       gstin.length === 0 || isValidGstin(gstin)
                         ? 'border-table-border focus:border-primary'
                         : 'border-error focus:border-error',
@@ -680,27 +673,27 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
           {/* ── Referral code (new customers) ── */}
           {referralEligible && (
             <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5">
-              <h2 className="font-black text-sm uppercase tracking-widest text-primary flex items-center gap-2 mb-4">
+              <h2 className="font-black text-sm text-primary flex items-center gap-2 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                   <Gift size={14} className="text-white" />
                 </div>
                 Referral Code
-                <span className="text-[10px] normal-case tracking-normal text-on-surface-variant/50 font-medium">(optional)</span>
+                <span className="text-[12px] normal-case tracking-normal text-on-surface-variant/50 font-medium">(optional)</span>
               </h2>
               {referralApplied ? (
                 <div className="flex items-center justify-between gap-3 rounded-xl border-2 border-primary bg-primary/5 px-4 py-3">
                   <div>
-                    <p className="text-sm font-black text-primary uppercase tracking-wider">{referralApplied.code} applied</p>
+                    <p className="text-sm font-black text-primary">{referralApplied.code} applied</p>
                     <p className="text-xs font-bold text-on-surface-variant/60 mt-0.5">−₹{referralDiscount.toFixed(0)} off your first order</p>
                   </div>
                   <button
                     onClick={() => { setReferralApplied(null); setReferralInput(''); setReferralError('') }}
-                    className="text-[11px] font-black uppercase tracking-wider text-on-surface-variant border-2 border-table-border rounded-xl px-3 py-1.5 hover:border-error/40 hover:text-error transition-colors"
+                    className="text-[11px] font-black text-on-surface-variant border-2 border-table-border rounded-xl px-3 py-1.5 hover:border-error/40 hover:text-error transition-colors"
                   >Remove</button>
                 </div>
               ) : couponDiscount > 0 ? (
                 <p className="text-xs font-bold text-on-surface-variant/70 leading-relaxed">
-                  A coupon is already applied. You can use a coupon <b>or</b> a referral code, not both — remove the coupon to enter a friend&apos;s code.
+                  A coupon is already applied. You can use a coupon <b>or</b> a referral code, not both. Remove the coupon to enter a friend&apos;s code.
                 </p>
               ) : (
                 <>
@@ -710,12 +703,12 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                       onChange={(e) => setReferralInput(e.target.value.toUpperCase())}
                       onKeyDown={(e) => { if (e.key === 'Enter') applyReferral() }}
                       placeholder="FRIEND'S CODE"
-                      className="flex-1 min-w-0 border-2 border-table-border focus:border-primary rounded-xl px-4 py-2.5 text-sm bg-background placeholder:text-on-surface-variant/30 focus:outline-none transition-colors font-black tracking-widest uppercase"
+                      className="flex-1 min-w-0 border-2 border-table-border focus:border-primary rounded-xl px-4 py-2.5 text-base bg-background placeholder:text-on-surface-variant/50 focus:outline-none transition-colors font-bold uppercase"
                     />
                     <button
                       onClick={applyReferral}
                       disabled={!referralInput.trim() || referralChecking}
-                      className="shrink-0 px-5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40 active:scale-95 flex items-center gap-1.5"
+                      className="shrink-0 px-5 bg-primary text-white text-[11px] font-black rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40 active:scale-95 flex items-center gap-1.5"
                     >
                       {referralChecking ? <Loader2 size={13} className="animate-spin" /> : null} Apply
                     </button>
@@ -731,10 +724,10 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
           <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5">
             <label
               htmlFor="checkout-transport"
-              className="block font-black text-sm uppercase tracking-widest text-primary mb-3"
+              className="block font-black text-sm text-primary mb-3"
             >
               Transport / Bus{' '}
-              <span className="text-[10px] normal-case tracking-normal text-on-surface-variant/50 font-medium">
+              <span className="text-[12px] normal-case tracking-normal text-on-surface-variant/50 font-medium">
                 (optional)
               </span>
             </label>
@@ -747,7 +740,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
               <option value="">Not specified</option>
               {vehicles.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {[v.number, v.name].filter(Boolean).join(' — ')}
+                  {[v.number, v.name].filter(Boolean).join(', ')}
                 </option>
               ))}
               <option value="custom">Other (enter details)</option>
@@ -768,10 +761,10 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
           <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5 lg:hidden">
             <label
               htmlFor="checkout-notes"
-              className="block font-black text-sm uppercase tracking-widest text-primary mb-3"
+              className="block font-black text-sm text-primary mb-3"
             >
               Order Notes{' '}
-              <span className="text-[10px] normal-case tracking-normal text-on-surface-variant/50 font-medium">
+              <span className="text-[12px] normal-case tracking-normal text-on-surface-variant/50 font-medium">
                 (optional)
               </span>
             </label>
@@ -790,11 +783,9 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
         {/* ── RIGHT — Order Summary ── */}
         <div className="lg:col-span-5 xl:col-span-4 mt-5 lg:mt-6 lg:sticky lg:top-24 pb-28 lg:pb-0">
           <section className="relative bg-primary rounded-2xl overflow-hidden p-5">
-            {/* Dot texture */}
-            <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
 
             <div className="relative z-10">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/80 mb-4">
+              <p className="text-[11px] font-black text-white/80 mb-4">
                 Order Summary
               </p>
 
@@ -818,7 +809,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-black text-white line-clamp-1">{item.name}</p>
-                        <p className="text-[10px] text-white/80 font-medium">{item.unit} × {item.quantity}</p>
+                        <p className="text-[12px] text-white/80 font-medium">{item.unit} × {item.quantity}</p>
                       </div>
                     </div>
                     <span className="text-sm font-black text-white flex-shrink-0">
@@ -858,41 +849,40 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                   <span className="text-white/80 font-medium">Delivery</span>
                   {deliveryFee > 0
                     ? <span className="text-white font-black">₹{deliveryFee.toFixed(0)}</span>
-                    : <span className="text-white font-black text-xs uppercase tracking-wider">Free</span>}
+                    : <span className="text-white font-black text-xs">Free</span>}
                 </div>
               </div>
 
               <div className="flex items-end justify-between mb-5">
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/80">Total</span>
+                <span className="text-[12px] font-black text-white/80">Total</span>
                 <span className="text-2xl font-black text-white">₹{grandTotal.toFixed(0)}</span>
               </div>
 
-              {/* Payment method — online only, no Cash on Delivery */}
+              {/* What is paid now and what on delivery, for the chosen method. */}
               <div className="mb-5">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/35 mb-2">Payment Method</p>
-                {razorpayEnabled ? (
-                  <div className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-white bg-white/10 text-left">
-                    <span className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center flex-shrink-0">
-                      <span className="w-2 h-2 rounded-full bg-white" />
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-sm font-black text-white">Pay Online</span>
-                      <span className="block text-[11px] font-medium text-white/50">UPI · Card · Net Banking (Razorpay)</span>
-                    </span>
-                  </div>
-                ) : (
-                  <div className="w-full px-4 py-3 rounded-xl border-2 border-white/20 bg-white/5 text-left">
-                    <span className="block text-sm font-black text-white">Not available yet</span>
-                    <span className="block text-[11px] font-medium text-white/50">Online payment isn&apos;t configured — orders can&apos;t be placed right now.</span>
-                  </div>
-                )}
+                <p className="text-[12px] font-bold text-white/60 mb-2">Payment</p>
+                <div className="w-full px-4 py-3 rounded-xl border-2 border-white/20 bg-white/5 text-left space-y-1">
+                  {payMode === null && <span className="block text-sm font-bold text-white">Ordering is paused right now</span>}
+                  {payMode === 'online' && (
+                    <span className="block text-sm font-bold text-white">Pay ₹{grandTotal.toFixed(0)} online now</span>
+                  )}
+                  {payMode === 'cod' && (
+                    <span className="block text-sm font-bold text-white">Pay ₹{cashTotal} in cash on delivery</span>
+                  )}
+                  {payMode === 'partial' && (
+                    <>
+                      <span className="flex justify-between text-sm font-bold text-white"><span>Online now</span><span>₹{advance}</span></span>
+                      <span className="flex justify-between text-sm text-white/80"><span>Cash on delivery</span><span>₹{cashTotal - advance}</span></span>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Notes — desktop */}
               <div className="hidden lg:block mb-5">
                 <label
                   htmlFor="checkout-notes-desktop"
-                  className="block text-[10px] font-black uppercase tracking-widest text-white/35 mb-2"
+                  className="block text-[12px] font-black text-white/35 mb-2"
                 >
                   Order Notes (optional)
                 </label>
@@ -917,7 +907,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
               <button
                 onClick={requestPlaceOrder}
                 disabled={!canPlace || isPlacing}
-                className="hidden md:flex w-full items-center justify-center gap-2 bg-white text-primary font-black text-sm uppercase tracking-widest py-4 px-4 rounded-xl hover:bg-white/90 transition-all duration-200 active:scale-95 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                className="hidden md:flex w-full items-center justify-center gap-2 bg-white text-primary font-black text-sm py-4 px-4 rounded-xl hover:bg-white/90 transition duration-200 active:scale-95 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isPlacing && <Loader2 size={16} className="animate-spin" />}
                 {isPlacing
@@ -936,7 +926,7 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
                 </p>
               ) : belowMinOrder ? (
                 <p className="text-[11px] font-black text-white text-center mt-3">
-                  Minimum order ₹{minOrderValue.toLocaleString('en-IN')} — add ₹{(minOrderValue - subtotal).toLocaleString('en-IN')} more to place your order
+                  Minimum order ₹{minOrderValue.toLocaleString('en-IN')}. Add ₹{(minOrderValue - subtotal).toLocaleString('en-IN')} more to place your order
                 </p>
               ) : null}
             </div>
@@ -946,29 +936,29 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
 
       {/* ── Mobile sticky bottom bar ── */}
       <div
-        className="md:hidden fixed bottom-0 left-0 w-full bg-primary border-t-2 border-primary/50 px-4 py-3 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-40"
+        className="md:hidden fixed bottom-0 left-0 w-full bg-primary border-t-2 border-primary/50 px-4 py-3 shadow-[var(--shadow-modal)] z-40"
         style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
       >
         <div className="flex justify-between items-center mb-2.5">
-          <span className="text-[9px] font-black uppercase tracking-widest text-white/80">
+          <span className="text-[11px] font-black text-white/80">
             Total{couponDiscount > 0 ? ` · −₹${couponDiscount.toFixed(0)}` : ''}
           </span>
           <span className="text-xl font-black text-white">₹{grandTotal.toFixed(0)}</span>
         </div>
         {!storeOpen ? (
           <p className="text-[11px] font-black text-white bg-error/30 border border-error/40 rounded-lg py-1.5 px-2 text-center mb-2">
-            Orders open {openLabel}–{closeLabel} — currently closed
+            Orders open {openLabel} to {closeLabel}. Closed right now.
           </p>
         ) : belowMinOrder ? (
           <p className="text-[11px] font-black text-white bg-error/30 border border-error/40 rounded-lg py-1.5 px-2 text-center mb-2">
-            Min order ₹{minOrderValue.toLocaleString('en-IN')} — add ₹{(minOrderValue - subtotal).toLocaleString('en-IN')} more
+            Min order ₹{minOrderValue.toLocaleString('en-IN')}. Add ₹{(minOrderValue - subtotal).toLocaleString('en-IN')} more
           </p>
         ) : null}
         {error && <p className="text-xs font-bold text-error mb-2">{error}</p>}
         <button
           onClick={requestPlaceOrder}
           disabled={!canPlace || isPlacing}
-          className="w-full flex items-center justify-center gap-2 bg-white text-primary font-black text-sm uppercase tracking-widest py-3.5 px-4 rounded-xl active:scale-95 transition-all duration-200 disabled:opacity-40"
+          className="w-full flex items-center justify-center gap-2 bg-white text-primary font-black text-sm py-3.5 px-4 rounded-xl active:scale-95 transition duration-200 disabled:opacity-40"
         >
           {isPlacing && <Loader2 size={16} className="animate-spin" />}
           {isPlacing
@@ -987,11 +977,11 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
               </div>
               <div>
                 <h3 id="email-modal-title" className="font-black text-lg text-primary leading-tight">Your email for order updates</h3>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant/50">Required</p>
+                <p className="text-[11px] font-bold text-on-surface-variant/50">Required</p>
               </div>
             </div>
             <p className="text-sm font-medium text-on-surface-variant/80 mb-4">
-              Enter an active email address. We&apos;ll send your order confirmation and every status update — <strong className="text-primary">processing, shipped, out for delivery</strong> and <strong className="text-primary">delivered</strong> — to this email.
+              Enter an active email address. We&apos;ll send your order confirmation and every status update: <strong className="text-primary">processing, shipped, out for delivery</strong> and <strong className="text-primary">delivered</strong> — to this email.
             </p>
             <input
               type="email"
@@ -1013,14 +1003,14 @@ export default function CheckoutClient({ profileId, initialEmail = '' }: Props) 
               <button
                 onClick={() => setShowEmailModal(false)}
                 disabled={isPlacing}
-                className="flex-1 py-3 rounded-xl border-2 border-table-border font-black text-xs uppercase tracking-widest text-on-surface-variant hover:border-primary/40 hover:text-primary transition-colors disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl border-2 border-table-border font-black text-xs text-on-surface-variant hover:border-primary/40 hover:text-primary transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={placeOrder}
                 disabled={!emailValid || isPlacing}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white font-black text-xs hover:bg-primary/90 transition-colors active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isPlacing && <Loader2 size={16} className="animate-spin" />}
                 {isPlacing ? 'Placing…' : 'Confirm & Place Order'}

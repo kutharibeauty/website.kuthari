@@ -1,36 +1,35 @@
 import Link from 'next/link'
 import { unstable_cache } from 'next/cache'
-import { Phone, Mail, MapPin, Heart } from 'lucide-react'
 import { createAdminClient } from '@/lib/supabase/server'
-import Logo from './Logo'
+import { BrandLockup } from './Logo'
+import { FooterMap, VerifiedListings } from './FooterTrust'
+import PaymentBadges from './PaymentBadges'
+import Image from 'next/image'
+import { getStoreContent } from '@/lib/data/store-content'
 import type { Category } from '@/types/database.types'
 
-const PHONE_NUMBERS = [
-  { label: '+91 98612 35276', href: 'tel:+919861235276' },
-  { label: '+91 78490 76520', href: 'tel:+917849076520' },
-]
-
-const USEFUL_LINKS = [
-  { label: 'Home', href: '/' },
-  { label: 'All Categories', href: '/search' },
+const ACCOUNT_LINKS = [
   { label: 'Orders', href: '/orders' },
   { label: 'Profile', href: '/profile' },
-  { label: 'Cart', href: '/cart' },
+  { label: 'Wishlist', href: '/wishlist' },
+  { label: 'Shopping list', href: '/shopping-list' },
+  { label: 'Bag', href: '/cart' },
+]
+
+const HELP_LINKS = [
+  { label: 'Contact us', href: '/contact' },
+  { label: 'Shipping and delivery', href: '/shipping-policy' },
+  { label: 'Cancellations and refunds', href: '/refund-policy' },
+  { label: 'Privacy policy', href: '/privacy' },
+  { label: 'Terms of use', href: '/terms' },
 ]
 
 /**
- * Cached + admin client on purpose, NOT the cookie-scoped one. Same reasoning as
- * the shop layout's chrome query, but getting it wrong here was worse: the
- * cookie client calls `cookies()`, and this footer renders inside the layout on
- * EVERY shop page. Most of them are dynamic, so it went unnoticed — but the
- * product page sets `revalidate = 60`, so Next tries to statically generate it,
- * hits `cookies()` deep in the layout, and fails the whole render with
- * DYNAMIC_SERVER_USAGE. That was a hard 500 on every /product/* URL in
- * production (including ones that should have 404'd) while local dynamic
- * renders looked fine.
- *
- * Nothing here is per-user — it's a list of active category names — so caching
- * it also stops re-querying the same rows on every navigation.
+ * Cached + admin client on purpose, NOT the cookie-scoped one: this footer
+ * renders inside the layout on every shop page, and the product page is
+ * statically generated (`revalidate = 60`). Calling `cookies()` here failed
+ * that render with DYNAMIC_SERVER_USAGE, a hard 500 on every /product/* URL.
+ * Nothing here is per-user, so caching also saves a query per navigation.
  */
 const getFooterCategories = unstable_cache(
   async (): Promise<Pick<Category, 'id' | 'name' | 'slug'>[]> => {
@@ -46,80 +45,58 @@ const getFooterCategories = unstable_cache(
   { revalidate: 300, tags: ['shop-chrome'] },
 )
 
+const colHead = 'text-[14px] font-normal text-periwinkle mb-4'
+const colLink = 'text-[17px] font-semibold text-paper-raised hover:text-periwinkle transition-colors'
+
 export default async function Footer() {
-  const categories = await getFooterCategories()
+  const [categories, content] = await Promise.all([getFooterCategories(), getStoreContent()])
+  const { contact, social } = content
+  const socials = [
+    { label: 'Instagram', href: social.instagram },
+    { label: 'Facebook', href: social.facebook },
+    { label: 'YouTube', href: social.youtube },
+  ].filter((x) => x.href)
 
   return (
-    <footer className="mt-8 md:mt-24 relative overflow-hidden bg-primary text-white border-t-2 border-primary">
-      <div className="relative z-10 px-6 md:px-12 py-16 md:py-20 max-w-[1400px] mx-auto flex flex-col gap-14">
-        <div className="flex flex-col lg:flex-row gap-14 lg:gap-20">
-          {/* Brand & Info */}
-          <div className="flex flex-col flex-shrink-0">
-            <ul className="flex flex-col gap-6 text-[13px] font-medium tracking-wide text-white/65">
-              <li className="flex items-center gap-4 group cursor-pointer hover:text-white transition-colors">
-                <MapPin size={24} strokeWidth={2.5} className="group-hover:rotate-12 transition-transform duration-300" />
-                <span className="max-w-[240px] leading-relaxed">
-                  Marthapeta St, Sano Bazar<br />Back side of Ganesh Market<br />Brahmapur, Odisha 760009
-                </span>
-              </li>
-              <li className="flex items-center gap-4 group/item hover:text-white transition-colors">
-                <Phone size={24} strokeWidth={2.5} className="group-hover/item:-rotate-12 transition-transform duration-300 flex-shrink-0" />
-                <span className="flex flex-col gap-1">
-                  {PHONE_NUMBERS.map((p) => (
-                    <a key={p.href} href={p.href} className="hover:text-white transition-colors">
-                      {p.label}
-                    </a>
-                  ))}
-                </span>
-              </li>
-              <li className="flex items-center gap-4 group/item hover:text-white transition-colors">
-                <Mail size={24} strokeWidth={2.5} className="group-hover/item:rotate-12 transition-transform duration-300 flex-shrink-0" />
-                <a href="mailto:smortika@gmail.com" className="hover:text-white transition-colors normal-case tracking-normal">
-                  smortika@gmail.com
-                </a>
-              </li>
-              <li className="flex items-center gap-4 group/item hover:text-white transition-colors">
-                {/* Inline glyph — lucide-react v1 no longer ships brand icons. */}
-                <svg
-                  viewBox="0 0 24 24"
-                  width={24}
-                  height={24}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  className="group-hover/item:-rotate-12 transition-transform duration-300 flex-shrink-0"
-                >
-                  <rect x="2" y="2" width="20" height="20" rx="5" />
-                  <circle cx="12" cy="12" r="4" />
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                </svg>
-                <a
-                  href="https://www.instagram.com/k_beauty_store923/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors normal-case tracking-normal"
-                >
-                  Instagram
-                </a>
-              </li>
-            </ul>
+    <footer className="mt-[var(--spacing-section)] bg-ink-deep text-paper-raised pb-24">
+      <div className="mx-auto max-w-[1440px] px-5 md:px-10 pt-16 md:pt-24 pb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] gap-x-8 gap-y-12">
+          {/* Visit: the shop itself leads, because it is the business. */}
+          <div className="col-span-2 lg:col-span-1 flex flex-col gap-5">
+            <Link href="/" className="w-max rounded-xl bg-paper-raised px-4 py-3" aria-label="Kuthari Beauty Store, home">
+              <BrandLockup size="lg" />
+            </Link>
+            <p className="text-[16px] text-paper-raised">Open {contact.hours}</p>
+            <FooterMap address={contact.address} />
+            <VerifiedListings />
           </div>
 
-          {/* Useful Links */}
-          <div className="flex flex-col flex-shrink-0">
-            <h5 className="text-[10px] font-semibold text-white/45 uppercase tracking-[0.22em] mb-6">
-              Useful Links
-            </h5>
-            <ul className="flex flex-col gap-3">
-              {USEFUL_LINKS.map(({ label, href }) => (
+          {categories.length > 0 && (
+            <div>
+              <h2 className={colHead}>Shop</h2>
+              <ul className="flex flex-col gap-2.5">
+                {categories.slice(0, 7).map((cat) => (
+                  <li key={cat.id}>
+                    <Link href={`/category/${cat.slug}`} className={colLink}>
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))}
+                <li>
+                  <Link href="/search" className={colLink}>
+                    Everything
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          )}
+
+          <div>
+            <h2 className={colHead}>Your account</h2>
+            <ul className="flex flex-col gap-2.5">
+              {ACCOUNT_LINKS.map(({ label, href }) => (
                 <li key={href}>
-                  <Link
-                    href={href}
-                    className="text-sm font-medium text-white/60 hover:text-white transition-colors"
-                  >
+                  <Link href={href} className={colLink}>
                     {label}
                   </Link>
                 </li>
@@ -127,87 +104,60 @@ export default async function Footer() {
             </ul>
           </div>
 
-          {/* Categories — synced live from the admin panel */}
-          {categories.length > 0 && (
-            <div className="flex flex-col flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-5">
-                <h5 className="text-[10px] font-semibold text-white/45 uppercase tracking-[0.22em]">
-                  Categories
-                </h5>
-                <Link
-                  href="/search"
-                  className="link-underline text-[11px] font-semibold tracking-wide text-secondary hover:text-secondary/80 transition-colors"
-                >
-                  see all
-                </Link>
-              </div>
-              <div className="columns-2 sm:columns-3 gap-x-8">
-                {categories.map((cat) => (
-                  <Link
-                    key={cat.id}
-                    href={`/category/${cat.slug}`}
-                    className="block break-inside-avoid text-sm font-medium text-white/60 hover:text-white transition-colors py-1.5"
-                  >
-                    {cat.name}
+          <div>
+            <h2 className={colHead}>Help</h2>
+            <ul className="flex flex-col gap-2.5">
+              {HELP_LINKS.map(({ label, href }) => (
+                <li key={href}>
+                  <Link href={href} className={colLink}>
+                    {label}
                   </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Massive Logo — cream section matching the site background. Icon-only
-          image + a live text wordmark (not baked into the artwork), so the
-          store name can change without needing new artwork. */}
-      <div className="w-full bg-background text-primary pt-10 pb-32 md:pb-10 flex flex-col items-center justify-center overflow-hidden">
-        <Link href="/" className="inline-flex flex-col items-center group hover:scale-[1.02] transition-transform duration-700">
-          {/* Width derived from the height x the 364:498 icon aspect, so the
-              browser fetches a variant that matches instead of the full 364px. */}
-          <Logo
-            variant="mark"
-            className="h-24 sm:h-32 md:h-40 lg:h-44 w-auto"
-            sizes="(min-width: 1024px) 129px, (min-width: 768px) 117px, (min-width: 640px) 94px, 70px"
-          />
-          <span className="mt-3 sm:mt-4 font-heading font-black tracking-tight text-primary text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none">
-            KUTHARI
-          </span>
-          <span className="mt-1.5 sm:mt-2 font-sans font-bold tracking-[0.35em] text-on-surface-variant text-[10px] sm:text-xs md:text-sm uppercase">
-            Beauty Store
-          </span>
-        </Link>
-        <div className="mt-8 flex flex-col md:flex-row items-center gap-4 text-[10px] font-medium tracking-[0.22em] text-on-surface-variant/60 uppercase">
-          <span>© 2026 Kuthari Beauty Store</span>
-          <span className="hidden md:inline">·</span>
-          <span>Retail &amp; Bulk Supplier</span>
-          <span className="hidden md:inline">·</span>
-          <span>Odisha</span>
+                </li>
+              ))}
+            </ul>
+            <h2 className={`${colHead} mt-8`}>Talk to us</h2>
+            <ul className="flex flex-col gap-2.5">
+              {contact.phones.map((p) => (
+                <li key={p}>
+                  <a href={`tel:${p.replace(/[^d+]/g, '')}`} className={colLink}>
+                    {p}
+                  </a>
+                </li>
+              ))}
+              <li>
+                <a href={`mailto:${contact.email}`} className={colLink}>
+                  {contact.email}
+                </a>
+              </li>
+              {socials.map((x) => (
+                <li key={x.label}>
+                  <a href={x.href} target="_blank" rel="noopener noreferrer" className={colLink}>
+                    {x.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        {/* Developer credit — the last thing on the page. Styled from the same
-            tokens as the rest of the site (cream card, table-border outline,
-            primary on hover) rather than a fixed dark pill, so it belongs to
-            this cream band instead of sitting on top of it. */}
-        <div className="group mt-6 inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border-2 border-table-border bg-surface-card px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant/70 transition-all duration-200 hover:border-primary/40 hover:shadow-sm">
-          <span>Crafted with</span>
-          <Heart
-            size={12}
-            strokeWidth={2.5}
-            className="fill-error text-error transition-transform duration-200 group-hover:scale-125"
-          />
-          <span>by</span>
+        <PaymentBadges className="mt-12" />
+
+        <div className="mt-8 pt-6 border-t border-paper-raised/25 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[14px] text-paper-raised">
+          <p>© 2026 Kuthari Beauty Store, Brahmapur</p>
           <a
             href="https://jyotiranjansahoo.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Jyotiranjan — open portfolio in a new tab"
-            className="text-primary tracking-[0.12em] normal-case text-[11px] underline-offset-4 hover:underline transition-colors"
+            className="group flex items-center gap-3 w-max"
+            aria-label="Designed and developed by Crayora"
           >
-            Jyotiranjan
+            <span>Designed and developed by</span>
+            <span className="crayora-glow">
+              <Image src="/images/crayora-light.png" alt="Crayora" width={600} height={200} className="relative h-7 w-auto" />
+            </span>
           </a>
         </div>
       </div>
     </footer>
   )
 }
-

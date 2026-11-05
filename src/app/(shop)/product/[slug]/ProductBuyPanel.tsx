@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ShoppingCart, Plus, Minus } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
+import { useFlyToCartStore } from '@/store/flyToCartStore'
 import { useAuthPromptStore } from '@/store/authPromptStore'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { cn } from '@/lib/utils'
@@ -97,11 +98,13 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
     return true
   }
   // Add the typed quantity in one action (PRD #1) — respects the stock clamp.
-  const handleAdd = () => {
+  const handleAdd = (e?: React.MouseEvent<HTMLElement>) => {
     if (outOfStock || !requireAuth()) return
     addItem(buildItem())
     const n = clampQty(qty)
     if (n > 1) updateQuantity(lineId, n)
+    // The product photo arcs from this button into the bag.
+    useFlyToCartStore.getState().launch(product.images?.[0] ?? null, e?.currentTarget ?? null)
   }
   const handleBuyNow = () => {
     if (outOfStock || !requireAuth()) return
@@ -134,7 +137,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
           value={cartItem.quantity}
           onChange={(e) => { const n = parseInt(e.target.value, 10); updateQuantity(cartItem.id, clampQty(Number.isNaN(n) ? 1 : n)) }}
           aria-label={hasLevels ? `Number of ${unitNounPlural}` : 'Quantity'}
-          className="w-14 bg-transparent text-center font-black text-sm tracking-widest outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-14 bg-transparent text-center font-black text-base outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         <button onClick={() => updateQuantity(cartItem.id, clampQty(cartItem.quantity + 1))} className="w-11 h-full flex items-center justify-center rounded-full hover:bg-white/15 active:scale-95 transition" aria-label="Add one more">
           <Plus size={16} strokeWidth={3} />
@@ -149,7 +152,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
           full && 'flex-1',
         )}
       >
-        <ShoppingCart size={15} /> Add to cart
+        <ShoppingCart size={15} aria-hidden="true" /> Add to bag
       </button>
     )
 
@@ -157,14 +160,13 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
     <>
       {/* ── Pricing box ── */}
       <div className="bg-gradient-to-br from-surface-container-low to-surface-container border border-table-border/70 rounded-2xl p-5 mb-5 relative overflow-hidden shadow-[0_2px_14px_rgba(27, 44, 61,0.06)]">
-        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle,#000_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none" />
         <div className="relative z-10">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/50 mb-2">
+          <p className="text-[12px] font-black text-on-surface-variant/50 mb-2">
             Price per {unitNoun}
           </p>
           <div className="flex items-end justify-between">
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-black text-primary tracking-tight">₹{price}</span>
+              <span className="text-5xl md:text-6xl font-bold text-primary tabular-nums leading-none">₹{price}</span>
               {mrp && mrp > price && (
                 <span className="text-base font-medium text-on-surface-variant/40 line-through">₹{mrp}</span>
               )}
@@ -186,13 +188,13 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
 
           <div className="mt-3 pt-3 border-t border-table-border">
             {outOfStock ? (
-              <p className="text-[11px] font-black uppercase tracking-widest text-error flex items-center gap-2">
+              <p className="text-[11px] font-black text-error flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-error" /> Out of Stock
               </p>
             ) : (
-              <p className="text-[11px] font-black uppercase tracking-widest text-success flex items-center gap-2">
+              <p className="text-[11px] font-black text-success flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-success" /> In Stock
-                {product.stock_qty <= 10 && <span className="text-error font-black ml-1">— only {product.stock_qty} left</span>}
+                {product.stock_qty <= 10 && <span className="text-error font-black ml-1">(only {product.stock_qty} left)</span>}
               </p>
             )}
           </div>
@@ -204,7 +206,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
            the product has no retail price (bulk-only), leaving step 2 alone. */}
       {hasRetail && retail && (
         <div className="mb-5">
-          <p className="block text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60 mb-3">
+          <p className="block text-[12px] font-black text-on-surface-variant/60 mb-3">
             How would you like to buy?
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -222,23 +224,23 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
                   aria-pressed={sel}
                   className={cn(
                     'group relative flex flex-col items-start gap-1 rounded-2xl border-2 p-4 text-left overflow-hidden',
-                    'transition-all duration-200 ease-out active:scale-[0.97] hover:-translate-y-0.5',
+                    'transition duration-200 ease-out active:scale-[0.97] hover:-translate-y-0.5',
                     sel
-                      ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27,44,61,0.06)]'
+                      ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_var(--color-haze)]'
                       : 'border-table-border hover:border-primary/40 hover:shadow-sm',
                   )}
                 >
                   {/* Selected tick */}
                   <span
                     className={cn(
-                      'absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black',
-                      'transition-all duration-200',
+                      'absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[12px] font-black',
+                      'transition duration-200',
                       sel ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
                     )}
                   >
                     ✓
                   </span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">{tag}</span>
+                  <span className="text-[12px] font-black text-on-surface-variant/70">{tag}</span>
                   <span className="font-black text-sm text-primary">{title}</span>
                   <span className="flex items-baseline gap-1.5">
                     <span className="font-black text-lg text-primary">₹{opt.price.toLocaleString('en-IN')}</span>
@@ -249,7 +251,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
                     )}
                   </span>
                   {off != null && (
-                    <span className="text-[10px] font-black uppercase tracking-wider text-success">{off}% off</span>
+                    <span className="text-[12px] font-black text-success">{off}% off</span>
                   )}
                 </button>
               )
@@ -263,7 +265,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
            unit for this product (e.g. Box and Hanger). */}
       {mode === 'bulk' && hasBulkChoice && (
         <div className="mb-6 animate-drop-in">
-          <p className="block text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60 mb-3">
+          <p className="block text-[12px] font-black text-on-surface-variant/60 mb-3">
             Choose your bulk pack
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -278,16 +280,16 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
                   aria-pressed={sel}
                   className={cn(
                     'relative flex flex-col items-start gap-1 rounded-2xl border-2 p-4 text-left',
-                    'transition-all duration-200 ease-out active:scale-[0.97] hover:-translate-y-0.5',
+                    'transition duration-200 ease-out active:scale-[0.97] hover:-translate-y-0.5',
                     sel
-                      ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27,44,61,0.06)]'
+                      ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_var(--color-haze)]'
                       : 'border-table-border hover:border-primary/40 hover:shadow-sm',
                   )}
                 >
                   <span
                     className={cn(
-                      'absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black',
-                      'transition-all duration-200',
+                      'absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[12px] font-black',
+                      'transition duration-200',
                       sel ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
                     )}
                   >
@@ -303,10 +305,10 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
                     )}
                   </span>
                   {off != null && (
-                    <span className="text-[10px] font-black uppercase tracking-wider text-success">{off}% off</span>
+                    <span className="text-[12px] font-black text-success">{off}% off</span>
                   )}
                   {opt.pieces != null && (
-                    <span className="text-[10px] font-bold text-on-surface-variant/60">
+                    <span className="text-[12px] font-bold text-on-surface-variant/60">
                       {opt.pieces.toLocaleString('en-IN')} pieces
                     </span>
                   )}
@@ -321,7 +323,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
       {/* ── Quantity / Boxes: +/- stepper + explicit typed field + live total (PRD #1) ── */}
       {!outOfStock && (
         <div className="mb-5 rounded-2xl border-2 border-table-border p-4">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60 mb-3">
+          <p className="text-[12px] font-black text-on-surface-variant/60 mb-3">
             {hasLevels ? `Number of ${unitNounPlural}` : 'Quantity'}
           </p>
 
@@ -374,7 +376,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
               ) : null}
             </div>
             <div className="text-right">
-              <p className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/50">{tField('Total amount', 'ମୋଟ ରାଶି')}</p>
+              <p className="text-[11px] font-black text-on-surface-variant/50">{tField('Total amount', 'ମୋଟ ରାଶି')}</p>
               <p className="text-2xl font-black text-primary tracking-tight leading-none mt-0.5">₹{(currentQty * price).toLocaleString('en-IN')}</p>
             </div>
           </div>
@@ -384,15 +386,15 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
       {/* ── Badges ── */}
       <div className="flex items-center gap-2 flex-wrap mb-5">
         {!hasLevels && (
-          <span className="px-3 py-1.5 border border-table-border rounded-xl font-black text-[11px] uppercase tracking-wider text-on-surface-variant">
+          <span className="px-3 py-1.5 border border-table-border rounded-xl font-black text-[11px] text-on-surface-variant">
             {product.unit}{product.unit_or && ` / ${product.unit_or}`}
           </span>
         )}
         {product.is_featured && (
-          <span className="px-3 py-1.5 bg-primary text-white rounded-xl font-black text-[11px] uppercase tracking-wider">Featured</span>
+          <span className="px-3 py-1.5 bg-primary text-white rounded-xl font-black text-[11px]">Featured</span>
         )}
         {hasLevels && product.unit_type && product.units_per_pack && (
-          <span className="px-3 py-1.5 border border-table-border rounded-xl font-black text-[11px] uppercase tracking-wider text-on-surface-variant">
+          <span className="px-3 py-1.5 border border-table-border rounded-xl font-black text-[11px] text-on-surface-variant">
             {`1 ${product.pack_type ?? 'Box'} = ${product.units_per_pack} ${product.unit_type}s`}
             {product.pieces_per_secondary ? ` × ${product.pieces_per_secondary} = ${(product.units_per_pack * product.pieces_per_secondary).toLocaleString('en-IN')} pieces` : ''}
           </span>
@@ -417,7 +419,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
           entirely — the reported "no add to cart button" bug. From md up the
           bottom nav is gone, so it drops back to the screen edge. */}
       <div
-        className="fixed left-0 w-full bg-surface-container-lowest shadow-[0_-4px_16px_rgba(0,0,0,0.08)] px-4 py-3 flex items-center gap-3 z-40 lg:hidden border-t border-outline-variant/30 bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0"
+        className="fixed left-0 w-full bg-surface-container-lowest shadow-[var(--shadow-modal)] px-4 py-3 flex items-center gap-3 z-40 lg:hidden border-t border-outline-variant/30 bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0"
         style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
       >
         <div className="flex flex-col leading-none">
@@ -425,7 +427,7 @@ export default function ProductBuyPanel({ product }: { product: Product }) {
               price, not the bare unit price. When more than one is selected the
               small line shows the "3 × ₹5,410" breakdown so the total reads
               correctly instead of "Box ₹16,230". */}
-          <span className="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/50">
+          <span className="text-[12px] font-black text-on-surface-variant/50">
             {currentQty > 1 ? `${currentQty} × ₹${price.toLocaleString('en-IN')}` : unit}
           </span>
           <span className="text-lg font-black text-primary">₹{(currentQty * price).toLocaleString('en-IN')}</span>

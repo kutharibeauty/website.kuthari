@@ -6,7 +6,6 @@ export default function CategoryLoading() {
     <>
       {/* Category banner */}
       <section className="relative w-full h-[200px] md:h-[280px] bg-primary overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none z-10" />
         <div className="absolute inset-0 z-20 flex flex-col justify-end px-5 md:px-10 lg:px-16 pb-7 md:pb-10 max-w-7xl mx-auto gap-3">
           <Skeleton className="h-6 w-24 rounded-full bg-white/20" />
           <Skeleton className="h-10 w-64 bg-white/20" />

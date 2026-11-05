@@ -1,25 +1,45 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ShoppingCart, Search, Menu, X, Home, Grid, Truck, User, Heart, ClipboardList } from 'lucide-react'
-import { useState, useEffect, type FormEvent } from 'react'
+import { ShoppingBag, Search, Menu, X, User, Heart, ClipboardList } from 'lucide-react'
+import { useState, useEffect, useRef, type FormEvent } from 'react'
 import { useSupabaseUser } from '@/hooks/useSupabaseUser'
 import { useCartStore } from '@/store/cartStore'
 import { useT } from '@/hooks/useT'
+import { cn } from '@/lib/utils'
 import HeaderLocation from './HeaderLocation'
-import Logo from './Logo'
+import { BrandLockup } from './Logo'
 import AnimatedSearchPlaceholder from './AnimatedSearchPlaceholder'
 import { motion, AnimatePresence } from 'framer-motion'
+import { WA_LINK } from '@/components/home/WhatsAppFAB'
 
 const NAV = [
-  { key: 'nav.home' as const, href: '/', icon: Home },
-  { key: 'nav.categories' as const, href: '/search', icon: Grid },
-  { key: 'nav.orders' as const, href: '/orders', icon: Truck },
+  { key: 'nav.home' as const, href: '/' },
+  { key: 'nav.categories' as const, href: '/search' },
+  { key: 'nav.orders' as const, href: '/orders' },
+]
+
+const MORE = [
+  { href: '/wishlist', label: 'Wishlist', Icon: Heart },
+  { href: '/shopping-list', label: 'Shopping list', Icon: ClipboardList },
 ]
 
 /** Fallback rotating terms when no category names are supplied. */
 const DEFAULT_TERMS = ['shampoo', 'lipstick', 'face wash', 'hair oil', 'nail polish', 'perfume']
+
+const iconBtn =
+  'w-10 h-10 flex items-center justify-center rounded-full text-ink hover:bg-paper-sunk transition-colors press'
+
+/** The crest lockup, linking home. */
+function Wordmark({ compact = false }: { compact?: boolean }) {
+  return (
+    <Link href="/" className="shrink-0 rounded-lg" aria-label="Kuthari Beauty Store, home">
+      <BrandLockup size={compact ? 'sm' : 'md'} priority />
+    </Link>
+  )
+}
 
 export default function Header({ searchTerms }: { searchTerms?: string[] }) {
   const terms = searchTerms && searchTerms.length > 0 ? searchTerms : DEFAULT_TERMS
@@ -27,18 +47,61 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
   const router = useRouter()
   const totalItems = useCartStore((s) => s.totalItems())
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const searchRef = useRef<HTMLInputElement>(null)
+  // Phones: the location + search row folds away while scrolling down and
+  // returns on the way up, so the sticky header stays one row tall.
+  const [tucked, setTucked] = useState(false)
   const { isSignedIn, isLoaded } = useSupabaseUser()
   const { t } = useT()
 
-  // The /search page carries its own search bar — drop the header one on mobile
-  // there to avoid two stacked search inputs.
+  // The /search page carries its own search bar, so the header one steps aside.
   const isSearchPage = pathname === '/search'
 
-  // Close the drawer on route change
-  useEffect(() => {
+  // Close the menu and search on navigation (state reset during render, the
+  // pattern React recommends over an effect).
+  const [lastPath, setLastPath] = useState(pathname)
+  if (pathname !== lastPath) {
+    setLastPath(pathname)
     setMenuOpen(false)
-  }, [pathname])
+    setSearchOpen(false)
+  }
+
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus()
+  }, [searchOpen])
+
+  useEffect(() => {
+    let last = window.scrollY
+    let ticking = false
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const y = window.scrollY
+        if (y < 140) setTucked(false)
+        else if (y > last + 6) setTucked(true)
+        else if (y < last - 6) setTucked(false)
+        last = y
+        ticking = false
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    if (!searchOpen && !menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSearchOpen(false)
+        setMenuOpen(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [searchOpen, menuOpen])
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault()
@@ -46,261 +109,226 @@ export default function Header({ searchTerms }: { searchTerms?: string[] }) {
     router.push(q ? `/search?q=${encodeURIComponent(q)}` : '/search')
   }
 
+  const searchField = (id: string) => (
+    <form onSubmit={handleSearch} role="search">
+      <div className="relative w-full">
+        <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+        <input
+          id={id}
+          ref={id === 'header-search-desktop' ? searchRef : undefined}
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder=""
+          aria-label={t('nav.searchPlaceholder')}
+          className="w-full pl-12 pr-5 py-3 rounded-full bg-paper-raised border border-line focus:border-ink text-[15px] font-medium text-ink outline-none transition-colors"
+        />
+        {query === '' && <AnimatedSearchPlaceholder terms={terms} />}
+      </div>
+    </form>
+  )
+
+  const bag = (
+    <Link
+      href="/cart"
+      data-cart-target
+      className="relative flex items-center gap-2 pl-4 pr-1.5 py-1.5 rounded-full bg-ink text-paper-raised font-semibold text-[15px] hover:bg-ink-soft transition-colors press"
+      aria-label={totalItems > 0 ? `Bag, ${totalItems} items` : 'Bag'}
+    >
+      <ShoppingBag size={17} strokeWidth={2.25} />
+      <span>Bag</span>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={totalItems}
+          initial={{ scale: 0.4 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+          className="min-w-[26px] h-[26px] px-1.5 rounded-full bg-periwinkle text-ink text-[13px] font-bold flex items-center justify-center tabular-nums"
+        >
+          {totalItems}
+        </motion.span>
+      </AnimatePresence>
+    </Link>
+  )
+
   return (
-    <div className="sticky top-0 z-50 w-full bg-surface/85 backdrop-blur-xl border-b border-table-border/60 transform-gpu backface-hidden will-change-transform">
+    <div className="sticky top-0 z-50 w-full bg-paper/90 backdrop-blur-xl border-b border-line">
       <header className="w-full">
-        <div className="mx-auto max-w-7xl flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-3">
-
-          {/* ── Logo ── */}
-          <Link href="/" className="flex items-center flex-shrink-0 group">
-            <Logo className="h-11 md:h-12 w-auto group-hover:scale-105 transition-transform duration-300" priority />
-            {/* Brand name beside the mark, on every size. Kept nowrap inside the
-                shrink-0 logo block; the search bar is flex-1 so it gives up the
-                width instead of this wrapping or the row overflowing. */}
-            <span className="ml-2.5 flex flex-col leading-none whitespace-nowrap">
-              <span className="font-heading font-semibold text-primary text-[15px] sm:text-base lg:text-lg tracking-tight">
-                Kuthari
-              </span>
-              <span className="mt-0.5 text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.28em] text-on-surface-variant/70">
-                Beauty Store
-              </span>
-            </span>
-          </Link>
-
-          {/* ── Delivery location (desktop) ── */}
-          <div className="hidden md:flex items-center flex-shrink-0 pl-4 ml-1 border-l border-outline-variant/40">
-            <HeaderLocation />
-          </div>
-
-          {/* ── Search bar (desktop, centered) ── */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-auto">
-            <div className="relative w-full">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50 pointer-events-none" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder=""
-                aria-label={t('nav.searchPlaceholder')}
-                className="w-full pl-11 pr-4 py-2.5 rounded-full bg-surface-container-low/70 border border-table-border/60 focus:border-primary/30 focus:bg-surface-card text-sm font-medium text-primary placeholder:text-on-surface-variant/50 outline-none transition-all duration-200"
-              />
-              {query === '' && <AnimatedSearchPlaceholder terms={terms} />}
-            </div>
-          </form>
-
-          {/* ── Right cluster (desktop) ── */}
-          <div className="hidden lg:flex items-center gap-2 flex-shrink-0 ml-auto">
-
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
-              className="w-10 h-10 flex items-center justify-center rounded-full border border-table-border/70 hover:border-primary/30 hover:bg-surface-container-low text-primary transition-all press"
-              aria-label="Menu"
-            >
-              <Menu size={18} strokeWidth={2.5} />
-            </button>
-
-            {isLoaded && isSignedIn && (
+        {/* ── Desktop ── */}
+        <div className="hidden lg:grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 mx-auto max-w-[1440px] px-10 py-3.5">
+          <nav className="flex items-center gap-7" aria-label="Main">
+            {NAV.map(({ key, href }) => (
               <Link
-                href="/profile"
-                className="flex items-center gap-1.5 pl-2 pr-3 py-1.5 rounded-xl hover:bg-surface-container-low transition-colors"
+                key={href}
+                href={href}
+                aria-current={pathname === href ? 'page' : undefined}
+                className={cn(
+                  'link-underline text-[15px] font-medium transition-colors',
+                  pathname === href ? 'text-ink' : 'text-ink/75 hover:text-ink',
+                )}
               >
-                <span className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center">
-                  <User size={14} strokeWidth={2.5} />
-                </span>
-                <span className="text-[13px] font-semibold tracking-wide text-primary">{t('nav.account')}</span>
+                {t(key)}
+              </Link>
+            ))}
+            <span className="h-6 w-px bg-line" aria-hidden="true" />
+            <HeaderLocation />
+          </nav>
+
+          <Wordmark />
+
+          <div className="flex items-center justify-end gap-1.5">
+            {!isSearchPage && (
+              <button
+                type="button"
+                onClick={() => setSearchOpen((v) => !v)}
+                className={iconBtn}
+                aria-label={searchOpen ? 'Close search' : 'Search'}
+                aria-expanded={searchOpen}
+                aria-controls="header-search-row"
+              >
+                {searchOpen ? <X size={19} strokeWidth={2.25} /> : <Search size={19} strokeWidth={2.25} />}
+              </button>
+            )}
+            {MORE.map(({ href, label, Icon }) => (
+              <Link key={href} href={href} className={iconBtn} aria-label={label}>
+                <Icon size={19} strokeWidth={2.25} />
+              </Link>
+            ))}
+            {isLoaded && isSignedIn && (
+              <Link href="/profile" className={iconBtn} aria-label={t('nav.account')}>
+                <User size={19} strokeWidth={2.25} />
               </Link>
             )}
             {isLoaded && !isSignedIn && (
-              <Link
-                href="/login"
-                className="link-underline flex items-center gap-1 px-2 py-2.5 text-[13px] font-semibold tracking-wide text-primary transition-colors"
-              >
+              <Link href="/login" className="link-underline px-3 text-[15px] font-medium text-ink">
                 {t('nav.signIn')}
               </Link>
             )}
-
-            <Link
-              href="/wishlist"
-              className="w-10 h-10 flex items-center justify-center rounded-full border border-table-border/70 hover:border-primary/30 hover:bg-surface-container-low text-primary transition-all press"
-              aria-label="Wishlist"
-            >
-              <Heart size={18} strokeWidth={2.5} />
-            </Link>
-
-            <Link
-              href="/shopping-list"
-              className="w-10 h-10 flex items-center justify-center rounded-full border border-table-border/70 hover:border-primary/30 hover:bg-surface-container-low text-primary transition-all press"
-              aria-label="Shopping list"
-            >
-              <ClipboardList size={18} strokeWidth={2.5} />
-            </Link>
-
-            <Link
-              href="/cart"
-              data-cart-target
-              className="relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-white font-semibold text-[13px] tracking-wide hover:bg-primary-container transition-colors press"
-            >
-              <ShoppingCart size={18} strokeWidth={2.5} />
-              {t('nav.myCart')}
-              <AnimatePresence mode="popLayout">
-                {totalItems > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    key={totalItems}
-                    className="absolute -top-1.5 -right-1.5 min-w-[18px] h-4.5 bg-secondary text-on-secondary text-[9px] font-bold rounded-full flex items-center justify-center px-1 ring-2 ring-surface"
-                  >
-                    {totalItems}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </Link>
+            <span className="ml-2">{bag}</span>
           </div>
+        </div>
 
-          {/* ── Mobile right controls ── */}
-          <div className="flex lg:hidden items-center gap-2 ml-auto flex-shrink-0">
+        {/* Desktop search row, opened from the search button. */}
+        <AnimatePresence>
+          {searchOpen && !isSearchPage && (
+            <motion.div
+              id="header-search-row"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="hidden lg:block border-t border-line"
+            >
+              <div className="mx-auto max-w-3xl px-10 py-4">{searchField('header-search-desktop')}</div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Mobile and tablet ── */}
+        <div className="lg:hidden flex items-center gap-2 px-4 sm:px-6 py-2.5">
+          <Wordmark compact />
+          <div className="ml-auto flex items-center gap-1.5">
             <Link
               href="/cart"
               data-cart-target
-              className="relative w-10 h-10 flex items-center justify-center rounded-full border border-table-border/70 text-primary transition-colors press"
-              aria-label="Cart"
+              className="relative w-10 h-10 flex items-center justify-center rounded-full bg-ink text-paper-raised press"
+              aria-label={totalItems > 0 ? `Bag, ${totalItems} items` : 'Bag'}
             >
-              <ShoppingCart size={17} strokeWidth={2.5} />
+              <ShoppingBag size={17} strokeWidth={2.25} />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-4.5 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 ring-2 ring-surface">
+                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-periwinkle text-ink text-[11px] font-bold flex items-center justify-center ring-2 ring-paper tabular-nums">
                   {totalItems}
                 </span>
               )}
             </Link>
             <button
+              type="button"
               onClick={() => setMenuOpen((v) => !v)}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white active:scale-95 transition-transform"
-              aria-label="Toggle menu"
+              className="w-10 h-10 flex items-center justify-center rounded-full border border-line text-ink press"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
             >
-              <AnimatePresence mode="wait">
-                {menuOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <X size={18} strokeWidth={2.5} />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Menu size={18} strokeWidth={2.5} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {menuOpen ? <X size={18} strokeWidth={2.25} /> : <Menu size={18} strokeWidth={2.25} />}
             </button>
           </div>
         </div>
 
-        {/* ── Mobile: location + search (second row) ── */}
-        <div className="md:hidden px-4 pb-3 flex flex-col gap-2.5">
-          <HeaderLocation />
-          {!isSearchPage && (
-            <form onSubmit={handleSearch}>
-              <div className="relative w-full">
-                {/* /80 not /50: 4.66:1 vs 2.37:1 on the #FAF5E9 search bar. */}
-                <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/80 pointer-events-none" />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder=""
-                  // The visible cue is the animated overlay below, which screen
-                  // readers can't use — so name the field explicitly. Nothing
-                  // visual changes.
-                  aria-label={t('nav.searchPlaceholder')}
-                  className="w-full pl-11 pr-4 py-2.5 rounded-full bg-surface-container-low/70 border border-table-border/60 focus:border-primary/30 focus:bg-surface-card text-sm font-medium text-primary placeholder:text-on-surface-variant/50 outline-none transition-all duration-200"
-                />
-                {query === '' && <AnimatedSearchPlaceholder terms={terms} />}
-              </div>
-            </form>
+        <div
+          className={cn(
+            'lg:hidden grid transition-[grid-template-rows,opacity] duration-300 ease-[var(--ease-out-soft)]',
+            tucked && !menuOpen ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
           )}
+        >
+          <div className={cn('min-h-0', tucked && !menuOpen ? 'overflow-hidden' : 'overflow-visible')} inert={tucked && !menuOpen ? true : undefined}>
+            <div className="px-4 sm:px-6 pb-3 flex flex-col gap-2.5">
+              <HeaderLocation />
+              {!isSearchPage && searchField('header-search-mobile')}
+            </div>
+          </div>
         </div>
 
-        {/* ── Dropdown drawer (nav links, account, language) ── */}
+        {/* ── Drawer (phones and tablets) ── */}
         <AnimatePresence>
           {menuOpen && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden bg-surface absolute top-full left-0 w-full border-b border-table-border/60 shadow-[0_24px_48px_rgba(27,44,61,0.10)]"
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:hidden absolute top-full left-0 w-full max-h-[calc(100dvh-72px)] overflow-y-auto overscroll-contain bg-paper border-b border-line shadow-[var(--shadow-modal)]"
             >
-              <div className="mx-auto max-w-7xl px-6 py-8 flex flex-col gap-6">
-                {NAV.map(({ key, href }) => {
-                  const active = pathname === href
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setMenuOpen(false)}
-                      className={`font-heading text-2xl font-semibold tracking-tight transition-all duration-300 flex items-center justify-between hover:translate-x-1 ${
-                        active ? 'text-primary' : 'text-on-surface-variant hover:text-primary'
-                      }`}
-                    >
-                      <span>{t(key)}</span>
-                      {active && <span className="w-2 h-2 rounded-full bg-primary" />}
-                    </Link>
-                  )
-                })}
-
-                {/* Wishlist + Shopping list (kept out of the crowded top bar on mobile) */}
-                {[
-                  { href: '/wishlist', label: 'Wishlist', Icon: Heart },
-                  { href: '/shopping-list', label: 'Shopping List', Icon: ClipboardList },
-                ].map(({ href, label, Icon }) => {
-                  const active = pathname === href
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setMenuOpen(false)}
-                      className={`font-heading text-2xl font-semibold tracking-tight transition-all duration-300 flex items-center justify-between hover:translate-x-1 ${
-                        active ? 'text-primary' : 'text-on-surface-variant hover:text-primary'
-                      }`}
-                    >
-                      <span className="flex items-center gap-3"><Icon size={20} strokeWidth={1.75} /> {label}</span>
-                      {active && <span className="w-2 h-2 rounded-full bg-primary" />}
-                    </Link>
-                  )
-                })}
-
-                <div className="my-2 h-px bg-outline-variant/20" />
-
-                <div className="flex items-center justify-end">
+              <nav className="px-6 py-8 flex flex-col gap-5" aria-label="Menu">
+                {NAV.map(({ key, href }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    aria-current={pathname === href ? 'page' : undefined}
+                    className={cn(
+                      'font-display uppercase text-[40px] leading-[1.02] transition-colors',
+                      pathname === href ? 'text-indigo' : 'text-ink hover:text-indigo',
+                    )}
+                  >
+                    {t(key)}
+                  </Link>
+                ))}
+                {MORE.map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    aria-current={pathname === href ? 'page' : undefined}
+                    className={cn(
+                      'font-display uppercase text-[40px] leading-[1.02] transition-colors',
+                      pathname === href ? 'text-indigo' : 'text-ink hover:text-indigo',
+                    )}
+                  >
+                    {label}
+                  </Link>
+                ))}
+                <a
+                  href={WA_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 font-display uppercase text-[40px] leading-[1.02] text-ink hover:text-indigo transition-colors"
+                >
+                  <Image src="/images/whatsapp.webp" alt="" width={40} height={40} className="h-10 w-10" />
+                  WhatsApp us
+                </a>
+                <div className="mt-3 pt-6 border-t border-line">
                   {isLoaded && isSignedIn && (
-                    <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
-                        <User size={16} strokeWidth={2.5} />
-                      </span>
-                      <span className="text-sm font-black text-primary tracking-wide uppercase">{t('nav.account')}</span>
+                    <Link href="/profile" onClick={() => setMenuOpen(false)} className="btn-pill">
+                      <User size={16} strokeWidth={2.25} />
+                      {t('nav.account')}
                     </Link>
                   )}
                   {isLoaded && !isSignedIn && (
-                    <Link
-                      href="/login"
-                      onClick={() => setMenuOpen(false)}
-                      className="gold-sheen relative overflow-hidden px-7 py-3 bg-primary text-white text-[13px] font-semibold tracking-wide rounded-full active:scale-95 transition-transform"
-                    >
+                    <Link href="/login" onClick={() => setMenuOpen(false)} className="btn-pill">
                       {t('nav.signIn')}
                     </Link>
                   )}
                 </div>
-              </div>
+              </nav>
             </motion.div>
           )}
         </AnimatePresence>

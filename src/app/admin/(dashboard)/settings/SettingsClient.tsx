@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
 import { formatMinute, parseTimeToMinutes } from '@/lib/store-hours'
 
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200'
 
 /** "04:00" → "4:00 AM" for the settings preview; leaves malformed input as-is. */
 function fmtTime(hhmm: string): string {
@@ -29,6 +29,9 @@ type Settings = {
   admin_notification_email: string
   otp_expiry_minutes: string
   razorpay_enabled: boolean
+  cod_enabled: boolean
+  bulk_partial_enabled: boolean
+  bulk_advance_percent: string
   delivery_enabled: boolean
 }
 
@@ -36,8 +39,8 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
   return (
     <section className="card-lift animate-rise bg-surface-card rounded-2xl border-2 border-table-border p-6 space-y-6 hover:border-primary/25">
       <div className="border-b-2 border-table-border pb-4">
-        <h2 className="font-black text-xl text-primary">{title}.</h2>
-        {sub && <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">{sub}</p>}
+        <h2 className="font-bold text-xl text-primary">{title}.</h2>
+        {sub && <p className="font-bold text-[12px] text-on-surface-variant mt-2">{sub}</p>}
       </div>
       {children}
     </section>
@@ -49,10 +52,10 @@ function Field({ label, hint, required, children }: {
 }) {
   return (
     <div className="space-y-2">
-      <label className="font-black text-[10px] text-primary uppercase tracking-widest flex items-center">
+      <label className="font-bold text-[12px] text-primary flex items-center">
         {label}
         {required && <span className="text-error ml-1">*</span>}
-        {hint && <span className="font-bold text-[10px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
+        {hint && <span className="font-bold text-[12px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
       </label>
       {children}
     </div>
@@ -65,8 +68,8 @@ function Toggle({ checked, onChange, label, sub }: {
   return (
     <div className="flex items-center justify-between gap-6 p-5 bg-surface rounded-2xl border-2 border-table-border">
       <div>
-        <p className="font-black text-xs text-primary uppercase tracking-widest">{label}</p>
-        <p className="font-bold text-[10px] text-on-surface-variant mt-1">{sub}</p>
+        <p className="font-bold text-xs text-primary">{label}</p>
+        <p className="font-bold text-[12px] text-on-surface-variant mt-1">{sub}</p>
       </div>
       <button
         type="button"
@@ -110,6 +113,10 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
     if (settings.otp_expiry_minutes && (isNaN(otp) || otp < 1 || otp > 60)) {
       setError('OTP expiry must be between 1 and 60 minutes'); return
     }
+    const adv = parseInt(settings.bulk_advance_percent, 10)
+    if (settings.bulk_partial_enabled && (isNaN(adv) || adv < 10 || adv > 90)) {
+      setError('Bulk advance must be between 10% and 90%'); return
+    }
     if (settings.order_hours_enabled) {
       if (parseTimeToMinutes(settings.order_open_time) == null || parseTimeToMinutes(settings.order_close_time) == null) {
         setError('Enter valid order open and close times'); return
@@ -136,6 +143,9 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
       admin_notification_email: settings.admin_notification_email.trim(),
       otp_expiry_minutes: settings.otp_expiry_minutes ? parseInt(settings.otp_expiry_minutes, 10) : 10,
       razorpay_enabled: settings.razorpay_enabled,
+      cod_enabled: settings.cod_enabled,
+      bulk_partial_enabled: settings.bulk_partial_enabled,
+      bulk_advance_percent: Math.min(90, Math.max(10, parseInt(settings.bulk_advance_percent, 10) || 25)),
       delivery_enabled: settings.delivery_enabled,
     }
 
@@ -165,17 +175,17 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b-2 border-table-border pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight capitalize">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight capitalize">
             Settings.
           </h1>
-          <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">
+          <p className="font-bold text-[12px] text-on-surface-variant mt-2">
             Store configuration
           </p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="gold-sheen relative overflow-hidden flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0 transition-all duration-200 active:scale-95 shadow-sm"
+          className="gold-sheen relative overflow-hidden flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0 transition duration-200 active:scale-95 shadow-sm"
         >
           {saving && <Loader2 size={16} className="animate-spin" />}
           {saving ? 'Saving…' : saved ? <><Check size={16} strokeWidth={2.5} /> Saved</> : 'Save Settings'}
@@ -222,7 +232,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Minimum Order Value" hint="0 = no minimum">
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-black text-sm">₹</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">₹</span>
               <input
                 type="number"
                 value={settings.min_order_value}
@@ -236,7 +246,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
           </Field>
           <Field label="Bulk Order Minimum" hint="Qualifies as bulk order">
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-black text-sm">₹</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">₹</span>
               <input
                 type="number"
                 value={settings.bulk_order_minimum}
@@ -257,7 +267,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
               <div className="flex items-center gap-3 px-4 py-3 bg-blue-50 border-2 border-blue-200 rounded-xl">
                 <Info size={16} strokeWidth={2.5} className="text-blue-600 flex-shrink-0" />
                 <p className="font-bold text-xs text-blue-800">
-                  Customers must spend at least <strong className="font-black tracking-widest text-blue-900">₹{settings.min_order_value}</strong> to checkout
+                  Customers must spend at least <strong className="font-bold tracking-widest text-blue-900">₹{settings.min_order_value}</strong> to checkout
                 </p>
               </div>
             )}
@@ -265,7 +275,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
               <div className="flex items-center gap-3 px-4 py-3 bg-purple-50 border-2 border-purple-200 rounded-xl">
                 <Info size={16} strokeWidth={2.5} className="text-purple-600 flex-shrink-0" />
                 <p className="font-bold text-xs text-purple-800">
-                  Orders above <strong className="font-black tracking-widest text-purple-900">₹{settings.bulk_order_minimum}</strong> are flagged as bulk
+                  Orders above <strong className="font-bold tracking-widest text-purple-900">₹{settings.bulk_order_minimum}</strong> are flagged as bulk
                 </p>
               </div>
             )}
@@ -306,8 +316,8 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
             <Info size={16} strokeWidth={2.5} className="text-blue-600 flex-shrink-0" />
             <p className="font-bold text-xs text-blue-800">
               Orders can be placed only between{' '}
-              <strong className="font-black text-blue-900">{fmtTime(settings.order_open_time)}</strong> and{' '}
-              <strong className="font-black text-blue-900">{fmtTime(settings.order_close_time)}</strong> (IST). Outside these hours customers can still browse but checkout is disabled.
+              <strong className="font-bold text-blue-900">{fmtTime(settings.order_open_time)}</strong> and{' '}
+              <strong className="font-bold text-blue-900">{fmtTime(settings.order_close_time)}</strong> (IST). Outside these hours customers can still browse but checkout is disabled.
             </p>
           </div>
         ) : (
@@ -325,7 +335,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Free Delivery Above" hint="Free at/above this subtotal">
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-black text-sm">₹</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">₹</span>
               <input
                 type="number"
                 value={settings.free_delivery_min}
@@ -339,7 +349,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
           </Field>
           <Field label="Flat Delivery Fee" hint="Charged below the threshold">
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-black text-sm">₹</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">₹</span>
               <input
                 type="number"
                 value={settings.flat_delivery_fee}
@@ -355,8 +365,8 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
         <div className="flex items-center gap-3 px-4 py-3 bg-blue-50 border-2 border-blue-200 rounded-xl">
           <Info size={16} strokeWidth={2.5} className="text-blue-600 flex-shrink-0" />
           <p className="font-bold text-xs text-blue-800">
-            Orders under <strong className="font-black text-blue-900">₹{settings.free_delivery_min || '1000'}</strong> pay{' '}
-            <strong className="font-black text-blue-900">₹{settings.flat_delivery_fee || '50'}</strong> delivery; at or above, it's free. A per-product delivery charge (set on a product) still overrides this.
+            Orders under <strong className="font-bold text-blue-900">₹{settings.free_delivery_min || '1000'}</strong> pay{' '}
+            <strong className="font-bold text-blue-900">₹{settings.flat_delivery_fee || '50'}</strong> delivery; at or above, it's free. A per-product delivery charge (set on a product) still overrides this.
           </p>
         </div>
       </Section>
@@ -374,7 +384,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
               placeholder="10"
               className={cn(inputCls, 'w-32 font-mono')}
             />
-            <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest">
+            <p className="font-bold text-[12px] text-on-surface-variant">
               units remaining
             </p>
           </div>
@@ -392,7 +402,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
             className={inputCls}
           />
         </Field>
-        <p className="font-bold text-[10px] text-on-surface-variant">
+        <p className="font-bold text-[12px] text-on-surface-variant">
           New order notifications and low stock alerts are sent here.
         </p>
       </Section>
@@ -410,7 +420,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
               placeholder="10"
               className={cn(inputCls, 'w-32 font-mono')}
             />
-            <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest">minutes</p>
+            <p className="font-bold text-[12px] text-on-surface-variant">minutes</p>
           </div>
         </Field>
       </Section>
@@ -427,13 +437,57 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
           <div className="flex items-start gap-3 px-5 py-4 bg-amber-50 border-2 border-amber-200 rounded-xl mt-4">
             <AlertTriangle size={20} strokeWidth={2.5} className="text-amber-600 flex-shrink-0 mt-0.5" />
             <p className="font-bold text-xs text-amber-900 leading-relaxed">
-              Ensure <code className="bg-amber-100 border-2 border-amber-200 px-1.5 py-0.5 rounded-lg text-[10px] mx-1">RAZORPAY_KEY_ID</code> and <code className="bg-amber-100 border-2 border-amber-200 px-1.5 py-0.5 rounded-lg text-[10px] mx-1">RAZORPAY_KEY_SECRET</code> are set in your environment variables before enabling.
+              Ensure <code className="bg-amber-100 border-2 border-amber-200 px-1.5 py-0.5 rounded-lg text-[12px] mx-1">RAZORPAY_KEY_ID</code> and <code className="bg-amber-100 border-2 border-amber-200 px-1.5 py-0.5 rounded-lg text-[12px] mx-1">RAZORPAY_KEY_SECRET</code> are set in your environment variables before enabling.
             </p>
           </div>
         )}
-        <p className="font-bold text-[10px] text-error mt-4">
-          There is no Cash on Delivery option — customers cannot place any order until this is switched on and correctly configured.
-        </p>
+
+        <div className="mt-6 border-t border-table-border pt-6 space-y-6">
+          <Toggle
+            checked={settings.cod_enabled}
+            onChange={v => set('cod_enabled', v)}
+            label="Cash on Delivery"
+            sub="Let customers pay the full amount in cash when the order arrives."
+          />
+
+          <Toggle
+            checked={settings.bulk_partial_enabled}
+            onChange={v => set('bulk_partial_enabled', v)}
+            label="Part payment for bulk orders"
+            sub="When Cash on Delivery is off, bulk orders (any box or pack in the bag) can pay a share online now and the rest in cash on delivery. Needs Razorpay on."
+          />
+
+          {settings.bulk_partial_enabled && (
+            <Field label="Paid online up front" hint="10% to 90% of the order total">
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  min={10}
+                  max={90}
+                  step={5}
+                  value={settings.bulk_advance_percent}
+                  onChange={e => set('bulk_advance_percent', e.target.value)}
+                  className={cn(inputCls, 'w-32 font-mono')}
+                />
+                <p className="text-[14px] text-on-surface-variant">
+                  % now, the remaining {100 - (Math.min(90, Math.max(10, parseInt(settings.bulk_advance_percent, 10) || 25)))}% in cash on delivery
+                </p>
+              </div>
+            </Field>
+          )}
+
+          {settings.cod_enabled && settings.bulk_partial_enabled && (
+            <p className="text-[14px] text-on-surface-variant">
+              Cash on Delivery is on, so customers can already pay everything on delivery. Part payment only appears while Cash on Delivery is off.
+            </p>
+          )}
+
+          {!settings.razorpay_enabled && !settings.cod_enabled && (
+            <p className="font-bold text-[14px] text-error">
+              Both online payment and Cash on Delivery are off, so no one can place an order. Switch one of them on.
+            </p>
+          )}
+        </div>
       </Section>
 
       {/* ── Delivery panel ── */}
@@ -459,7 +513,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm w-full md:w-auto justify-center"
+          className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 disabled:opacity-50 transition-opacity active:scale-95 shadow-sm w-full md:w-auto justify-center"
         >
           {saving && <Loader2 size={16} className="animate-spin" />}
           {saving ? 'Saving…' : saved ? <><Check size={16} strokeWidth={2.5} /> All Settings Saved</> : 'Save All Settings'}

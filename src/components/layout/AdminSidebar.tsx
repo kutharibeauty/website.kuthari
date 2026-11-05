@@ -80,7 +80,7 @@ export default function AdminSidebar({ role, onClose, className, badges, name, p
     {
       label: 'Content',
       items: [
-        { href: '/admin/banners', label: 'Banners & CMS', icon: 'photo_library', show: can('manage_banners') || can('manage_cms') },
+        { href: '/admin/banners', label: 'Homepage & banners', icon: 'photo_library', show: can('manage_banners') || can('manage_cms') },
       ],
     },
     {
@@ -120,14 +120,16 @@ export default function AdminSidebar({ role, onClose, className, badges, name, p
       className,
     )}>
       {/* Background texture */}
-      <div className="absolute inset-0 opacity-[0.05] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
 
       {/* ── Brand ── */}
       <div className="px-6 py-6 flex items-center gap-3 flex-shrink-0 relative z-10 border-b-2 border-white/10">
         <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center flex-shrink-0 p-1.5">
           <Logo className="h-full w-auto" />
         </div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">Admin Panel</p>
+        <div className="leading-tight">
+          <p className="text-[16px] font-bold text-white">Kuthari</p>
+          <p className="text-[13px] text-white/70">Store admin</p>
+        </div>
         {onClose && (
           <button
             onClick={onClose}
@@ -146,7 +148,7 @@ export default function AdminSidebar({ role, onClose, className, badges, name, p
           if (!visible.length) return null
           return (
             <div key={group.label} className="mb-6">
-              <p className="px-4 py-1.5 text-[10px] font-black text-white/35 uppercase tracking-[0.2em]">
+              <p className="px-4 py-1.5 text-[13px] font-semibold text-white/60">
                 {group.label}
               </p>
               <div className="space-y-1">
@@ -158,10 +160,10 @@ export default function AdminSidebar({ role, onClose, className, badges, name, p
                       href={item.href}
                       onClick={onClose}
                       className={cn(
-                        'flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 text-sm font-bold',
+                        'flex items-center gap-3 px-4 py-2.5 rounded-xl transition duration-200 text-sm font-bold',
                         active
                           ? 'bg-white text-primary shadow-sm'
-                          : 'text-white/60 hover:bg-white/10 hover:text-white',
+                          : 'text-white/80 hover:bg-white/10 hover:text-white',
                       )}
                     >
                       <span
@@ -172,7 +174,7 @@ export default function AdminSidebar({ role, onClose, className, badges, name, p
                       </span>
                       <span className="flex-1 truncate">{item.label}</span>
                       {!!item.badge && (
-                        <span className="ml-auto min-w-[24px] h-6 flex items-center justify-center rounded-lg bg-error text-white font-black text-[10px] px-1.5 flex-shrink-0 border-2 border-primary/20">
+                        <span className="ml-auto min-w-[24px] h-6 flex items-center justify-center rounded-lg bg-error text-white font-bold text-[12px] px-1.5 flex-shrink-0 border-2 border-primary/20">
                           {item.badge > 99 ? '99+' : item.badge}
                         </span>
                       )}
@@ -190,15 +192,15 @@ export default function AdminSidebar({ role, onClose, className, badges, name, p
         {/* User info */}
         <div className="flex items-center gap-3 px-2 py-2">
           <div className="w-10 h-10 rounded-xl bg-white/10 border-2 border-white/20 flex items-center justify-center flex-shrink-0">
-            <span className="font-black text-lg text-white">
+            <span className="font-bold text-lg text-white">
               {displayName[0]?.toUpperCase() ?? 'A'}
             </span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm text-white font-black truncate leading-tight mb-0.5">
+            <p className="text-sm text-white font-bold truncate leading-tight mb-0.5">
               {displayName}
             </p>
-            <p className="text-[10px] font-black text-white/50 uppercase tracking-widest flex items-center gap-1">
+            <p className="text-[12px] font-bold text-white/50 flex items-center gap-1">
               <ShieldAlert size={10} />
               {role === 'super_admin' ? 'Super Admin' : 'Admin'}
             </p>
@@ -208,7 +210,7 @@ export default function AdminSidebar({ role, onClose, className, badges, name, p
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-white/10 text-white hover:bg-error/20 hover:border-error/50 hover:text-error-container transition-colors text-xs font-black uppercase tracking-widest active:scale-95"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-white/10 text-white hover:bg-error/20 hover:border-error/50 hover:text-error-container transition-colors text-xs font-bold active:scale-95"
         >
           <LogOut size={16} strokeWidth={2.5} />
           Logout

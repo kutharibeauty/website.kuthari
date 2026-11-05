@@ -52,20 +52,20 @@ export default function Error({
         {retry && (
           <button
             onClick={() => retry()}
-            className="press gold-sheen relative overflow-hidden flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-white text-[11px] font-bold uppercase tracking-[0.14em] hover:bg-primary/90 transition-colors"
+            className="press gold-sheen relative overflow-hidden flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-white text-[11px] font-bold hover:bg-primary/90 transition-colors"
           >
             <RefreshCw size={14} strokeWidth={2.5} /> Try again
           </button>
         )}
         <Link
           href="/"
-          className="press flex items-center gap-2 px-7 py-3.5 rounded-full border-[1.5px] border-table-border text-primary text-[11px] font-bold uppercase tracking-[0.14em] hover:border-primary transition-colors"
+          className="press flex items-center gap-2 px-7 py-3.5 rounded-full border-[1.5px] border-table-border text-primary text-[11px] font-bold hover:border-primary transition-colors"
         >
           <Home size={14} strokeWidth={2.5} /> Go home
         </Link>
         <a
           href="tel:+919861235276"
-          className="press flex items-center gap-2 px-7 py-3.5 rounded-full border-[1.5px] border-table-border text-primary text-[11px] font-bold uppercase tracking-[0.14em] hover:border-primary transition-colors"
+          className="press flex items-center gap-2 px-7 py-3.5 rounded-full border-[1.5px] border-table-border text-primary text-[11px] font-bold hover:border-primary transition-colors"
         >
           <Phone size={14} strokeWidth={2.5} /> Call us
         </a>

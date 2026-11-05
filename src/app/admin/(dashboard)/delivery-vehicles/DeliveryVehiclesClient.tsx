@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
 import type { DeliveryVehicle } from '@/types/database.types'
 
-const inputCls = 'w-full px-3 py-2.5 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
+const inputCls = 'w-full px-3 py-2.5 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200'
 
 export default function DeliveryVehiclesClient({ initial }: { initial: DeliveryVehicle[] }) {
   const [vehicles, setVehicles] = useState<DeliveryVehicle[]>(initial)
@@ -66,17 +66,17 @@ export default function DeliveryVehiclesClient({ initial }: { initial: DeliveryV
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto w-full space-y-8">
       <div className="border-b-2 border-table-border pb-6">
-        <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight flex items-center gap-3">
+        <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight flex items-center gap-3">
           <Truck size={30} /> Delivery Vehicles.
         </h1>
-        <p className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mt-2">
+        <p className="text-sm font-bold text-on-surface-variant mt-2">
           Buses customers can pick at checkout
         </p>
       </div>
 
       {/* Add */}
       <section className="bg-surface-card rounded-2xl border-2 border-table-border p-5 space-y-4">
-        <p className="font-black text-xs text-primary uppercase tracking-widest">Add a vehicle</p>
+        <p className="font-bold text-xs text-primary">Add a vehicle</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <input value={form.number} onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))} placeholder="Bus number *" className={inputCls} />
           <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Transporter / driver name" className={inputCls} />
@@ -85,7 +85,7 @@ export default function DeliveryVehiclesClient({ initial }: { initial: DeliveryV
         <button
           onClick={addVehicle}
           disabled={adding}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 disabled:opacity-60 transition-opacity active:scale-95"
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 disabled:opacity-60 transition-opacity active:scale-95"
         >
           {adding ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
           Add Vehicle
@@ -95,7 +95,7 @@ export default function DeliveryVehiclesClient({ initial }: { initial: DeliveryV
       {/* List */}
       <section className="space-y-3">
         {vehicles.length === 0 ? (
-          <p className="text-center py-12 font-black text-sm text-on-surface-variant uppercase tracking-widest">
+          <p className="text-center py-12 font-bold text-sm text-on-surface-variant">
             No vehicles yet.
           </p>
         ) : (

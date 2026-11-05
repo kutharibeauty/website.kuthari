@@ -25,12 +25,21 @@ export interface HomepageData {
   promoCards: Banner[]
   categories: Category[]
   featuredProducts: Product[]
+  /** The hero story and the shelf grid: featured products, or, when none are
+   *  marked featured yet, the first active products that have a photo. */
+  shelfProducts: Product[]
+  /** True when shelfProducts are the admin's featured picks. */
+  shelfIsFeatured: boolean
   coupons: Coupon[]
   categoryProducts: Record<string, Product[]>
+  /** Active products per category id (the rows above are capped). */
+  categoryCounts: Record<string, number>
   announcement: SiteAnnouncement | null
   offerBanner: OfferBannerConfig | null
   trustBadges: TrustBadgeItem[]
   marqueeLines: MarqueeLineItem[]
+  /** Real reviews for the home page wall (see components/home/ReviewsWall). */
+  reviews: import('@/components/home/ReviewsWall').WallReview[]
 }
 
 function parseCmsValue<T>(
@@ -55,7 +64,7 @@ export async function getHomepageData(): Promise<HomepageData> {
   // waterfall, because the per-category fetches needed the category ids first.
   // Fetching every active product once removes that dependency entirely; the
   // featured row and each category row are derived in memory below.
-  const [bannersRes, categoriesRes, productsRes, couponsRes, cmsRes] =
+  const [bannersRes, categoriesRes, productsRes, couponsRes, cmsRes, reviewsRes] =
     await Promise.all([
       supabase
         .from('banners')
@@ -79,6 +88,14 @@ export async function getHomepageData(): Promise<HomepageData> {
         .limit(MAX_ACTIVE_PRODUCTS),
       supabase.from('coupons').select('*').eq('is_active', true),
       supabase.from('cms_content').select('*'),
+      // Approved reviews with words in them, newest first.
+      supabase
+        .from('reviews')
+        .select('id, product_id, reviewer_name, rating, body, created_at')
+        .eq('is_approved', true)
+        .not('body', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(9),
     ])
 
   const allBanners = bannersRes.data ?? []
@@ -93,27 +110,23 @@ export async function getHomepageData(): Promise<HomepageData> {
     cmsMap[row.key] = row.value
   })
 
-  // Derived in memory — no extra queries.
-  // Best Sellers ordering: Ruchi first, then Fortune, then every other brand.
-  // Sort runs before the slice so those brands surface even when their
-  // display_order would have pushed them past the 12-item cut. Array.sort is
-  // stable, so within each tier the existing display_order is preserved.
-  const brandRank = (p: Product) => {
-    const hay = `${p.name} ${p.brand ?? ''}`
-    if (/ruchi/i.test(hay)) return 0
-    if (/fortune/i.test(hay)) return 1
-    return 2
-  }
-  const featuredProducts = allProducts
-    .filter((p) => p.is_featured)
-    .sort((a, b) => brandRank(a) - brandRank(b))
-    .slice(0, 12)
+  // Derived in memory, no extra queries. Featured keeps the admin's display_order.
+  const featuredProducts = allProducts.filter((p) => p.is_featured).slice(0, 12)
+  const withPhoto = (p: Product) => Array.isArray(p.images) && p.images.length > 0
+  const shelfIsFeatured = featuredProducts.length > 0
+  const shelfProducts = (shelfIsFeatured ? featuredProducts : allProducts).filter(withPhoto).slice(0, 12)
 
   const categoryProducts: Record<string, Product[]> = {}
-  for (const cat of categories) categoryProducts[cat.id] = []
+  const categoryCounts: Record<string, number> = {}
+  for (const cat of categories) {
+    categoryProducts[cat.id] = []
+    categoryCounts[cat.id] = 0
+  }
   for (const p of allProducts) {
-    const bucket = p.category_id ? categoryProducts[p.category_id] : undefined
-    if (bucket && bucket.length < PER_CATEGORY_LIMIT) bucket.push(p)
+    if (!p.category_id || !(p.category_id in categoryProducts)) continue
+    categoryCounts[p.category_id] += 1
+    const bucket = categoryProducts[p.category_id]
+    if (bucket.length < PER_CATEGORY_LIMIT) bucket.push(p)
   }
 
   const announcement = parseCmsValue<SiteAnnouncement>(
@@ -154,13 +167,47 @@ export async function getHomepageData(): Promise<HomepageData> {
         .filter((l) => l.text.trim().length > 0)
     : []
 
+  // Product reviews from this site, then reviews the shop copied in from
+  // Google / Justdial (Banners & CMS → Homepage → Customer reviews).
+  const productName = new Map(allProducts.map((p) => [p.id, { name: p.name, slug: p.slug }]))
+  type RawReview = { id: string; product_id: string; reviewer_name: string; rating: number; body: string | null }
+  const siteReviews = ((reviewsRes.data ?? []) as RawReview[])
+    .filter((r) => (r.body ?? '').trim().length > 0)
+    .map((r) => ({
+      id: r.id,
+      name: r.reviewer_name,
+      text: (r.body ?? '').trim(),
+      rating: Number(r.rating) || 5,
+      source: productName.get(r.product_id)?.name ?? 'Verified purchase',
+      href: productName.get(r.product_id) ? `/product/${productName.get(r.product_id)!.slug}` : undefined,
+    }))
+  const copied = Array.isArray(cmsMap['testimonials'])
+    ? (cmsMap['testimonials'] as unknown[])
+        .map((t, i) => {
+          const o = (t && typeof t === 'object' ? t : {}) as Record<string, unknown>
+          return {
+            id: `cms-${i}`,
+            name: typeof o.name === 'string' ? o.name.trim() : '',
+            text: typeof o.text === 'string' ? o.text.trim() : '',
+            rating: Number(o.rating) || 5,
+            source: typeof o.source === 'string' && o.source.trim() ? o.source.trim() : 'Google',
+          }
+        })
+        .filter((t) => t.name && t.text)
+    : []
+  const reviews = [...siteReviews, ...copied]
+
   return {
+    reviews,
     banners,
     promoCards,
     categories,
     featuredProducts,
+    shelfProducts,
+    shelfIsFeatured,
     coupons,
     categoryProducts,
+    categoryCounts,
     announcement,
     offerBanner,
     trustBadges,

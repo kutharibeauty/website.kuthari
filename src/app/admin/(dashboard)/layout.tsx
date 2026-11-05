@@ -123,6 +123,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <>
+      <link
+        rel="stylesheet"
+        // Icon font for the admin and delivery panels only; the storefront doesn't load it.
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        precedence="default"
+      />
       <AdminShell role={role} badges={badges} name={profile.name} permissions={profile.permissions} notifications={notifications}>{children}</AdminShell>
       <AdminToaster />
     </>

@@ -11,6 +11,7 @@ async function upstashIncr(key: string, ttlSeconds: number): Promise<{ count: nu
   if (!UPSTASH_URL || !UPSTASH_TOKEN) return null
   try {
     const res = await fetch(`${UPSTASH_URL}/pipeline`, {
+      signal: AbortSignal.timeout(3000),
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify([
@@ -31,6 +32,33 @@ async function upstashIncr(key: string, ttlSeconds: number): Promise<{ count: nu
   }
 }
 
+/**
+ * Shared counter in Postgres (migration 040). Used when Upstash isn't set up.
+ * Returns null if the function isn't there yet or the call fails, so the
+ * caller falls back to memory rather than blocking sign-in.
+ */
+async function supabaseIncr(key: string, ttlSeconds: number): Promise<{ count: number; ttl: number } | null> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.NEXT_PUBLIC_SUPABASE_URL) return null
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/server')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (createAdminClient() as any).rpc('rate_limit_hit', {
+      p_key: key,
+      p_window_seconds: ttlSeconds,
+    })
+    if (error) {
+      console.error('[rate-limit] supabase error', error.message)
+      return null
+    }
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row) return null
+    return { count: Number(row.hits), ttl: Math.max(1, Number(row.ttl_seconds)) }
+  } catch (err) {
+    console.error('[rate-limit] supabase error', err)
+    return null
+  }
+}
+
 function memoryIncr(key: string, ttlSeconds: number) {
   const now = Date.now()
   const existing = memoryStore.get(key)
@@ -46,7 +74,10 @@ function memoryIncr(key: string, ttlSeconds: number) {
 
 export async function rateLimit(opts: { key: string; limit: number; windowSec: number }): Promise<RateLimitResult> {
   const fullKey = `rl:${opts.key}:${opts.windowSec}`
-  const result = (await upstashIncr(fullKey, opts.windowSec)) ?? memoryIncr(fullKey, opts.windowSec)
+  const result =
+    (await upstashIncr(fullKey, opts.windowSec)) ??
+    (await supabaseIncr(fullKey, opts.windowSec)) ??
+    memoryIncr(fullKey, opts.windowSec)
   const reset = Math.floor(Date.now() / 1000) + result.ttl
   if (result.count > opts.limit) {
     return { ok: false, remaining: 0, reset, retryAfterSec: result.ttl }

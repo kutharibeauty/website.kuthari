@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cleanGstin } from '@/lib/validations/gst'
 import { findBuyOption } from '@/lib/products/packaging'
-import { computeDeliveryFee, parseDeliveryConfig } from '@/lib/cart/delivery'
+import { computeDeliveryFee, parseDeliveryConfig, availablePaymentModes, advanceFor } from '@/lib/cart/delivery'
 import { isOrderingOpen, formatMinute } from '@/lib/store-hours'
 import { createCheckoutOrder, verifyPaymentSignature, fetchPayment, isRazorpayConfigured } from '@/lib/razorpay'
 import { getReferralConfig, computeRefereeDiscount, computeReferrerReward } from '@/lib/referral/config'
@@ -24,14 +24,14 @@ export async function POST(request: Request) {
   const profileId = meta?.supabase_profile_id
   if (!profileId) return Response.json({ error: 'Profile not configured' }, { status: 400 })
 
-  let body: { address_id: string; items: CartItem[]; notes?: string; is_bulk?: boolean; coupon_code?: string; email?: string; gstin?: string; gst_business_name?: string; referral_code?: string; transport_details?: string; payment_method?: 'cod' | 'online'; razorpay?: { order_id?: string; payment_id?: string; signature?: string } }
+  let body: { address_id: string; items: CartItem[]; notes?: string; is_bulk?: boolean; coupon_code?: string; email?: string; gstin?: string; gst_business_name?: string; referral_code?: string; transport_details?: string; payment_method?: 'cod' | 'online' | 'partial'; razorpay?: { order_id?: string; payment_id?: string; signature?: string } }
   try {
     body = await request.json()
   } catch {
     return Response.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { address_id, items, notes, is_bulk, coupon_code, email } = body
+  const { address_id, items, notes, coupon_code, email } = body
 
   if (!address_id || !Array.isArray(items) || items.length === 0) {
     return Response.json({ error: 'address_id and items are required' }, { status: 400 })
@@ -126,6 +126,9 @@ export async function POST(request: Request) {
   // exists — by its CART LINE id so the client can drop it.
   const unavailableIds: string[] = []
   const orderItems: OrderItem[] = []
+  // A bulk order is any order with a line bought above the single-piece retail
+  // option (a box, pack, hanger...). Decided here from the DB, never by the client.
+  let isBulkOrder = false
   for (const i of items) {
     const pid = i.product_id ?? i.id
     const product = productMap.get(pid)
@@ -138,6 +141,7 @@ export async function POST(request: Request) {
     // Packaging levels (Box / Hanger / Pack / Tin): price the chosen level
     // authoritatively from the DB — never trust the client's price.
     const buyOption = findBuyOption(product, i.variant)
+    if (buyOption?.level !== 'retail') isBulkOrder = true
     if (buyOption) {
       price = buyOption.price
       mrp = buyOption.mrp
@@ -365,21 +369,55 @@ export async function POST(request: Request) {
   //     and return it — NO db order yet.
   //   Phase 2 (with razorpay proof): verify the signature, confirm the captured
   //     payment with Razorpay, then fall through and create the order as paid.
-  const requestedOnline = body.payment_method === 'online'
-  if (requestedOnline && (!deliveryConfig.razorpayEnabled || !isRazorpayConfigured())) {
+  // ── Payment ────────────────────────────────────────────────────────────
+  // Three modes, offered by the admin's settings (availablePaymentModes is the
+  // same rule the checkout shows):
+  //   online  - the full amount through Razorpay
+  //   partial - bulk orders only, while COD is off: an advance through Razorpay,
+  //             the balance collected in cash on delivery
+  //   cod     - the full amount in cash on delivery
+  // Razorpay is a two-phase call to THIS endpoint so all the pricing above runs
+  // identically both times and the order is created once, after the payment is
+  // verified: phase 1 (no proof) returns a Razorpay order for the exact amount,
+  // phase 2 (with proof) verifies it and creates the order.
+  const mode = body.payment_method ?? 'online'
+  const allowed = availablePaymentModes(deliveryConfig, isBulkOrder)
+  if (!allowed.includes(mode)) {
+    const reason = allowed.length === 0
+      ? 'Ordering is paused right now. Please try again shortly or contact us directly.'
+      : mode === 'cod'
+        ? 'Cash on delivery is not available. Please choose another way to pay.'
+        : mode === 'partial'
+          ? 'Part payment is only available for bulk orders. Please choose another way to pay.'
+          : 'Online payment is currently unavailable. Please try again shortly or contact us directly.'
+    return Response.json({ error: reason }, { status: 400 })
+  }
+  // A part-paid order needs the amount_paid / amount_due columns (migration
+  // 042). Check before taking any money, so a payment can never be captured
+  // for an order that then fails to save.
+  if (mode === 'partial') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: colErr } = await (adminDb as any).from('orders').select('amount_due').limit(1)
+    if (colErr) {
+      console.error('Part payment unavailable, migration 042 not applied:', colErr.message)
+      return Response.json({ error: 'Part payment is not available right now. Please choose another way to pay.' }, { status: 400 })
+    }
+  }
+  if (mode !== 'cod' && !isRazorpayConfigured()) {
     return Response.json({ error: 'Online payment is currently unavailable. Please try again shortly or contact us directly.' }, { status: 400 })
   }
 
-  const amountPaise = Math.round(exactTotal * 100)
-  let paymentMethod: 'cod' | 'online' = 'cod'
-  let paymentStatus: 'pending' | 'collected' = 'pending'
+  // Cash changes hands in whole rupees, so any order with a cash part is rounded.
+  const total = mode === 'online' ? Math.round(exactTotal * 100) / 100 : Math.round(exactTotal)
+  const amountNow = mode === 'online' ? total : mode === 'partial' ? advanceFor(total, deliveryConfig.bulkAdvancePercent) : 0
+  const amountPaise = Math.round(amountNow * 100)
+  let paymentStatus: 'pending' | 'collected' | 'partial' = 'pending'
   let paymentReference: string | null = null
 
-  if (requestedOnline) {
-    paymentMethod = 'online'
+  if (mode !== 'cod') {
     const rzp = body.razorpay
     if (!rzp?.payment_id || !rzp.order_id || !rzp.signature) {
-      // Phase 1 — start the payment. No order is created until it succeeds.
+      // Phase 1 - start the payment. No order is created until it succeeds.
       try {
         const rzOrder = await createCheckoutOrder(amountPaise, `kbs_${profileId.slice(0, 8)}_${Date.now()}`)
         return Response.json({
@@ -397,7 +435,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Phase 2 — a payment came back. Verify it before trusting it.
+    // Phase 2 - a payment came back. Verify it before trusting it.
     if (!verifyPaymentSignature(rzp.order_id, rzp.payment_id, rzp.signature)) {
       return Response.json({ error: 'Payment verification failed. If you were charged, contact support.' }, { status: 400 })
     }
@@ -417,13 +455,9 @@ export async function POST(request: Request) {
       console.error('Razorpay payment fetch failed:', e)
       return Response.json({ error: 'Payment could not be confirmed. If you were charged, contact support.' }, { status: 502 })
     }
-    paymentStatus = 'collected'
+    paymentStatus = mode === 'online' ? 'collected' : 'partial'
     paymentReference = rzp.payment_id
   }
-
-  // COD is collected in whole rupees (no coins). Online charges the exact amount
-  // the customer already paid, so no rounding.
-  const total = paymentMethod === 'cod' ? Math.round(exactTotal) : amountPaise / 100
 
   const transportDetails = typeof body.transport_details === 'string'
     ? body.transport_details.trim().slice(0, 300)
@@ -439,13 +473,15 @@ export async function POST(request: Request) {
     discount: totalDiscount,
     coupon_code: appliedCouponCode,
     total,
-    payment_method: paymentMethod,
-    // Online orders are prepaid: record the money as collected + the Razorpay
-    // payment id. COD keeps the default 'pending' until collected at delivery.
-    ...(paymentMethod === 'online' ? { payment_status: paymentStatus, payment_reference: paymentReference } : {}),
+    payment_method: mode,
+    payment_status: paymentStatus,
+    ...(paymentReference ? { payment_reference: paymentReference } : {}),
+    // What was paid online and what the delivery person collects (migration 042).
+    amount_paid: amountNow,
+    amount_due: Math.round((total - amountNow) * 100) / 100,
     status: 'placed',
     notes: notes?.trim() || null,
-    is_bulk: is_bulk ?? false,
+    is_bulk: isBulkOrder,
     ...(transportDetails ? { transport_details: transportDetails } : {}),
     // Only reference the GST columns when the buyer actually asked for a GST
     // invoice. Naming a column that doesn't exist on the live table fails the
@@ -456,10 +492,17 @@ export async function POST(request: Request) {
   let { data: order, error } = await adminDb
     .from('orders').insert(orderPayload).select('id, order_number, created_at').single()
 
-  // transport_details lands only after migration 034. If that's the only snag,
-  // drop it and retry so placing an order never depends on the migration.
-  if (error && transportDetails && /transport_details/i.test(error.message)) {
+  // transport_details (034) and amount_paid/amount_due (042) are newer columns.
+  // If one is missing on the live table, drop it and retry so placing an order
+  // never depends on a migration. A 'partial' order needs 042, so it can't fall back.
+  if (error && /transport_details/i.test(error.message)) {
     delete orderPayload.transport_details
+    ;({ data: order, error } = await adminDb
+      .from('orders').insert(orderPayload).select('id, order_number, created_at').single())
+  }
+  if (error && mode !== 'partial' && /amount_paid|amount_due/i.test(error.message)) {
+    delete orderPayload.amount_paid
+    delete orderPayload.amount_due
     ;({ data: order, error } = await adminDb
       .from('orders').insert(orderPayload).select('id, order_number, created_at').single())
   }
@@ -541,7 +584,7 @@ export async function POST(request: Request) {
   // `totalDiscount`, not `discountAmt` — the order was inserted with the coupon
   // AND referral discounts combined, so passing the coupon share alone makes the
   // email/invoice fail to add up against the total the customer actually pays.
-  after(() => sendOrderEmails(orderId, orderNumber, createdAt, orderItems, address, subtotal, deliveryFee, totalDiscount, appliedCouponCode, total, profileId, gstin, gstBusinessName))
+  after(() => sendOrderEmails(orderId, orderNumber, createdAt, orderItems, address, subtotal, deliveryFee, totalDiscount, appliedCouponCode, total, profileId, gstin, gstBusinessName, mode, amountNow))
 
   return Response.json({ order_id: orderId }, { status: 201 })
 }
@@ -560,6 +603,8 @@ async function sendOrderEmails(
   profileId: string,
   gstin: string | null,
   gstBusinessName: string | null,
+  paymentMethod?: string,
+  amountPaid?: number,
 ) {
   try {
     const resend = await import('@/lib/resend')
@@ -590,6 +635,8 @@ async function sendOrderEmails(
       // with none of the buyer's GST details on it.
       gstin,
       gstBusinessName,
+      paymentMethod,
+      amountPaid,
     }
 
     const admins = await resend.getOrderEmailAdmins()

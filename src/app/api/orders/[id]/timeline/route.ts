@@ -4,6 +4,7 @@ import { NextRequest, NextResponse, after } from 'next/server'
 import type { AuthMetadata } from '@/types'
 import { mapTimelineRow } from '@/lib/orders/timeline'
 import { notifyOrderEvent } from '@/lib/resend/notify'
+import { requirePermission } from '@/lib/auth/guard'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -33,6 +34,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function POST(req: NextRequest, { params }: Params) {
+  const noPerm = await requirePermission('update_order_status'); if (noPerm) return noPerm
   const { userId, sessionClaims } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const meta = sessionClaims?.publicMetadata as AuthMetadata | undefined

@@ -93,7 +93,7 @@ export default function OtpInput({ value, onChange, length = 4, autoFocus, onCom
           return (
             <div
               key={i}
-              className={`relative flex w-full aspect-square min-w-0 items-center justify-center overflow-hidden rounded-2xl border-2 bg-surface-card text-2xl font-black text-primary transition-all duration-200 ${
+              className={`relative flex w-full aspect-square min-w-0 items-center justify-center overflow-hidden rounded-2xl border-2 bg-surface-card text-2xl font-black text-primary transition duration-200 ${
                 d ? 'border-primary/60' : 'border-table-border'
               } ${isActive ? 'border-primary shadow-[0_0_0_4px_rgba(27, 44, 61,0.08)] -translate-y-0.5' : ''}`}
             >

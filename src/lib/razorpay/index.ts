@@ -1,6 +1,15 @@
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
 
+/** Razorpay's SDK has no timeout option; give every call one so a slow gateway
+ *  can't hang checkout. */
+function withTimeout<T>(p: Promise<T>, ms = 15000): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Razorpay timed out after ${ms}ms`)), ms)),
+  ])
+}
+
 function getRazorpay() {
   return new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID!,
@@ -23,13 +32,13 @@ export async function createCheckoutOrder(
   receipt: string,
 ): Promise<{ id: string; amount: number; currency: string }> {
   const rz = getRazorpay()
-  const order = await rz.orders.create({
+  const order = await withTimeout(rz.orders.create({
     amount: amountPaise,
     currency: 'INR',
     receipt,
     // Auto-capture so a successful payment is settled, not left authorized.
     payment_capture: true,
-  })
+  }))
   return { id: order.id as string, amount: Number(order.amount), currency: order.currency as string }
 }
 
@@ -60,7 +69,7 @@ export async function fetchPayment(
 ): Promise<{ status: string; amount: number; orderId: string | null }> {
   const rz = getRazorpay()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const p = (await rz.payments.fetch(paymentId)) as any
+  const p = (await withTimeout(rz.payments.fetch(paymentId))) as any
   return { status: String(p.status), amount: Number(p.amount), orderId: p.order_id ? String(p.order_id) : null }
 }
 
@@ -70,12 +79,12 @@ export async function createDeliveryPaymentLink(
 ): Promise<string> {
   const rz = getRazorpay()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const link = await (rz.paymentLink as any).create({
+  const link: { short_url?: string } = await withTimeout((rz.paymentLink as any).create({
     amount: Math.round(amount * 100), // paise
     currency: 'INR',
     description: `Kuthari Beauty Store Order #${orderId.slice(-8).toUpperCase()}`,
     reminder_enable: false,
     upi_link: true,
-  })
+  }))
   return link.short_url as string
 }

@@ -89,7 +89,7 @@ function CallbackContent() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background px-4 text-center">
         <p className="text-sm font-medium text-error">{error}</p>
-        <a href="/login" className="text-xs font-black uppercase tracking-widest text-primary hover:underline">
+        <a href="/login" className="text-xs font-black text-primary hover:underline">
           Back to Login
         </a>
       </div>
@@ -99,7 +99,7 @@ function CallbackContent() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background">
       <Loader2 size={24} className="animate-spin text-primary" />
-      <p className="text-xs font-black uppercase tracking-widest text-on-surface-variant">Securing your session…</p>
+      <p className="text-xs font-black text-on-surface-variant">Securing your session…</p>
     </div>
   )
 }

@@ -7,12 +7,16 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE
 
 // Google taxonomy path fallback by category slug
 const CAT_GPC: Record<string, string> = {
-  'edible-oil':      'Food, Beverages & Tobacco > Food Items > Cooking & Baking Ingredients > Cooking Oils',
-  'pulses-dal':      'Food, Beverages & Tobacco > Food Items > Grains, Rice & Cereal',
-  'atta-flour':      'Food, Beverages & Tobacco > Food Items > Grains, Rice & Cereal > Flour',
-  'spices-masala':   'Food, Beverages & Tobacco > Food Items > Herbs, Spices & Seasonings',
-  'sugar-jaggery':   'Food, Beverages & Tobacco > Food Items > Sugars & Sweeteners',
-  'packaged-water':  'Food, Beverages & Tobacco > Beverages > Water',
+  'skincare':              'Health & Beauty > Personal Care > Cosmetics > Skin Care',
+  'haircare':              'Health & Beauty > Personal Care > Hair Care',
+  'hair-colour':           'Health & Beauty > Personal Care > Hair Care > Hair Color',
+  'makeup':                'Health & Beauty > Personal Care > Cosmetics > Makeup',
+  'nail-care':             'Health & Beauty > Personal Care > Cosmetics > Nail Care',
+  'fragrances-deodorants': 'Health & Beauty > Personal Care > Cosmetics > Perfume & Cologne',
+  'mens-grooming':         'Health & Beauty > Personal Care > Shaving & Grooming',
+  'bath-body':             'Health & Beauty > Personal Care > Cosmetics > Bath & Body',
+  'salon-parlour':         'Health & Beauty > Personal Care > Cosmetics',
+  'beauty-tools':          'Health & Beauty > Personal Care > Cosmetics > Cosmetic Tools',
 }
 
 function xe(s: string) {
@@ -39,7 +43,7 @@ function buildItem(p: Record<string, any>): string {
   const mrp: number | null = p.mrp ?? null
   const hasSale = (p.show_strikethrough ?? false) && mrp != null && mrp > price
 
-  const gpc = xe(p.google_product_category || CAT_GPC[catSlug] || 'Food, Beverages & Tobacco > Food Items')
+  const gpc = xe(p.google_product_category || CAT_GPC[catSlug] || 'Health & Beauty > Personal Care > Cosmetics')
   const images: string[] = p.images ?? []
   const hasGtin = Boolean(p.gtin)
   const hasMpn = Boolean(p.mpn)
@@ -110,7 +114,7 @@ export async function GET() {
   <channel>
     <title>Kuthari Beauty Store</title>
     <link>${SITE_URL}</link>
-    <description>Kuthari Beauty Store — Wholesale Cosmetics, Salon & Grooming Products</description>
+    <description>Kuthari Beauty Store: cosmetics, skincare, haircare and salon products, by the piece or by the box</description>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items}
   </channel>

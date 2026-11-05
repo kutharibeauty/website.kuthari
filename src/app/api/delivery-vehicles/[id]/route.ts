@@ -1,9 +1,10 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import { requireAdmin } from '@/lib/auth/guard'
+import { requireAdmin, requirePermission } from '@/lib/auth/guard'
 
 type Params = { params: Promise<{ id: string }> }
 
 export async function PATCH(request: Request, { params }: Params) {
+  const noPerm = await requirePermission('manage_delivery_persons'); if (noPerm) return noPerm
   const denied = await requireAdmin(); if (denied) return denied
   const { id } = await params
   const body = await request.json().catch(() => ({}))
@@ -23,6 +24,7 @@ export async function PATCH(request: Request, { params }: Params) {
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
+  const noPerm = await requirePermission('manage_delivery_persons'); if (noPerm) return noPerm
   const denied = await requireAdmin(); if (denied) return denied
   const { id } = await params
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

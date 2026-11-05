@@ -40,7 +40,7 @@ export default function OrderPlacedAdmin({
               </Column>
               <Column style={statCol}>
                 <Text style={statLabel}>TOTAL</Text>
-                <Text style={{ ...statValue, color: '#1b2c3d' }}>{fmt(total)}</Text>
+                <Text style={{ ...statValue, color: '#292966' }}>{fmt(total)}</Text>
               </Column>
               <Column style={statCol}>
                 <Text style={statLabel}>DATE</Text>
@@ -80,7 +80,7 @@ export default function OrderPlacedAdmin({
             <Heading style={sectionTitle}>Order Items</Heading>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#faf6ee' }}>
+                <tr style={{ backgroundColor: '#f7f7fc' }}>
                   <th style={th}>Product</th>
                   <th style={{ ...th, textAlign: 'center' }}>Qty</th>
                   <th style={{ ...th, textAlign: 'right' }}>Unit Price</th>
@@ -125,9 +125,9 @@ export default function OrderPlacedAdmin({
                   <td style={totalLbl}>Delivery</td>
                   <td style={totalVal}>{deliveryFee === 0 ? 'FREE' : fmt(deliveryFee)}</td>
                 </tr>
-                <tr style={{ borderTop: '2px solid #1b2c3d' }}>
-                  <td style={{ ...totalLbl, fontWeight: '700', color: '#1b2c3d', fontSize: '15px', paddingTop: '8px' }}>Grand Total</td>
-                  <td style={{ ...totalVal, fontWeight: '700', color: '#1b2c3d', fontSize: '15px', paddingTop: '8px' }}>{fmt(total)}</td>
+                <tr style={{ borderTop: '2px solid #292966' }}>
+                  <td style={{ ...totalLbl, fontWeight: '700', color: '#292966', fontSize: '15px', paddingTop: '8px' }}>Grand Total</td>
+                  <td style={{ ...totalVal, fontWeight: '700', color: '#292966', fontSize: '15px', paddingTop: '8px' }}>{fmt(total)}</td>
                 </tr>
               </tbody>
             </table>
@@ -164,24 +164,24 @@ export default function OrderPlacedAdmin({
   )
 }
 
-const body = { backgroundColor: '#f5f0e8', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0', padding: '20px 0' }
+const body = { backgroundColor: '#eeeef8', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0', padding: '20px 0' }
 const container = { maxWidth: '600px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden' as const }
 const alertHeader = { backgroundColor: '#c2410c', padding: '28px 32px', textAlign: 'center' as const }
 const alertIcon = { fontSize: '40px', margin: '0 0 4px' }
 const alertTitle = { color: '#ffffff', fontSize: '26px', fontWeight: '700', margin: '0 0 6px' }
 const alertSub = { color: '#fed7aa', fontSize: '14px', margin: '0' }
-const statsRow = { backgroundColor: '#faf6ee', padding: '20px 32px' }
+const statsRow = { backgroundColor: '#f7f7fc', padding: '20px 32px' }
 const statCol = { padding: '0 12px', textAlign: 'center' as const }
 const statLabel = { color: '#81756e', fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase' as const, margin: '0 0 4px' }
 const statValue = { color: '#1c1c17', fontSize: '18px', fontWeight: '700', margin: '0' }
 const ctaSection = { padding: '20px 32px', textAlign: 'center' as const }
-const ctaButton = { backgroundColor: '#1b2c3d', color: '#faf6ee', borderRadius: '24px', padding: '14px 32px', fontSize: '15px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }
+const ctaButton = { backgroundColor: '#292966', color: '#f7f7fc', borderRadius: '24px', padding: '14px 32px', fontSize: '15px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }
 const divider = { borderColor: '#e5e1d9', margin: '0' }
 const section = { padding: '24px 32px' }
-const sectionTitle = { color: '#1b2c3d', fontSize: '15px', fontWeight: '700', margin: '0 0 16px', letterSpacing: '0.5px', textTransform: 'uppercase' as const }
+const sectionTitle = { color: '#292966', fontSize: '15px', fontWeight: '700', margin: '0 0 16px', letterSpacing: '0.5px', textTransform: 'uppercase' as const }
 const metaLabel = { color: '#81756e', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase' as const, margin: '0 0 4px' }
 const metaValue = { color: '#1c1c17', fontSize: '15px', fontWeight: '600', margin: '0' }
-const phoneLink = { color: '#1b2c3d', fontSize: '15px', fontWeight: '600' }
+const phoneLink = { color: '#292966', fontSize: '15px', fontWeight: '600' }
 const th = { padding: '8px 10px', textAlign: 'left' as const, fontSize: '11px', letterSpacing: '0.5px', color: '#4f453f', fontWeight: '600', textTransform: 'uppercase' as const }
 const td = { padding: '10px', verticalAlign: 'top' as const }
 const tdText = { color: '#1c1c17', fontSize: '14px', margin: '0' }
@@ -190,5 +190,5 @@ const itemUnit = { color: '#81756e', fontSize: '12px', margin: '0' }
 const totalLbl = { padding: '4px 0', color: '#4f453f', fontSize: '13px' }
 const totalVal = { padding: '4px 0', textAlign: 'right' as const, color: '#1c1c17', fontSize: '13px' }
 const addrText = { color: '#3d2b1f', fontSize: '14px', lineHeight: '1.7', margin: '0' }
-const footer = { backgroundColor: '#f5f0e8', padding: '20px 32px', textAlign: 'center' as const }
+const footer = { backgroundColor: '#eeeef8', padding: '20px 32px', textAlign: 'center' as const }
 const footerText = { color: '#81756e', fontSize: '12px', margin: '0' }

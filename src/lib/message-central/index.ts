@@ -7,7 +7,7 @@
  *                                 (preferred — used directly, no extra request)
  *   MESSAGE_CENTRAL_PASSWORD    — Fallback only, used to fetch a token
  *                                 dynamically if AUTH_TOKEN isn't set
- *   MESSAGE_CENTRAL_SENDER_ID   — Registered SMS sender id (default: BCRTRD)
+ *   MESSAGE_CENTRAL_SENDER_ID   — DLT-registered SMS sender id for Kuthari (no default)
  *   MESSAGE_CENTRAL_BASE_URL    — API base (default: https://cpaas.messagecentral.com)
  */
 
@@ -32,7 +32,7 @@ async function fetchDynamicAuthToken(): Promise<string | null> {
   const url = `${baseUrl()}/auth/v1/authentication/token?customerId=${encodeURIComponent(customerId)}&key=${encodeURIComponent(key)}&scope=NEW&country=91`
 
   try {
-    const res = await fetch(url, { method: 'GET' })
+    const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(10000) })
     const text = await res.text()
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +80,9 @@ function digitsOnly(phone: string): string {
  */
 export async function sendSms(phone: string, message: string): Promise<void> {
   const customerId = process.env.MESSAGE_CENTRAL_CUSTOMER_ID
-  const senderId = process.env.MESSAGE_CENTRAL_SENDER_ID ?? 'BCRTRD'
+  // Must be a DLT-registered sender for Kuthari; unset means no sender id is
+  // sent and the gateway uses its own default.
+  const senderId = process.env.MESSAGE_CENTRAL_SENDER_ID ?? ''
   if (!customerId) return
 
   const token = await getAuthToken()
@@ -92,10 +94,11 @@ export async function sendSms(phone: string, message: string): Promise<void> {
   url.searchParams.set('countryCode', '91')
   url.searchParams.set('mobileNumber', mobile)
   url.searchParams.set('message', message)
-  url.searchParams.set('senderId', senderId)
+  if (senderId) url.searchParams.set('senderId', senderId)
   url.searchParams.set('type', 'SMS')
 
   await fetch(url.toString(), {
+    signal: AbortSignal.timeout(10000),
     method: 'POST',
     headers: { authToken: token },
   }).catch(() => {}) // fire-and-forget; don't fail the caller on SMS error
@@ -131,7 +134,7 @@ export async function sendOtp(
   const mobile = digitsOnly(phone)
   const doSend = async (authToken: string) => {
     const url = `${baseUrl()}/verification/v3/send?countryCode=91&customerId=${encodeURIComponent(customerId)}&flowType=SMS&mobileNumber=${mobile}&otpLength=4&otpExpiry=${requestedSeconds}`
-    return fetch(url, { method: 'POST', headers: { authToken, 'Content-Type': 'application/json' } })
+    return fetch(url, { method: 'POST', headers: { authToken, 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(10000) })
   }
 
   try {
@@ -192,7 +195,7 @@ export async function verifyOtp(
 
   const doVerify = async (authToken: string) => {
     const url = `${baseUrl()}/verification/v3/validateOtp?customerId=${encodeURIComponent(customerId)}&code=${encodeURIComponent(otp)}&verificationId=${encodeURIComponent(verificationId)}`
-    return fetch(url, { method: 'GET', headers: { authToken } })
+    return fetch(url, { method: 'GET', headers: { authToken }, signal: AbortSignal.timeout(10000) })
   }
 
   try {

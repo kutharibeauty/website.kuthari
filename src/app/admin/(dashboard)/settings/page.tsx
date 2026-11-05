@@ -42,6 +42,9 @@ export default async function SettingsPage() {
     admin_notification_email: str(raw.admin_notification_email, ''),
     otp_expiry_minutes:       num(raw.otp_expiry_minutes, 10),
     razorpay_enabled:         bool(raw.razorpay_enabled, false),
+    cod_enabled:              bool(raw.cod_enabled, false),
+    bulk_partial_enabled:     bool(raw.bulk_partial_enabled, false),
+    bulk_advance_percent:     num(raw.bulk_advance_percent, 25),
     // Delivery panel is off by default — it's re-enabled from this page.
     delivery_enabled:         bool(raw.delivery_enabled, false),
   }

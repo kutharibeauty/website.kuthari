@@ -98,7 +98,7 @@ export default function OrderTimeline({ status }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.08 + 0.1 }}
                 className={[
-                  'text-[10px] text-center leading-tight font-semibold',
+                  'text-[12px] text-center leading-tight font-semibold',
                   done || active ? 'text-primary' : 'text-on-surface-variant',
                   active && 'font-bold',
                 ].join(' ')}
@@ -107,7 +107,7 @@ export default function OrderTimeline({ status }: Props) {
               </motion.span>
 
               {future && (
-                <span className="text-[9px] text-on-surface-variant/50 mt-0.5 hidden lg:block">
+                <span className="text-[11px] text-on-surface-variant/50 mt-0.5 hidden lg:block">
                   Pending
                 </span>
               )}

@@ -21,7 +21,7 @@ export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: orders, error } = await (supabase as any)
     .from('orders')
-    .select('id, status, total, created_at, address, items, payment_method, assigned_to, delivered_at')
+    .select('id, status, total, created_at, address, items, payment_method, payment_status, amount_due, assigned_to, delivered_at')
     .eq('assigned_to', meta.admin_profile_id)
     .order('created_at', { ascending: false })
 

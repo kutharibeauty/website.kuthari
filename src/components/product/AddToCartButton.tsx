@@ -174,7 +174,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowSheet(false) }}
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-ink/50 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
         >
@@ -207,7 +207,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
             {/* Level picker — e.g. Hanger vs Pack for spices. */}
             {hasLevels && (
               <>
-                <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">
+                <p className="text-[13px] font-semibold text-on-surface-variant/60 mb-2">
                   {tField('Buy by', 'କିଣନ୍ତୁ')}
                 </p>
                 <div className="grid grid-cols-2 gap-3 mb-4">
@@ -219,14 +219,14 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
                         onClick={() => { setLevelIdx(i); setQtyStr('1') }}
                         aria-pressed={sel}
                         className={cn(
-                          'flex flex-col items-start gap-0.5 rounded-2xl border-2 p-3 text-left transition-all active:scale-95',
+                          'flex flex-col items-start gap-0.5 rounded-2xl border-2 p-3 text-left transition active:scale-95',
                           sel ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27, 44, 61,0.06)]' : 'border-table-border hover:border-primary/40',
                         )}
                       >
                         <span className="font-black text-sm text-primary">{o.label}</span>
                         <span className="font-black text-base text-primary">₹{fmt(o.price)}</span>
                         {o.pieces != null && (
-                          <span className="text-[10px] font-bold text-on-surface-variant/60">{fmt(o.pieces)} {tField('units', 'ୟୁନିଟ୍')}</span>
+                          <span className="text-[12px] font-bold text-on-surface-variant/60">{fmt(o.pieces)} {tField('units', 'ୟୁନିଟ୍')}</span>
                         )}
                       </button>
                     )
@@ -235,7 +235,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
               </>
             )}
 
-            <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">
+            <p className="text-[13px] font-semibold text-on-surface-variant/60 mb-2">
               {`Select quantity`}
             </p>
 
@@ -248,14 +248,14 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
                     key={n}
                     onClick={() => setQtyStr(String(n))}
                     className={cn(
-                      'flex flex-col items-start gap-0.5 rounded-2xl border-2 p-3 text-left transition-all active:scale-95',
+                      'flex flex-col items-start gap-0.5 rounded-2xl border-2 p-3 text-left transition active:scale-95',
                       sel ? 'border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(27, 44, 61,0.06)]' : 'border-table-border hover:border-primary/40',
                     )}
                   >
                     <span className="font-black text-sm text-primary">{n} {n === 1 ? unitWord : unitWordPlural}</span>
                     <span className="font-black text-base text-primary">₹{fmt(n * pricePerBox)}</span>
                     {unitsPerBox > 0 && (
-                      <span className="text-[10px] font-bold text-on-surface-variant/60">{fmt(n * unitsPerBox)} {tField('units', 'ୟୁନିଟ୍')}</span>
+                      <span className="text-[12px] font-bold text-on-surface-variant/60">{fmt(n * unitsPerBox)} {tField('units', 'ୟୁନିଟ୍')}</span>
                     )}
                   </button>
                 )
@@ -264,7 +264,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
 
             {/* Custom number of boxes */}
             <div className="rounded-2xl border-2 border-primary/25 bg-primary/[0.04] p-3 mb-4">
-              <label htmlFor="box-sheet-custom" className="block text-[10px] font-black uppercase tracking-widest text-primary mb-2">
+              <label htmlFor="box-sheet-custom" className="block text-[13px] font-semibold text-primary mb-2">
                 {`Or enter a custom quantity`}
               </label>
               <div className="flex items-center gap-3">
@@ -282,7 +282,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
                 />
                 <span className="text-sm font-bold text-on-surface-variant">{unitWordPlural}</span>
                 <div className="ml-auto text-right">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/50">{tField('Total', 'ମୋଟ')}</p>
+                  <p className="text-[13px] font-semibold text-on-surface-variant/50">{tField('Total', 'ମୋଟ')}</p>
                   <p className="text-xl font-black text-primary leading-none mt-0.5">₹{fmt(qtyNum * pricePerBox)}</p>
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
             {/* Confirm */}
             <button
               onClick={confirmSheet}
-              className="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-primary text-white font-black text-sm uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+              className="btn-pill w-full h-12"
             >
               {`Add ${qtyNum} ${qtyNum === 1 ? unitWord : unitWordPlural}`} · ₹{fmt(qtyNum * pricePerBox)}
             </button>
@@ -307,7 +307,7 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
       <>
       <div
         ref={(el) => { anchorRef.current = el }}
-        className={cn('relative h-10', className)}
+        className={cn('relative h-11', className)}
         onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -319,21 +319,21 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
               animate={{ scale: 1,    opacity: 1 }}
               exit={{    scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="absolute inset-0 flex items-center justify-between rounded-full bg-primary text-white overflow-hidden"
+              className="absolute inset-0 flex items-center justify-between rounded-full bg-ink text-paper-raised overflow-hidden"
             >
               <button
                 onClick={(e) => handleChange(e, -1)}
-                className="w-10 h-full flex items-center justify-center bg-transparent hover:bg-white/20 transition-colors active:scale-95"
+                className="w-11 h-full flex items-center justify-center bg-transparent hover:bg-indigo hover:text-paper-raised transition-colors active:scale-95"
                 aria-label="Remove one"
               >
                 <Minus size={16} strokeWidth={3} />
               </button>
-              <span className="text-[14px] font-black min-w-6 text-center tracking-widest">
+              <span className="text-[15px] font-bold min-w-6 text-center tabular-nums" aria-live="polite">
                 {cartItem.quantity}
               </span>
               <button
                 onClick={(e) => handleChange(e, 1)}
-                className="w-10 h-full flex items-center justify-center bg-transparent hover:bg-white/20 transition-colors active:scale-95"
+                className="w-11 h-full flex items-center justify-center bg-transparent hover:bg-indigo hover:text-paper-raised transition-colors active:scale-95"
                 aria-label="Add one more"
               >
                 <Plus size={16} strokeWidth={3} />
@@ -350,17 +350,17 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
               onClick={handleAdd}
               disabled={disabled}
               className={cn(
-                'absolute inset-0 overflow-hidden flex items-center justify-center gap-2 rounded-full font-semibold text-[13px] tracking-wide transition-all duration-300 active:scale-95 group/btn',
+                'absolute inset-0 overflow-hidden flex items-center justify-center gap-2 rounded-full font-semibold text-[15px] transition-[background-color,transform] duration-300 active:scale-95 group/btn',
                 disabled
                   ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-50'
                   : flash
-                  ? 'bg-primary-fixed text-on-primary'
-                  : 'gold-sheen bg-primary text-white hover:bg-primary-container shadow-sm hover:shadow-md',
+                  ? 'bg-periwinkle text-ink'
+                  : 'bg-ink text-paper-raised hover:bg-indigo hover:text-paper-raised',
               )}
               aria-label={t('product.addToCart')}
             >
               <Plus size={15} strokeWidth={2.5} className="transition-transform duration-300 group-hover/btn:rotate-90" />
-              Add to cart
+              Add to bag
             </motion.button>
           )}
         </AnimatePresence>
@@ -375,20 +375,20 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
     return (
       <div
         onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
-        className={cn('flex items-center justify-between bg-primary-fixed rounded-lg px-1 py-0.5 min-w-[96px]', className)}
+        className={cn('flex items-center justify-between bg-ink rounded-full px-1 py-1 min-w-[100px]', className)}
       >
         <button
           onClick={(e) => handleChange(e, -1)}
-          className="w-7 h-7 flex items-center justify-center rounded-md bg-surface-card shadow-sm text-primary hover:bg-primary-fixed-dim transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-full text-paper-raised hover:bg-indigo hover:text-paper-raised transition-colors" aria-label="Remove one"
         >
           <Minus size={14} />
         </button>
-        <span className="text-sm font-bold text-primary min-w-6 text-center">
+        <span className="text-sm font-bold text-paper-raised min-w-6 text-center tabular-nums">
           {cartItem.quantity}
         </span>
         <button
           onClick={(e) => handleChange(e, 1)}
-          className="w-7 h-7 flex items-center justify-center rounded-md bg-primary text-on-primary shadow-sm hover:opacity-90 transition-opacity"
+          className="w-7 h-7 flex items-center justify-center rounded-full text-paper-raised hover:bg-indigo hover:text-paper-raised transition-colors" aria-label="Add one more"
         >
           <Plus size={14} />
         </button>
@@ -403,12 +403,12 @@ export default function AddToCartButton({ product, className, variant = 'icon', 
       onClick={handleAdd}
       disabled={disabled}
       className={cn(
-        'w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95',
+        'w-9 h-9 rounded-full flex items-center justify-center transition-colors active:scale-95',
         disabled
           ? 'bg-surface-container text-on-surface-variant cursor-not-allowed'
           : flash
           ? 'bg-primary-fixed text-primary'
-          : 'bg-primary-container text-on-primary hover:bg-primary hover:text-on-primary',
+          : 'bg-ink text-paper-raised hover:bg-indigo hover:text-paper-raised',
         className,
       )}
       aria-label={t('product.addToCart')}

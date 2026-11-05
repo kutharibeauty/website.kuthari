@@ -16,6 +16,9 @@ type DeliveryOrderDetail = {
   items: OrderItem[]
   address: Address | null
   payment_method: string
+  payment_status?: string | null
+  /** Balance to collect (migration 042); absent on older data. */
+  amount_due?: number | string | null
   assigned_to: string | null
   delivered_at: string | null
   otp_sent: boolean
@@ -164,6 +167,9 @@ export default function DeliveryOrderDetailPage({ params }: { params: Promise<{ 
 
   const isAssigned = ['confirmed', 'packed', 'assigned', 'processing'].includes(order.status)
   const isOutForDelivery = ['shipping', 'out_for_delivery'].includes(order.status)
+  // What the driver collects: nothing if paid in full online, the balance of a
+  // part-paid order, or the whole total for cash on delivery.
+  const toCollect = order.payment_status === 'collected' ? 0 : order.amount_due != null ? Number(order.amount_due) : order.total
   const isDelivered = order.status === 'delivered'
 
   return (
@@ -196,7 +202,7 @@ export default function DeliveryOrderDetailPage({ params }: { params: Promise<{ 
 
         {/* Customer */}
         <section className="bg-surface rounded-2xl p-4 space-y-3" style={{ boxShadow: '0 2px 12px rgba(61,43,31,0.06)' }}>
-          <h2 className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Customer</h2>
+          <h2 className="font-label-sm text-label-sm text-on-surface-variant">Customer</h2>
           <p className="font-headline-sm text-headline-sm text-on-surface">{addr?.name ?? '—'}</p>
           {addr?.phone && (
             <a
@@ -211,7 +217,7 @@ export default function DeliveryOrderDetailPage({ params }: { params: Promise<{ 
 
         {/* Address */}
         <section className="bg-surface rounded-2xl p-4 space-y-3" style={{ boxShadow: '0 2px 12px rgba(61,43,31,0.06)' }}>
-          <h2 className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Delivery Address</h2>
+          <h2 className="font-label-sm text-label-sm text-on-surface-variant">Delivery Address</h2>
           {addr ? (
             <>
               <p className="font-body-lg text-body-lg text-on-surface leading-relaxed">
@@ -238,7 +244,7 @@ export default function DeliveryOrderDetailPage({ params }: { params: Promise<{ 
 
         {/* Items */}
         <section className="bg-surface rounded-2xl p-4" style={{ boxShadow: '0 2px 12px rgba(61,43,31,0.06)' }}>
-          <h2 className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-3">
+          <h2 className="font-label-sm text-label-sm text-on-surface-variant mb-3">
             Items ({order.items.length})
           </h2>
           <div className="space-y-3">
@@ -264,15 +270,21 @@ export default function DeliveryOrderDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <div className="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
-            <span className="font-headline-sm text-headline-sm text-primary">Order Total (Prepaid)</span>
+            <span className="font-headline-sm text-headline-sm text-primary">Order total</span>
             <span className="font-headline-sm text-headline-sm text-primary">{fmt(order.total)}</span>
+          </div>
+          <div className="mt-2 flex items-center justify-between rounded-xl bg-surface-container px-3 py-2.5">
+            <span className="font-body-md text-body-md font-semibold text-primary">
+              {toCollect > 0 ? 'Collect from customer' : 'Paid online, nothing to collect'}
+            </span>
+            {toCollect > 0 && <span className="font-headline-sm text-headline-sm text-primary">{fmt(toCollect)}</span>}
           </div>
         </section>
 
         {/* OTP + delivery status tracker (for out_for_delivery) */}
         {isOutForDelivery && (
           <section className="bg-surface rounded-2xl p-4 space-y-3" style={{ boxShadow: '0 2px 12px rgba(61,43,31,0.06)' }}>
-            <h2 className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Delivery Steps</h2>
+            <h2 className="font-label-sm text-label-sm text-on-surface-variant">Delivery Steps</h2>
 
             {/* Step 1: OTP sent */}
             <div className={cn('flex items-center gap-3 p-3 rounded-xl', otpSent ? 'bg-green-50' : 'bg-surface-container')}>
@@ -329,7 +341,7 @@ export default function DeliveryOrderDetailPage({ params }: { params: Promise<{ 
             <button
               onClick={markOutForDelivery}
               disabled={markingOutForDelivery}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-on-primary rounded-2xl font-body-lg text-body-lg font-semibold disabled:opacity-50 active:scale-[0.98] transition-all"
+              className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-on-primary rounded-2xl font-body-lg text-body-lg font-semibold disabled:opacity-50 active:scale-[0.98] transition"
             >
               {markingOutForDelivery ? (
                 <span className="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
@@ -345,7 +357,7 @@ export default function DeliveryOrderDetailPage({ params }: { params: Promise<{ 
             <button
               onClick={sendOtp}
               disabled={sendingOtp}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-on-primary rounded-2xl font-body-lg text-body-lg font-semibold disabled:opacity-50 active:scale-[0.98] transition-all"
+              className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-on-primary rounded-2xl font-body-lg text-body-lg font-semibold disabled:opacity-50 active:scale-[0.98] transition"
             >
               {sendingOtp ? (
                 <span className="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
@@ -360,7 +372,7 @@ export default function DeliveryOrderDetailPage({ params }: { params: Promise<{ 
           {isOutForDelivery && otpVerified && (
             <button
               onClick={() => setShowPaymentModal(true)}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-green-600 text-white rounded-2xl font-body-lg text-body-lg font-semibold active:scale-[0.98] transition-all"
+              className="w-full flex items-center justify-center gap-2 py-4 bg-green-600 text-white rounded-2xl font-body-lg text-body-lg font-semibold active:scale-[0.98] transition"
             >
               <span className="material-symbols-outlined text-[20px]">payments</span>
               Collect Payment & Confirm Delivery
@@ -394,7 +406,7 @@ export default function DeliveryOrderDetailPage({ params }: { params: Promise<{ 
       {showPaymentModal && (
         <PaymentModal
           orderId={order.id}
-          total={order.total}
+          total={toCollect}
           onDelivered={onDelivered}
           onClose={() => setShowPaymentModal(false)}
         />

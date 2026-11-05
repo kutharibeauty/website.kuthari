@@ -175,7 +175,7 @@ export default function HeaderLocation({ className = '' }: { className?: string 
             className="absolute left-0 top-full mt-3 bg-white border border-outline-variant/50 rounded-2xl p-5 shadow-xl flex flex-col gap-4 z-50 w-[320px]"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-widest text-primary">Enter your pincode</span>
+              <span className="text-xs font-black text-primary">Enter your pincode</span>
               <button
                 onClick={() => setOpen(false)}
                 className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors"

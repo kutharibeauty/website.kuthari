@@ -58,16 +58,16 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b-2 border-table-border pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary tracking-tight capitalize">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight capitalize">
             Admin Profiles.
           </h1>
-          <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">
+          <p className="font-bold text-[12px] text-on-surface-variant mt-2">
             Manage team members and their permissions
           </p>
         </div>
         <Link
           href="/admin/profiles/new"
-          className="flex items-center justify-center gap-1.5 px-5 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+          className="flex items-center justify-center gap-1.5 px-5 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
         >
           <Plus size={16} strokeWidth={2.5} />
           Add Profile
@@ -84,8 +84,8 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
           <div key={card.label} className={cn("rounded-2xl border-2 p-5", card.color)}>
             <div className="flex items-start justify-between">
               <div>
-                <p className="font-black text-4xl leading-none">{card.value}</p>
-                <p className="font-black text-[10px] uppercase tracking-widest mt-2">{card.label}</p>
+                <p className="font-bold text-4xl leading-none">{card.value}</p>
+                <p className="font-bold text-[12px] mt-2">{card.label}</p>
               </div>
               <div className="opacity-50">
                 {card.icon}
@@ -101,10 +101,10 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
           <div className="w-16 h-16 mx-auto bg-surface border-2 border-table-border rounded-2xl flex items-center justify-center mb-4">
             <Users size={24} className="text-on-surface-variant/40" />
           </div>
-          <p className="font-black text-sm text-on-surface-variant uppercase tracking-widest mb-6">No profiles yet.</p>
+          <p className="font-bold text-sm text-on-surface-variant mb-6">No profiles yet.</p>
           <Link
             href="/admin/profiles/new"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-[12px] hover:bg-primary/90 transition-colors active:scale-95 shadow-sm"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add first profile
@@ -129,19 +129,19 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
                 <div className="flex flex-col md:flex-row md:items-start gap-6">
 
                   {/* Avatar */}
-                  <div className={cn('w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-2xl border-2 border-table-border', avatarCls)}>
+                  <div className={cn('w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-2xl border-2 border-table-border', avatarCls)}>
                     {profile.name[0]?.toUpperCase() ?? '?'}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-3 mb-2">
-                      <p className="font-black text-xl text-primary">{profile.name}</p>
-                      <span className={cn('px-3 py-1 rounded-lg border-2 font-black text-[10px] uppercase tracking-widest', roleInfo.chip)}>
+                      <p className="font-bold text-xl text-primary">{profile.name}</p>
+                      <span className={cn('px-3 py-1 rounded-lg border-2 font-bold text-[12px]', roleInfo.chip)}>
                         {roleInfo.label}
                       </span>
                       {!profile.is_active && (
-                        <span className="px-3 py-1 rounded-lg border-2 border-error text-error bg-error/10 font-black text-[10px] uppercase tracking-widest">
+                        <span className="px-3 py-1 rounded-lg border-2 border-error text-error bg-error/10 font-bold text-[12px]">
                           Inactive
                         </span>
                       )}
@@ -169,14 +169,14 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
                             style={{ width: `${(permCount / totalPerms) * 100}%` }}
                           />
                         </div>
-                        <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest">
+                        <p className="font-bold text-[12px] text-on-surface-variant">
                           {permCount}/{totalPerms} permissions
                         </p>
                       </div>
                     )}
 
                     {profile.role === 'delivery' && (
-                      <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">
+                      <p className="font-bold text-[12px] text-on-surface-variant mt-2">
                         Fixed permissions: view + update assigned orders only
                       </p>
                     )}
@@ -187,7 +187,7 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
 
                     {/* Account link status */}
                     <div className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 font-black text-[10px] uppercase tracking-widest',
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 font-bold text-[12px]',
                       profile.user_id
                         ? 'bg-green-50 text-green-700 border-green-200'
                         : 'bg-amber-50 text-amber-700 border-amber-200',
@@ -222,7 +222,7 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
                       {profile.role !== 'super_admin' ? (
                         <Link
                           href={`/admin/profiles/${profile.id}`}
-                          className="p-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                          className="p-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant hover:border-primary/40 hover:text-primary transition active:scale-95"
                           title="Edit profile"
                         >
                           <Edit3 size={16} strokeWidth={2.5} />
@@ -239,14 +239,14 @@ export default function ProfilesClient({ initialProfiles }: { initialProfiles: A
                 {/* Permissions grid (admin only, expanded) */}
                 {profile.role === 'admin' && profile.permissions && (
                   <div className="mt-6 pt-5 border-t-2 border-table-border">
-                    <p className="font-black text-xs text-primary uppercase tracking-widest mb-3">Permissions</p>
+                    <p className="font-bold text-xs text-primary mb-3">Permissions</p>
                     <div className="flex flex-wrap gap-2">
                       {(Object.entries(profile.permissions) as [keyof AdminPermissions, boolean][])
                         .filter(([, v]) => v)
                         .map(([key]) => (
                           <span
                             key={key}
-                            className="px-3 py-1.5 bg-surface border-2 border-table-border text-on-surface-variant rounded-lg font-black text-[10px] uppercase tracking-widest"
+                            className="px-3 py-1.5 bg-surface border-2 border-table-border text-on-surface-variant rounded-lg font-bold text-[12px]"
                           >
                             {key.replace(/_/g, ' ')}
                           </span>

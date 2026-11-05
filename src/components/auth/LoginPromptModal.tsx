@@ -57,13 +57,13 @@ export default function LoginPromptModal() {
             <div className="flex flex-col gap-2.5 mt-6">
               <button
                 onClick={goLogin}
-                className="w-full py-3.5 rounded-2xl bg-primary text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 active:scale-[0.98]"
+                className="w-full py-3.5 rounded-2xl bg-primary text-white font-black text-sm shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-xl transition duration-200 active:scale-[0.98]"
               >
                 Log In / Sign Up
               </button>
               <button
                 onClick={hide}
-                className="w-full py-3 rounded-2xl font-black text-xs uppercase tracking-widest text-on-surface-variant/70 hover:text-primary transition-colors"
+                className="w-full py-3 rounded-2xl font-black text-xs text-on-surface-variant/70 hover:text-primary transition-colors"
               >
                 Maybe later
               </button>

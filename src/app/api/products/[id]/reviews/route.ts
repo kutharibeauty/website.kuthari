@@ -73,11 +73,14 @@ export async function POST(
     return NextResponse.json({ error: 'rating must be 1–5' }, { status: 400 })
   }
 
-  const supabase = await createClient()
-
-  // Verified purchase check — user must have a delivered order containing this product
+  // Server-side client throughout: customers have no write access to reviews
+  // (RLS + grants are read-only), so the insert happens here, after the checks.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: purchaseCheck } = await (supabase as any)
+  const db = createAdminClient() as any
+
+  // Verified purchase check: the user must have a delivered order containing
+  // this product. The user_id filter scopes it to this customer.
+  const { data: purchaseCheck } = await db
     .from('orders')
     .select('id')
     .eq('user_id', profileId)
@@ -93,19 +96,34 @@ export async function POST(
     )
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  // One review per customer per product.
+  const { data: existing } = await db
+    .from('reviews').select('id').eq('user_id', profileId).eq('product_id', product_id).limit(1).maybeSingle()
+  if (existing) return NextResponse.json({ error: 'You have already reviewed this product' }, { status: 409 })
+
+  // Shown as "First L." on the store.
+  const { data: profile } = await db.from('profiles').select('name').eq('id', profileId).maybeSingle()
+  const parts = String((profile as { name?: string } | null)?.name ?? '').trim().split(/\s+/).filter(Boolean)
+  const reviewerName = parts.length ? (parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0]) : 'Verified buyer'
+
+  const text = typeof reviewBody === 'string' ? reviewBody.trim().slice(0, 1000) : ''
+
+  const { data, error } = await db
     .from('reviews')
     .insert({
       product_id,
       user_id: profileId,
-      rating,
-      body: typeof reviewBody === 'string' && reviewBody.trim() ? reviewBody.trim() : null,
+      order_id: (purchaseCheck as { id: string }).id,
+      reviewer_name: reviewerName,
+      rating: Math.round(rating),
+      body: text || null,
+      is_verified_purchase: true,
+      // Every review waits for the shop to approve it (Products → Reviews).
       is_approved: false,
     })
     .select('id')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Could not save your review' }, { status: 500 })
   return NextResponse.json({ id: (data as { id: string }).id }, { status: 201 })
 }

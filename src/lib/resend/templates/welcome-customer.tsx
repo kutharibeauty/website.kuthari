@@ -14,14 +14,14 @@ export default function WelcomeCustomer({ name, siteUrl }: Props) {
   return (
     <Html lang="en">
       <Head />
-      <Preview>Welcome to Kuthari Beauty Store — wholesale cosmetics at your doorstep.</Preview>
+      <Preview>Welcome to Kuthari Beauty Store. Your account is ready.</Preview>
       <Body style={body}>
         <Container style={container}>
 
           {/* Header */}
           <Section style={header}>
             <Heading style={headerTitle}>KUTHARI BEAUTY STORE</Heading>
-            <Text style={headerSub}>Wholesale. Trusted. Delivered.</Text>
+            <Text style={headerSub}>Your beauty counter, at your door.</Text>
           </Section>
 
           {/* Hero */}
@@ -29,8 +29,8 @@ export default function WelcomeCustomer({ name, siteUrl }: Props) {
             <Text style={heroIcon}>🎉</Text>
             <Heading style={heroTitle}>{greeting}</Heading>
             <Text style={heroText}>
-              Your account is ready. Order wholesale skincare, haircare, makeup, salon and
-              grooming products — at wholesale prices, delivered across Odisha.
+              Your account is ready. Shop skincare, haircare, makeup, salon and grooming
+              products from our Brahmapur shop, delivered across India.
             </Text>
           </Section>
 
@@ -38,9 +38,9 @@ export default function WelcomeCustomer({ name, siteUrl }: Props) {
 
           {/* Perks */}
           <Section style={section}>
-            <Text style={perk}>🛒 <strong>Bulk wholesale prices</strong> on everyday essentials</Text>
-            <Text style={perk}>🚚 <strong>Fast delivery</strong> across Odisha</Text>
-            <Text style={perk}>🔒 <strong>Secure online payment</strong> — pay safely by UPI or card</Text>
+            <Text style={perk}><strong>One piece or a full box:</strong> retail price for one, bulk price by the box</Text>
+            <Text style={perk}><strong>Delivery across India</strong>, free on bigger orders</Text>
+            <Text style={perk}><strong>Secure online payment</strong> by UPI, card or net banking</Text>
           </Section>
 
           {/* CTA */}
@@ -67,20 +67,20 @@ export default function WelcomeCustomer({ name, siteUrl }: Props) {
 
 // ── Styles ──────────────────────────────────────────────────────────────────────
 
-const body = { backgroundColor: '#f5f0e8', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0', padding: '20px 0' }
+const body = { backgroundColor: '#eeeef8', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0', padding: '20px 0' }
 const container = { maxWidth: '600px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden' as const }
-const header = { backgroundColor: '#1b2c3d', padding: '28px 32px', textAlign: 'center' as const }
-const headerTitle = { color: '#faf6ee', fontSize: '28px', fontWeight: '700', margin: '0', letterSpacing: '2px' }
-const headerSub = { color: '#c4a882', fontSize: '13px', margin: '4px 0 0', letterSpacing: '1px' }
+const header = { backgroundColor: '#292966', padding: '28px 32px', textAlign: 'center' as const }
+const headerTitle = { color: '#f7f7fc', fontSize: '28px', fontWeight: '700', margin: '0', letterSpacing: '2px' }
+const headerSub = { color: '#a3a3cc', fontSize: '13px', margin: '4px 0 0', letterSpacing: '1px' }
 const hero = { padding: '32px 32px 24px', textAlign: 'center' as const }
 const heroIcon = { fontSize: '48px', margin: '0 0 8px' }
-const heroTitle = { color: '#1b2c3d', fontSize: '26px', fontWeight: '700', margin: '0 0 12px' }
+const heroTitle = { color: '#292966', fontSize: '26px', fontWeight: '700', margin: '0 0 12px' }
 const heroText = { color: '#3d2b1f', fontSize: '15px', lineHeight: '1.6', margin: '0' }
 const divider = { borderColor: '#e5e1d9', margin: '0' }
 const section = { padding: '24px 32px' }
 const perk = { color: '#3d2b1f', fontSize: '15px', lineHeight: '1.6', margin: '0 0 10px' }
 const ctaWrap = { padding: '0 32px 8px', textAlign: 'center' as const }
-const ctaButton = { backgroundColor: '#1b2c3d', color: '#faf6ee', fontSize: '15px', fontWeight: '700', textDecoration: 'none', padding: '14px 32px', borderRadius: '10px', display: 'inline-block' }
-const footer = { backgroundColor: '#f5f0e8', padding: '24px 32px', textAlign: 'center' as const }
+const ctaButton = { backgroundColor: '#292966', color: '#f7f7fc', fontSize: '15px', fontWeight: '700', textDecoration: 'none', padding: '14px 32px', borderRadius: '10px', display: 'inline-block' }
+const footer = { backgroundColor: '#eeeef8', padding: '24px 32px', textAlign: 'center' as const }
 const footerText = { color: '#81756e', fontSize: '13px', margin: '0 0 8px' }
 const footerCopy = { color: '#b0a89e', fontSize: '12px', margin: '16px 0 0' }

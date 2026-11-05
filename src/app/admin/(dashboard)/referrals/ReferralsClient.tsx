@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils'
 import { referralBenefitText, type ReferralConfig, type DiscountType } from '@/lib/referral/shared'
 
 const inputCls =
-  'w-full px-4 py-3 rounded-xl border-2 border-table-border bg-surface-card text-sm font-bold text-on-surface focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
-const labelCls = 'text-[11px] font-black text-on-surface-variant/70 uppercase tracking-[0.1em] block mb-1.5'
+  'w-full px-4 py-3 rounded-xl border-2 border-table-border bg-surface-card text-sm font-bold text-on-surface focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200'
+const labelCls = 'text-[11px] font-bold text-on-surface-variant/70 block mb-1.5'
 
 function TypeValue({
   type, value, onType, onValue,
@@ -80,17 +80,17 @@ export default function ReferralsClient({
       {/* Header */}
       <div className="flex items-center justify-between gap-4 border-b-2 border-table-border pb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-primary tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight flex items-center gap-2">
             <Gift size={26} /> Referrals
           </h1>
-          <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mt-1">
+          <p className="text-xs font-bold text-on-surface-variant mt-1">
             Refer-a-friend program — Super Admin
           </p>
         </div>
         <button
           onClick={save}
           disabled={saving}
-          className="px-6 py-3 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-widest hover:bg-primary/90 disabled:opacity-60 transition-colors active:scale-95 flex items-center gap-2"
+          className="px-6 py-3 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary/90 disabled:opacity-60 transition-colors active:scale-95 flex items-center gap-2"
         >
           {saving ? <Loader2 size={15} className="animate-spin" /> : saved ? <Check size={15} /> : null}
           {saving ? 'Saving…' : saved ? 'Saved' : 'Save'}
@@ -104,12 +104,12 @@ export default function ReferralsClient({
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4">
         <div className="rounded-2xl border-2 border-table-border bg-surface-card p-4">
-          <div className="flex items-center gap-2 text-on-surface-variant/60"><Users size={15} /><span className="text-[10px] font-black uppercase tracking-widest">Referrals</span></div>
-          <p className="text-2xl font-black text-primary mt-1">{stats.totalReferrals}</p>
+          <div className="flex items-center gap-2 text-on-surface-variant/60"><Users size={15} /><span className="text-[12px] font-bold">Referrals</span></div>
+          <p className="text-2xl font-bold text-primary mt-1">{stats.totalReferrals}</p>
         </div>
         <div className="rounded-2xl border-2 border-table-border bg-surface-card p-4">
-          <div className="flex items-center gap-2 text-on-surface-variant/60"><Coins size={15} /><span className="text-[10px] font-black uppercase tracking-widest">Rewards Given</span></div>
-          <p className="text-2xl font-black text-primary mt-1">₹{stats.totalRewards.toLocaleString('en-IN')}</p>
+          <div className="flex items-center gap-2 text-on-surface-variant/60"><Coins size={15} /><span className="text-[12px] font-bold">Rewards Given</span></div>
+          <p className="text-2xl font-bold text-primary mt-1">₹{stats.totalRewards.toLocaleString('en-IN')}</p>
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export default function ReferralsClient({
       <div className="rounded-2xl border-2 border-table-border bg-surface-card p-5">
         <label className="flex items-center justify-between gap-3 cursor-pointer">
           <div>
-            <p className="font-black text-sm text-primary">Enable referral program</p>
+            <p className="font-bold text-sm text-primary">Enable referral program</p>
             <p className="text-xs font-medium text-on-surface-variant/60 mt-0.5">
               Customers get a code after their first purchase. New customers can redeem a code at checkout.
             </p>
@@ -132,7 +132,7 @@ export default function ReferralsClient({
       {/* Referee (taker) */}
       <div className="rounded-2xl border-2 border-table-border bg-surface-card p-5 space-y-4">
         <div>
-          <p className="font-black text-sm text-primary">New customer (referral taker)</p>
+          <p className="font-bold text-sm text-primary">New customer (referral taker)</p>
           <p className="text-xs font-medium text-on-surface-variant/60 mt-0.5">Discount the new customer gets on their first order when they use a code.</p>
         </div>
         <TypeValue
@@ -144,7 +144,7 @@ export default function ReferralsClient({
       {/* Referrer (giver) */}
       <div className="rounded-2xl border-2 border-table-border bg-surface-card p-5 space-y-4">
         <div>
-          <p className="font-black text-sm text-primary">Existing customer (referral giver)</p>
+          <p className="font-bold text-sm text-primary">Existing customer (referral giver)</p>
           <p className="text-xs font-medium text-on-surface-variant/60 mt-0.5">Reward the referrer earns; it auto-applies to their next order.</p>
         </div>
         <TypeValue

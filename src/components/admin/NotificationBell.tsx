@@ -106,7 +106,7 @@ export default function NotificationBell({ items, variant }: Props) {
         {unviewedCount > 0 && (
           <span
             className={cn(
-              'absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-error text-white text-[10px] font-black leading-none border-2',
+              'absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-error text-white text-[12px] font-bold leading-none border-2',
               badgeBorder,
             )}
           >
@@ -122,13 +122,13 @@ export default function NotificationBell({ items, variant }: Props) {
 
           <div className="absolute right-0 top-full mt-2 z-50 w-[calc(100vw-2rem)] max-w-sm rounded-2xl bg-white border-2 border-table-border shadow-xl overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-table-border bg-surface">
-              <p className="font-black text-sm text-primary uppercase tracking-wide">
+              <p className="font-bold text-sm text-primary">
                 Notifications
               </p>
               {unviewedCount > 0 && (
                 <button
                   onClick={markAllViewed}
-                  className="text-[11px] font-black text-secondary hover:text-primary uppercase tracking-wide transition-colors"
+                  className="text-[11px] font-bold text-secondary hover:text-primary transition-colors"
                 >
                   Mark all read
                 </button>
@@ -171,7 +171,7 @@ export default function NotificationBell({ items, variant }: Props) {
                             'text-sm truncate',
                             isViewed
                               ? 'font-bold text-on-surface-variant'
-                              : 'font-black text-primary',
+                              : 'font-bold text-primary',
                           )}
                         >
                           {item.title}

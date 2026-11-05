@@ -10,7 +10,7 @@ import { useToastStore } from '@/store/toastStore'
 import type { Category } from '@/types/database.types'
 import { ArrowLeft, Loader2, AlertCircle, X, CloudUpload, Bold, Italic, List, ListOrdered } from 'lucide-react'
 
-const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition-all duration-200'
+const inputCls = 'w-full px-4 py-3 bg-surface border-2 border-table-border rounded-xl font-bold text-sm text-primary placeholder:font-medium placeholder:italic placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary hover:border-primary/40 focus:shadow-[0_0_0_4px_rgba(27,44,61,0.07)] transition duration-200'
 
 function toSlug(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
@@ -143,25 +143,25 @@ export default function CategoryForm({
             <ArrowLeft size={20} strokeWidth={2.5} />
           </Link>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-primary tracking-tight capitalize">
+            <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight capitalize">
               {isEdit ? form.name || 'Edit Category' : 'New Category.'}
             </h1>
             {isEdit && (
-              <p className="font-black text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">/{category.slug}</p>
+              <p className="font-bold text-[12px] text-on-surface-variant mt-1">/{category.slug}</p>
             )}
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/admin/categories"
-            className="px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-black text-xs uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+            className="px-5 py-2.5 rounded-xl border-2 border-table-border bg-surface text-on-surface-variant font-bold text-xs hover:border-primary/40 hover:text-primary transition active:scale-95"
           >
             Cancel
           </Link>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-opacity disabled:opacity-60 active:scale-95 shadow-sm"
+            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 transition-opacity disabled:opacity-60 active:scale-95 shadow-sm"
           >
             {saving && <Loader2 size={16} className="animate-spin" />}
             {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Category'}
@@ -252,8 +252,8 @@ export default function CategoryForm({
 
             <div className="flex items-center justify-between gap-6 p-5 bg-surface-card rounded-2xl border-2 border-table-border max-w-sm">
               <div>
-                <p className="font-black text-xs text-primary uppercase tracking-widest">Active</p>
-                <p className="font-bold text-[10px] text-on-surface-variant mt-1">Visible in the shop</p>
+                <p className="font-bold text-xs text-primary">Active</p>
+                <p className="font-bold text-[12px] text-on-surface-variant mt-1">Visible in the shop</p>
               </div>
               <button
                 type="button"
@@ -296,7 +296,7 @@ export default function CategoryForm({
                 placeholder="Describe this category…"
               />
             </Field>
-            <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest">
+            <p className="font-bold text-[12px] text-on-surface-variant">
               Note: descriptions are stored locally and will persist once DB migration adds description columns.
             </p>
           </Section>
@@ -325,7 +325,7 @@ export default function CategoryForm({
                 />
               </Field>
             </div>
-            <p className="font-bold text-[10px] text-on-surface-variant uppercase tracking-widest">
+            <p className="font-bold text-[12px] text-on-surface-variant">
               Note: SEO fields will persist once DB migration adds meta_title/meta_description columns to categories.
             </p>
           </Section>
@@ -342,7 +342,7 @@ export default function CategoryForm({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-6">
-      <h2 className="font-black text-xl text-primary tracking-tight border-b-2 border-table-border pb-3">
+      <h2 className="font-bold text-xl text-primary tracking-tight border-b-2 border-table-border pb-3">
         {title}
       </h2>
       {children}
@@ -355,10 +355,10 @@ function Field({ label, required, hint, children }: {
 }) {
   return (
     <div className="space-y-2">
-      <label className="font-black text-xs text-primary uppercase tracking-widest flex items-center">
+      <label className="font-bold text-xs text-primary flex items-center">
         {label}
         {required && <span className="text-error ml-1">*</span>}
-        {hint && <span className="font-bold text-[10px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
+        {hint && <span className="font-bold text-[12px] text-on-surface-variant ml-3 normal-case tracking-normal">{hint}</span>}
       </label>
       {children}
     </div>
@@ -390,7 +390,7 @@ function ImageUploadField({
         </div>
       ) : (
         <label className={cn(
-          'flex flex-col items-center justify-center w-48 h-48 border-2 border-dashed border-table-border bg-surface-card rounded-2xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all active:scale-[0.99]',
+          'flex flex-col items-center justify-center w-48 h-48 border-2 border-dashed border-table-border bg-surface-card rounded-2xl cursor-pointer hover:border-primary hover:bg-primary/5 transition active:scale-[0.99]',
           uploading && 'opacity-50 pointer-events-none',
         )}>
           <div className="p-3 bg-surface border-2 border-table-border rounded-xl mb-3">

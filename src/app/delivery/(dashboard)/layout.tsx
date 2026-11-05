@@ -17,6 +17,12 @@ export default async function DeliveryLayout({ children }: { children: React.Rea
 
   return (
     <div className="min-h-screen bg-background">
+      <link
+        rel="stylesheet"
+        // Icon font for the admin and delivery panels only; the storefront doesn't load it.
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        precedence="default"
+      />
       {children}
     </div>
   )

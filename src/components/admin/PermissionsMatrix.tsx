@@ -26,7 +26,7 @@ export default function PermissionsMatrix({ permissions, onChange, disabled }: P
   return (
     <div className="border border-outline-variant/50 rounded-xl overflow-hidden bg-surface-container-lowest">
       <div className="flex items-center justify-between px-5 py-3.5 bg-surface-container-low border-b border-outline-variant/30">
-        <p className="font-label-sm text-label-sm text-on-surface uppercase tracking-wider">Permissions</p>
+        <p className="font-label-sm text-label-sm text-on-surface">Permissions</p>
         {!disabled && (
           <div className="flex gap-3">
             <button
@@ -50,7 +50,7 @@ export default function PermissionsMatrix({ permissions, onChange, disabled }: P
       <div className="divide-y divide-outline-variant/20">
         {GROUPS.map((group) => (
           <div key={group.label}>
-            <p className="px-5 py-2 font-label-sm text-label-sm text-on-surface-variant/60 uppercase tracking-widest bg-surface-container/40">
+            <p className="px-5 py-2 font-label-sm text-label-sm text-on-surface-variant/60 bg-surface-container/40">
               {group.label}
             </p>
             {group.keys.map((key) => (

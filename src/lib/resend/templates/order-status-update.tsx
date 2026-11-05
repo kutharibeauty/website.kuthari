@@ -158,35 +158,35 @@ export default function OrderStatusUpdate({
   )
 }
 
-const body = { backgroundColor: '#f5f0e8', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0', padding: '20px 0' }
+const body = { backgroundColor: '#eeeef8', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0', padding: '20px 0' }
 const container = { maxWidth: '600px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden' as const }
-const header = { backgroundColor: '#1b2c3d', padding: '22px 32px', textAlign: 'center' as const }
-const headerTitle = { color: '#faf6ee', fontSize: '22px', fontWeight: '700', margin: '0', letterSpacing: '2px' }
+const header = { backgroundColor: '#292966', padding: '22px 32px', textAlign: 'center' as const }
+const headerTitle = { color: '#f7f7fc', fontSize: '22px', fontWeight: '700', margin: '0', letterSpacing: '2px' }
 const statusHero = { padding: '32px', textAlign: 'center' as const }
 const statusIcon = { fontSize: '52px', margin: '0 0 8px' }
 const statusTitle = { fontSize: '28px', fontWeight: '700', margin: '0 0 8px' }
 const statusSub = { color: '#4f453f', fontSize: '15px', margin: '0' }
-const msgBox = { backgroundColor: '#faf6ee', borderLeft: '4px solid #1b2c3d', margin: '0 32px', padding: '14px 20px' }
-const msgText = { color: '#1b2c3d', fontSize: '14px', fontStyle: 'italic', lineHeight: '1.6', margin: '0' }
+const msgBox = { backgroundColor: '#f7f7fc', borderLeft: '4px solid #292966', margin: '0 32px', padding: '14px 20px' }
+const msgText = { color: '#292966', fontSize: '14px', fontStyle: 'italic', lineHeight: '1.6', margin: '0' }
 const deliveryNote = { padding: '12px 32px', textAlign: 'center' as const }
-const deliveryText = { color: '#1b2c3d', fontSize: '15px', margin: '0' }
+const deliveryText = { color: '#292966', fontSize: '15px', margin: '0' }
 const divider = { borderColor: '#e5e1d9', margin: '0' }
 const section = { padding: '24px 32px' }
-const sectionTitle = { color: '#1b2c3d', fontSize: '13px', fontWeight: '700', margin: '0 0 16px', textTransform: 'uppercase' as const, letterSpacing: '1px' }
+const sectionTitle = { color: '#292966', fontSize: '13px', fontWeight: '700', margin: '0 0 16px', textTransform: 'uppercase' as const, letterSpacing: '1px' }
 const cancelledNote = { color: '#dc2626', fontSize: '14px', margin: '0' }
 const timeRow = { paddingBottom: '10px' }
 const dotDone = { width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#d1fae5', border: '2px solid #16a34a', margin: '0 auto' }
-const dotActive = { width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#1b2c3d', border: '2px solid #1b2c3d', margin: '0 auto' }
+const dotActive = { width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#292966', border: '2px solid #292966', margin: '0 auto' }
 const dotPending = { width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#ffffff', border: '2px solid #d6d3d1', margin: '0 auto' }
-const stepActive = { color: '#1b2c3d', fontSize: '14px', fontWeight: '700', margin: '0', paddingLeft: '12px' }
+const stepActive = { color: '#292966', fontSize: '14px', fontWeight: '700', margin: '0', paddingLeft: '12px' }
 const stepDone = { color: '#4f453f', fontSize: '14px', margin: '0', paddingLeft: '12px' }
 const stepPending = { color: '#c4bcb8', fontSize: '14px', margin: '0', paddingLeft: '12px' }
 const metaLabel = { color: '#81756e', fontSize: '10px', letterSpacing: '1.2px', textTransform: 'uppercase' as const, margin: '0 0 2px' }
 const metaValue = { color: '#1c1c17', fontSize: '14px', fontWeight: '600', margin: '0' }
 const itemName = { color: '#4f453f', fontSize: '13px', margin: '0' }
 const itemPrice = { color: '#1c1c17', fontSize: '13px', fontWeight: '600', margin: '0', textAlign: 'right' as const }
-const invoiceNote = { backgroundColor: '#faf6ee', padding: '12px 32px', textAlign: 'center' as const }
+const invoiceNote = { backgroundColor: '#f7f7fc', padding: '12px 32px', textAlign: 'center' as const }
 const invoiceText = { color: '#4f453f', fontSize: '13px', margin: '0' }
-const footer = { backgroundColor: '#f5f0e8', padding: '24px 32px', textAlign: 'center' as const }
-const trackLink = { color: '#1b2c3d', fontSize: '14px', fontWeight: '700', textDecoration: 'underline' }
+const footer = { backgroundColor: '#eeeef8', padding: '24px 32px', textAlign: 'center' as const }
+const trackLink = { color: '#292966', fontSize: '14px', fontWeight: '700', textDecoration: 'underline' }
 const footerText = { color: '#81756e', fontSize: '12px', margin: '16px 0 0' }

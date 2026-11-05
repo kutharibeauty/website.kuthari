@@ -108,8 +108,6 @@ export default async function SearchPage({ searchParams }: PageProps) {
             scroll container — that killed the sticking AND clipped any filters
             past the panel's box instead of letting them scroll. */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Dot texture */}
-          <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle,#fff_1px,transparent_1px)] bg-[size:18px_18px]" />
           {/* Ambient orb */}
           <div className="absolute -bottom-24 -left-12 w-64 h-64 bg-white/5 rounded-full blur-[60px]" />
         </div>
@@ -126,7 +124,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
           {/* Logo removed — the site header already shows it directly above
               this panel. Dropping it also returns ~60px to the category list. */}
           <div className="mb-4 hidden lg:block flex-shrink-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">
+            <p className="text-[12px] font-black text-white/35">
               Beauty Store
             </p>
           </div>
@@ -138,7 +136,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                 ? <TrendingUp size={12} className="text-white/40" strokeWidth={2.5} />
                 : <Sparkles size={12} className="text-white/40" strokeWidth={2.5} />
               }
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">
+              <span className="text-[11px] font-black text-white/40">
                 {isFeatured ? 'Curated' : isFiltered ? 'Filtered' : 'Full Catalog'}
               </span>
             </div>
@@ -159,14 +157,14 @@ export default async function SearchPage({ searchParams }: PageProps) {
               a typical category count needs no scrolling at all. */}
           {categories.length > 0 && (
             <div className="hidden lg:flex flex-col gap-0.5 flex-1 min-h-[120px] overflow-y-auto overscroll-contain scrollbar-thin-light -mr-2 pr-2">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/35 mb-2 px-1 flex-shrink-0">
+              <p className="text-[11px] font-black text-white/35 mb-2 px-1 flex-shrink-0">
                 Categories
               </p>
 
               {/* All link */}
               <Link
                 href="/search"
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-black uppercase tracking-wide transition-all duration-200 flex-shrink-0 ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[14px] font-semibold transition duration-200 flex-shrink-0 ${
                   !category && !isFeatured
                     ? 'bg-white text-primary'
                     : 'text-white/60 hover:text-white hover:bg-white/8'
@@ -180,7 +178,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                 <Link
                   key={cat.id}
                   href={`/search?category=${cat.slug}`}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-black uppercase tracking-wide transition-all duration-200 truncate flex-shrink-0 ${
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[14px] font-semibold transition duration-200 truncate flex-shrink-0 ${
                     category === cat.slug
                       ? 'bg-white text-primary'
                       : 'text-white/60 hover:text-white hover:bg-white/8'
@@ -195,7 +193,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
           {/* Bottom copyright */}
           <div className="mt-auto pt-4 hidden lg:block flex-shrink-0">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-white/20">
+            <p className="text-[11px] font-bold text-white/20">
               © 2026 Kuthari Beauty Store
             </p>
           </div>
@@ -209,14 +207,13 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
         {/* Mobile hero strip */}
         <div className="lg:hidden relative overflow-hidden bg-surface border-b border-table-border px-4 py-7">
-          <div className="absolute inset-0 opacity-[0.05] bg-[radial-gradient(circle,#1B2C3D_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-1">
               {isFeatured
                 ? <TrendingUp size={12} className="text-primary/50" strokeWidth={2.5} />
                 : <Sparkles size={12} className="text-primary/50" strokeWidth={2.5} />
               }
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-on-surface-variant">
+              <span className="text-[11px] font-black text-on-surface-variant">
                 {isFeatured ? 'Curated Selection' : isFiltered ? 'Filtered Results' : 'Full Catalog'}
               </span>
             </div>
@@ -247,7 +244,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
               <div className="hidden lg:flex items-center gap-3 mb-5">
                 <h1 className="text-lg font-black text-primary tracking-tight">{heading}</h1>
                 <div className="h-px flex-1 bg-table-border" />
-                <span className="text-[11px] font-black uppercase tracking-widest text-on-surface-variant/50">
+                <span className="text-[11px] font-black text-on-surface-variant/50">
                   {products.length} {products.length === 1 ? 'Product' : 'Products'}
                 </span>
               </div>
@@ -255,7 +252,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
               {/* Mobile count bar */}
               <div className="flex lg:hidden items-center gap-3 mb-4">
                 <div className="h-px flex-1 bg-table-border" />
-                <span className="text-[11px] font-black uppercase tracking-widest text-on-surface-variant/50">
+                <span className="text-[11px] font-black text-on-surface-variant/50">
                   {products.length} {products.length === 1 ? 'Product' : 'Products'}
                 </span>
                 <div className="h-px flex-1 bg-table-border" />
@@ -275,12 +272,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
                   <PackageSearch size={32} className="text-on-surface-variant/40" />
                 </div>
                 <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-white text-[10px] font-black">0</span>
+                  <span className="text-white text-[12px] font-black">0</span>
                 </div>
               </div>
 
               <div className="max-w-xs">
-                <p className="font-black text-primary text-lg uppercase tracking-tight">
+                <p className="font-black text-primary text-lg tracking-tight">
                   No products found
                 </p>
                 <p className="text-sm text-on-surface-variant/70 font-medium mt-1.5 leading-relaxed">
@@ -292,13 +289,13 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
               <div className="flex items-center gap-3 w-full max-w-xs">
                 <div className="h-px flex-1 bg-table-border" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/40">or</span>
+                <span className="text-[12px] font-black text-on-surface-variant/40">or</span>
                 <div className="h-px flex-1 bg-table-border" />
               </div>
 
               <Link
                 href="/search"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-black text-xs uppercase tracking-widest rounded-xl hover:bg-primary/90 transition-all duration-200 active:scale-95 shadow-sm"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-black text-xs rounded-xl hover:bg-primary/90 transition duration-200 active:scale-95 shadow-sm"
               >
                 Browse All Products
               </Link>
