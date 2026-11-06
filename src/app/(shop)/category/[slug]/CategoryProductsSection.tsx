@@ -187,17 +187,21 @@ export default function CategoryProductsSection({ categoryId, initialProducts, i
                 In Stock
               </span>
               <button
+                type="button"
                 role="switch"
                 aria-checked={inStockOnly}
+                aria-label="Show in-stock products only"
                 onClick={() => handleInStockChange(!inStockOnly)}
                 className={cn(
-                  'relative w-9 h-5 rounded-full transition-colors duration-200',
+                  'relative w-9 h-5 flex-shrink-0 rounded-full transition-colors duration-200',
                   inStockOnly ? 'bg-primary' : 'bg-outline-variant',
                 )}
               >
+                {/* left-0: without it the knob starts from the button's centred
+                    content position and the "on" slide pushes it out of the track. */}
                 <span
                   className={cn(
-                    'absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200',
+                    'absolute left-0 top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200',
                     inStockOnly ? 'translate-x-[18px]' : 'translate-x-0.5',
                   )}
                 />
