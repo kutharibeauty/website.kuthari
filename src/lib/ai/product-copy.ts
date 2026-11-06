@@ -26,7 +26,7 @@ function factLines(p: ProductFacts): string {
   ].filter(Boolean).join('\n')
 }
 
-/** English + Odia description as simple HTML. */
+/** English description as simple HTML (the store is English-only). */
 export async function writeDescription(p: ProductFacts, extra?: string): Promise<{ description: string; description_or: string }> {
   const system = `You are a product copywriter for ${STORE}. Most shoppers buy a single piece at retail price; salons and shops can also buy by the box at a bulk price. You write clear, warm, trustworthy descriptions. You always reply with strict JSON only.`
   const user = `Write a product description for this listing.
@@ -35,15 +35,14 @@ ${factLines(p)}
 ${extra ? `\nExtra instructions from the admin: ${extra}` : ''}
 
 Requirements:
-- English version: 60-110 words. Lead with what the product does and who it suits, then how to use it. Mention the bulk price only if a box or pack is part of the listing. Do NOT invent specific certifications, weights or prices that were not provided.
-- Odia version: a faithful natural translation of the English version into Odia (ଓଡ଼ିଆ) script.
-- Format BOTH as simple, clean HTML using only these tags: <p>, <ul>, <li>, <strong>. No headings, no inline styles, no markdown.
+- 60-110 words in English. Lead with what the product does and who it suits, then how to use it. Mention the bulk price only if a box or pack is part of the listing. Do NOT invent ingredients, certifications, weights or prices that were not provided.
+- Format as simple, clean HTML using only these tags: <p>, <ul>, <li>, <strong>. No headings, no inline styles, no markdown.
 
 Return ONLY this JSON, no commentary:
-{"description":"<p>...English HTML...</p>","description_or":"<p>...Odia HTML...</p>"}`
+{"description":"<p>...</p>"}`
   const json = await aiJSON<{ description?: string; description_or?: string }>({ system, user, maxTokens: 3000, temperature: 0.7 })
   if (!json.description?.trim()) throw new Error('AI did not return a description. Please try again.')
-  return { description: json.description.trim(), description_or: (json.description_or ?? '').trim() }
+  return { description: json.description.trim(), description_or: '' }
 }
 
 /** Meta title, meta description and 10 buying keywords. */

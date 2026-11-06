@@ -49,7 +49,7 @@ async function POST_handler(req: NextRequest, { params }: { params: Promise<{ id
       const out = await writeDescription(facts)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (db as any).from('products')
-        .update({ description: out.description, description_or: out.description_or || p.description_or, updated_at: new Date().toISOString() })
+        .update({ description: out.description, description_or: null, updated_at: new Date().toISOString() })
         .eq('id', id)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       after(() => notifySearchEngines({ productIds: [id] }))

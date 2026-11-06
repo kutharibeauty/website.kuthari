@@ -9,7 +9,7 @@ type Status = 'waiting' | 'working' | 'done' | 'skipped' | 'failed'
 type Mode = 'missing' | 'all' | 'selected'
 
 /**
- * "Fill with AI": writes the description (English + Odia) and the SEO title,
+ * "Fill with AI": writes the description and the SEO title,
  * description and keywords for many products, one product at a time, saving
  * each as it goes. By default only fills what's missing; can rewrite everything.
  */
@@ -98,7 +98,7 @@ export default function AiFillDialog({ selectedIds, onClose }: { selectedIds: st
           <div>
             <h2 id="ai-fill-title" className="flex items-center gap-2 text-xl font-bold text-primary"><Sparkles size={20} /> Fill with AI</h2>
             <p className="mt-1 text-sm text-on-surface-variant">
-              Writes each product&apos;s description (English and Odia), SEO title, SEO description and search keywords, and saves them. About 1–2 minutes per product.
+              Writes each product&apos;s description, SEO title, SEO description and search keywords, and saves them. About 1–2 minutes per product.
             </p>
           </div>
           <button onClick={() => { stopRef.current = true; onClose(changed) }} aria-label="Close" className="rounded-full p-2 hover:bg-surface-container"><X size={20} /></button>
