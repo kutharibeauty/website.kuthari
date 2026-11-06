@@ -166,10 +166,15 @@ export default async function HomePage() {
         )}
       </section>
 
-      <div className="flex flex-col gap-[var(--spacing-section)] pt-[var(--spacing-section)]">
-        {/* 2. The admin's promo cards, straight under the hero. */}
-        {promoCards.length > 0 && <PromoCardsRow cards={promoCards} />}
+      {/* 2. The admin's promo cards, tucked straight under the hero with the same
+          small gap the hero has under the header, so they read as one block. */}
+      {promoCards.length > 0 && (
+        <div className="pt-4 md:pt-6">
+          <PromoCardsRow cards={promoCards} />
+        </div>
+      )}
 
+      <div className={`flex flex-col gap-[var(--spacing-section)] ${promoCards.length > 0 ? 'pt-12 md:pt-16' : 'pt-[var(--spacing-section)]'}`}>
         {/* 3. The shelf grid with aisle filters. */}
         <ShelfGrid products={shelfProducts} categories={categories} featured={shelfIsFeatured} />
 
