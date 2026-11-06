@@ -116,7 +116,7 @@ export default function DeliveryVehiclesClient({ initial }: { initial: DeliveryV
                   title={v.is_active ? 'Active — shown at checkout' : 'Inactive — hidden'}
                   className={cn('relative w-11 h-6 rounded-full transition-colors flex-shrink-0', v.is_active ? 'bg-primary' : 'bg-outline-variant')}
                 >
-                  <span className={cn('absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform', v.is_active ? 'translate-x-[22px]' : 'translate-x-0.5')} />
+                  <span className={cn('absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform', v.is_active ? 'translate-x-[22px]' : 'translate-x-0.5')} />
                 </button>
                 {busy === v.id ? (
                   <Loader2 size={16} className="animate-spin text-on-surface-variant" />
