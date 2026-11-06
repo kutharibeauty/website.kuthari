@@ -34,7 +34,7 @@ export default function ShelfGrid({ products, categories, featured }: Props) {
   if (!products.length) return null
 
   return (
-    <section className="mx-auto w-full max-w-[1440px] px-5 md:px-10 reveal" aria-labelledby="shelf-head">
+    <section className="mx-auto w-full max-w-[1440px] px-5 md:px-10" aria-labelledby="shelf-head">
       <SectionHead
         id="shelf-head"
         title={featured ? 'Most reached for' : 'Fresh on the shelf'}

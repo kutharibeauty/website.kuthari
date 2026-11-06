@@ -21,7 +21,7 @@ export default function PromoCardsRow({ cards }: Props) {
   if (!cards.length) return null
 
   return (
-    <section className="mx-auto w-full max-w-[1440px] px-4 md:px-10 reveal">
+    <section className="mx-auto w-full max-w-[1440px] px-4 md:px-10">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         {cards.map((card) => {
           const title = card.title ? tField(card.title, card.title_or) : null

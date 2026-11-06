@@ -174,7 +174,7 @@ export default async function HomePage() {
         </div>
       )}
 
-      <div className={`flex flex-col gap-[var(--spacing-section)] ${promoCards.length > 0 ? 'pt-12 md:pt-16' : 'pt-[var(--spacing-section)]'}`}>
+      <div className={`flex flex-col gap-[var(--spacing-section)] ${promoCards.length > 0 ? 'pt-4 md:pt-6' : 'pt-[var(--spacing-section)]'}`}>
         {/* 3. The shelf grid with aisle filters. */}
         <ShelfGrid products={shelfProducts} categories={categories} featured={shelfIsFeatured} />
 
