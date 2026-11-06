@@ -40,7 +40,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const cap = (s: string) => s.replace(/\s+/g, ' ').trim().replace(/(^|\s)(\p{L})/gu, (_m, sp, ch) => sp + ch.toUpperCase())
   const displayName = cap(product.name)
   const brand = product.brand ? cap(product.brand) : null
-  const title = product.meta_title ?? `${displayName} | Kuthari Beauty Store`
+  // Shown as written: the root layout's "%s | KUTHARI BEAUTY STORE" template would
+  // repeat the store name, since titles here already end with it.
+  const title = product.meta_title?.trim() || `${displayName} | Kuthari Beauty Store`
   const description =
     product.meta_description ??
     `Buy ${displayName} (${product.unit}) from ₹${product.price}${brand ? ` by ${brand}` : ''}. One piece at retail price or a box at bulk price, with secure payment and delivery across India. ${product.description ? product.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) : ''}`.trim()
@@ -52,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const shownPrice = product.retail_price && product.retail_price > 0 ? product.retail_price : product.price
 
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords,
     alternates: { canonical: `/product/${slug}` },
