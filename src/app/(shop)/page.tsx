@@ -167,11 +167,11 @@ export default async function HomePage() {
       </section>
 
       <div className="flex flex-col gap-[var(--spacing-section)] pt-[var(--spacing-section)]">
+        {/* 2. The admin's promo cards, straight under the hero. */}
+        {promoCards.length > 0 && <PromoCardsRow cards={promoCards} />}
+
         {/* 3. The shelf grid with aisle filters. */}
         <ShelfGrid products={shelfProducts} categories={categories} featured={shelfIsFeatured} />
-
-        {/* 4. The admin's mid-page promo cards. */}
-        {promoCards.length > 0 && <PromoCardsRow cards={promoCards} />}
 
         {/* 5. Live coupons, when there are any. */}
         {(coupons.length > 0 || marqueeLines.length > 0) && (
