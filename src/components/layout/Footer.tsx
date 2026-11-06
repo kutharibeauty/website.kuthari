@@ -149,7 +149,7 @@ export default async function Footer() {
         <div className="mt-8 pt-6 border-t border-paper-raised/25 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[14px] text-paper-raised">
           <p>© 2026 Kuthari Beauty Store, Brahmapur</p>
           <a
-            href="https://jyotiranjansahoo.vercel.app/"
+            href="https://www.crayoratech.com"
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 w-max"
