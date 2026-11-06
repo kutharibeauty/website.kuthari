@@ -17,6 +17,7 @@ import ProductFAQ from '@/components/product/ProductFAQ'
 import ProductReviews from '@/components/product/ProductReviews'
 import ProductGrid from '@/components/product/ProductGrid'
 import ProductBuyPanel from './ProductBuyPanel'
+import ShareButton from '@/components/product/ShareButton'
 import { sanitizeRichText } from '@/lib/sanitize'
 import { safeJsonLd } from '@/lib/utils'
 import { SITE_URL } from '@/lib/site-url'
@@ -307,12 +308,15 @@ export default async function ProductPage({ params }: PageProps) {
               {product.name}
             </h1>
 
-            {/* SKU */}
-            {product.sku && (
-              <p className="text-[13px] text-muted mb-3">
-                SKU {product.sku}
-              </p>
-            )}
+            {/* SKU and share */}
+            <div className="mb-4 flex items-center justify-between gap-3">
+              {product.sku ? <p className="text-[13px] text-muted">SKU {product.sku}</p> : <span />}
+              <ShareButton
+                name={product.name}
+                price={product.retail_price && product.retail_price > 0 ? product.retail_price : product.price}
+                path={`/product/${product.slug}`}
+              />
+            </div>
 
             {/* Rating */}
             {stats.count > 0 && (
